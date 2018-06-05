@@ -15,8 +15,10 @@ using Lykke.SlackNotification.AzureQueue;
 using Lykke.MonitoringServiceApiCaller;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Serialization;
 
 namespace Lykke.Service.ClientAccountRecovery
 {
@@ -54,6 +56,12 @@ namespace Lykke.Service.ClientAccountRecovery
                 {
                     options.DefaultLykkeConfiguration("v1", "ClientAccountRecovery API");
                 });
+                services.Configure<MvcJsonOptions>(c =>
+                {
+                    // Serialize all properties to camelCase by default
+                    c.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                });
+
 
                 var builder = new ContainerBuilder();
                 var appSettings = Configuration.LoadSettings<AppSettings>();
@@ -119,8 +127,10 @@ namespace Lykke.Service.ClientAccountRecovery
                 await ApplicationContainer.Resolve<IStartupManager>().StartAsync();
 
                 await Log.WriteMonitorAsync("", $"Env: {Program.EnvInfo}", "Started");
-
-                await AutoRegistrationInMonitoring.RegisterAsync(Configuration, _monitoringServiceUrl, Log);
+                if (_monitoringServiceUrl != null)
+                {
+                    await AutoRegistrationInMonitoring.RegisterAsync(Configuration, _monitoringServiceUrl, Log);
+                }
             }
             catch (Exception ex)
             {

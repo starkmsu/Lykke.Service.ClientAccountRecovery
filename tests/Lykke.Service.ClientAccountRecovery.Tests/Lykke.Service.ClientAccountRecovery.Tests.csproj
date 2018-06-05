@@ -1,15 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
+    <PackageReference Include="Lykke.Common" Version="6.8.5" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
     <PackageReference Include="Moq" Version="4.8.2" />
+    <PackageReference Include="NSubstitute" Version="3.1.0" />
+    <PackageReference Include="Stateless" Version="4.2.1" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\client\Lykke.Service.ClientAccountRecovery.Client\Lykke.Service.ClientAccountRecovery.Client.csproj" />
+    <ProjectReference Include="..\..\src\Lykke.Service.ClientAccountRecovery.Services\Lykke.Service.ClientAccountRecovery.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using Autofac;
 using Common.Log;
 
@@ -13,9 +14,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             if (string.IsNullOrWhiteSpace(serviceUrl))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(serviceUrl));
 
-            builder.RegisterType<ClientAccountRecoveryClient>()
-                .WithParameter("serviceUrl", serviceUrl)
-                .As<IClientAccountRecoveryClient>()
+            builder.Register(c => new ClientAccountRecoveryServiceClient(new Uri(serviceUrl), new HttpClient()))
+                .As<IClientAccountRecoveryServiceClient>()
                 .SingleInstance();
         }
 
