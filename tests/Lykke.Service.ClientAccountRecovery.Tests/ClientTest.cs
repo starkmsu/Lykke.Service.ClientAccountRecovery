@@ -9,7 +9,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 {
     public class ClientTest
     {
-        [Fact]
+        [Fact(Skip = "Manual testing")]
         public async Task RegistrationTest()
         {
             var builder = new ContainerBuilder();
@@ -20,7 +20,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             var callResult = await client.StartNewRecoveryAsync(new NewRecoveryRequest("sdfdsf"));
         }    
         
-        [Fact]
+        [Fact(Skip = "Manual testing")]
         public async Task ShouldThrowException()
         {
             var builder = new ContainerBuilder();
