@@ -15,6 +15,7 @@
         CallSupport,
         Transfer,
         PasswordChangeAllowed,
-        PasswordChangeForbidden
+        PasswordChangeForbidden,
+        PasswordUpdated
     }
 }

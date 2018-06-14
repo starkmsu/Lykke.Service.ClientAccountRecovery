@@ -43,14 +43,18 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
             }
         }
 
-        public async Task<RecoverySummary> GetRecoverySummary(string clientId)
+        public async Task<RecoverySummaryForClient> GetRecoverySummary(string clientId)
         {
             var recoveries = await _stateRepository.GetAsync(clientId);
+            if (!recoveries.Any())
+            {
+                return null;
+            }
             var logItems = recoveries.Select(async r => await _logRepository.GetAsync(r.RecoveryID)).ToArray();
             await Task.WhenAll(logItems);
 
-            var result = new RecoverySummary();
-            foreach (var logItem in logItems.SelectMany(t => t.Result))
+            var result = new RecoverySummaryForClient();
+            foreach (var logItem in logItems.Select(t => t.Result))
             {
                 result.AddItem(logItem);
             }

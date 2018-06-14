@@ -5,7 +5,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
 {
     public interface IRecoveryFlowService
     {
-        State State { get; }
+        RecoveryContext Context { get; }
         Task StartRecoveryAsync();
         Task SecretPhrasesCompleteAsync();
         Task SecretPhrasesSkipAsync();
@@ -29,5 +29,6 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
         Task JumpToSupportAsync();
         Task JumpToFrozenAsync();
         Task JumpToSuspendAsync();
+        Task UpdatePasswordComplete();
     }
 }

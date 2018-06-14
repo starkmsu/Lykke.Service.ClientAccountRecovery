@@ -6,5 +6,8 @@ namespace Lykke.Service.ClientAccountRecovery.Settings.ServiceSettings
     {
         [AzureTableCheck]
         public string LogsConnString { get; set; }
+
+        [AzureTableCheck]
+        public string RecoveryActivitiesConnString { get; set; }
     }
 }

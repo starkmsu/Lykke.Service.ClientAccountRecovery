@@ -2,6 +2,7 @@
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Lykke.Service.ConfirmationCodes.Client;
+using Lykke.Service.ConfirmationCodes.Client.Models.Request;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
 {
@@ -20,11 +21,12 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         public async Task SendCodeAsync(string clientId)
         {
             var clientModel = await _accountClient.GetByIdAsync(clientId);
-            await _conformationClient.SendSmsConfirmationAsync(new SmsConfirmationRequest
+            await _conformationClient.SendSmsConfirmationAsync(new SendSmsConfirmationRequest
             {
                 Phone = clientModel.Phone,
-                PartnerId = clientModel.PartnerId
-            }, false);
+                PartnerId = clientModel.PartnerId,
+                IsPriority = false
+            });
         }
     }
 }

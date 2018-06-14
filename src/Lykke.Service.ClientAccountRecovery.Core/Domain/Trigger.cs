@@ -24,7 +24,7 @@
         JumpToSuspended,
         JumpToCallSupport,
         JumpToFrozen,
-        JumpToAllowed
-
+        JumpToAllowed,
+        UpdatePassword
     }
 }
