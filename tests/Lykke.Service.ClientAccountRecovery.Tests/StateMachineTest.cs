@@ -93,7 +93,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         [InlineData(State.PasswordChangeFrozen)]
         public async Task ShouldJumpFromAllAnyStateToSupportState(State supportState)
         {
-            var allStates = Enum.GetValues(typeof(State)).Cast<State>().Except(new[] { supportState, State.RecoveryStarted });
+            var allStates = Enum.GetValues(typeof(State)).Cast<State>().Except(new[] { supportState, State.RecoveryStarted, State.PasswordUpdated });
             foreach (var state in allStates)
             {
                 var context = new RecoveryContext
