@@ -12,6 +12,6 @@
         Words = 4,
         Device = 5,
         Pin = 6,
-        None = 7
+        Undefined = 7
     }
 }

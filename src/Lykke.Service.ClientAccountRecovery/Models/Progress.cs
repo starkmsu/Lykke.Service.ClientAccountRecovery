@@ -6,6 +6,7 @@
         WaitingForSupport,
         Frozen,
         Suspended,
-        Allowed
+        Allowed,
+        Undefined
     }
 }

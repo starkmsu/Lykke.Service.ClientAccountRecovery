@@ -23,15 +23,8 @@ namespace Lykke.Service.ClientAccountRecovery.Models
                     return Challenge.Selfie;
                 case State.AwaitPinCode:
                     return Challenge.Pin;
-                case State.PasswordChangeFrozen:
-                case State.PasswordChangeSuspended:
-                case State.CallSupport:
-                case State.Transfer:
-                case State.PasswordChangeAllowed:
-                case State.PasswordChangeForbidden:
-                    return Challenge.None;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+                    return Challenge.Undefined;
             }
         }
     }
@@ -65,7 +58,7 @@ namespace Lykke.Service.ClientAccountRecovery.Models
                 case State.PasswordChangeForbidden:
                     return Progress.Suspended;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+                    return Progress.Undefined;
             }
         }
     }
