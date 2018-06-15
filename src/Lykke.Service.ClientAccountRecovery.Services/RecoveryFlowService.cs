@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
@@ -7,6 +8,7 @@ using Stateless;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
 {
+    [UsedImplicitly]
     public class RecoveryFlowService : IRecoveryFlowService
     {
         private readonly ISmsSender _smsSender;
@@ -42,6 +44,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         {
             _ctx.State = transition.Destination;
             _ctx.Time = DateTime.UtcNow;
+            _ctx.Action = transition.Trigger;
             _ctx.SeqNo++; // Under any condition SenNo should be incremented only one time per client call
             return _stateRepository.InsertAsync(_ctx);
         }

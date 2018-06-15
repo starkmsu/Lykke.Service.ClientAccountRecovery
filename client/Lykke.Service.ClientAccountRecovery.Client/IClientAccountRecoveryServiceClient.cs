@@ -46,7 +46,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         Task<HttpOperationResponse<object>> IsAliveWithHttpMessagesAsync(Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
-        /// Checks service is alive
+        /// Starts password recovering process
         /// </summary>
         /// <param name='request'>
         /// </param>
@@ -58,7 +58,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </param>
         Task<HttpOperationResponse<NewRecoveryResponse>> StartNewRecoveryWithHttpMessagesAsync(NewRecoveryRequest request = default(NewRecoveryRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        /// Returns the current recovery state
+        /// </summary>
         /// <param name='recoveryId'>
+        /// Recovery Id
         /// </param>
         /// <param name='customHeaders'>
         /// The headers that will be added to request.
@@ -68,6 +72,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </param>
         Task<HttpOperationResponse<RecoveryStatusResponse>> GetRecoveryStatusWithHttpMessagesAsync(string recoveryId, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        /// Accepts challenge values
+        /// </summary>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -76,8 +83,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task<HttpOperationResponse> GetNextChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse> SubmitChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        /// Updates the user password
+        /// </summary>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -88,6 +98,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </param>
         Task<HttpOperationResponse> UpdatePasswordWithHttpMessagesAsync(PasswordRequest request = default(PasswordRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        /// Approves user challenges. Only for support.
+        /// </summary>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -98,6 +111,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </param>
         Task<HttpOperationResponse> ApproveChallengeWithHttpMessagesAsync(ApproveChallengeRequest request = default(ApproveChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        /// Updates current state of the recovery process. Only for support.
+        /// </summary>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -108,7 +124,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </param>
         Task<HttpOperationResponse> SubmitResolutionWithHttpMessagesAsync(ResolutionRequest request = default(ResolutionRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        /// Returns brief information about all client's recoveries
+        /// </summary>
         /// <param name='clientId'>
+        /// The client id
         /// </param>
         /// <param name='customHeaders'>
         /// The headers that will be added to request.
@@ -118,7 +138,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </param>
         Task<HttpOperationResponse<IList<ClientRecoveryHistoryResponse>>> GetClientRecoveriesWithHttpMessagesAsync(string clientId, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        /// Returns detailed information about the recovery
+        /// </summary>
         /// <param name='recoveryId'>
+        /// The recovery id
         /// </param>
         /// <param name='customHeaders'>
         /// The headers that will be added to request.

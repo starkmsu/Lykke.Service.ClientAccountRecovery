@@ -11,7 +11,6 @@ using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccountRecovery.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Lykke.Service.ClientAccountRecovery.Controllers
 {
@@ -38,7 +37,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         }
 
         /// <summary>
-        /// Checks service is alive
+        /// Starts password recovering process
         /// </summary>
         /// <returns></returns>
         [HttpPost]
@@ -51,25 +50,27 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return BadRequest(ModelState);
             }
 
-            var flowService = _factory.InitiateNew(request.ClientId);
+            var flow = _factory.InitiateNew(request.ClientId);
+            flow.Context.Initiator = Consts.InitiatorUser;
+
             try
             {
-                await flowService.StartRecoveryAsync();
+                await flow.StartRecoveryAsync();
             }
             catch (InvalidActionException ex)
             {
                 _log.WriteWarning("StartNewRecovery", request, "Unable to start new account recovery process", ex);
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
-            {
-                _log.WriteWarning("StartNewRecovery", request, "Unable to start new account recovery process", ex);
-                throw;
-            }
 
-            return Ok(new NewRecoveryResponse { RecoveryId = flowService.Context.RecoveryId });
+            return Ok(new NewRecoveryResponse { RecoveryId = flow.Context.RecoveryId });
         }
 
+        /// <summary>
+        /// Returns the current recovery state
+        /// </summary>
+        /// <param name="recoveryId">Recovery Id</param>
+        /// <returns></returns>
         [HttpGet("{recoveryId}")]
         [SwaggerOperation("GetRecoveryStatus")]
         [ProducesResponseType(typeof(RecoveryStatusResponse), (int)HttpStatusCode.OK)]
@@ -91,6 +92,11 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             return Ok(new RecoveryStatusResponse() { Challenge = challenge, OverallProgress = progress });
         }
 
+        /// <summary>
+        /// Accepts challenge values
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("challenge")]
         [SwaggerOperation("SubmitChallenge")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
@@ -106,10 +112,28 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             {
                 return NotFound();
             }
-            await _challengeManager.ExecuteAction(request.Challenge, request.Action, request.Value, flow);
+
+            flow.Context.Initiator = Consts.InitiatorUser;
+            try
+            {
+                await _challengeManager.ExecuteAction(request.Challenge, request.Action, request.Value, flow);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidActionException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             return Ok();
         }
 
+        /// <summary>
+        /// Updates the user password
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("password")]
         [SwaggerOperation("UpdatePassword")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
@@ -120,64 +144,75 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return BadRequest(ModelState);
             }
 
+            var flow = await _factory.FindExisted(request.RecoveryId);
+            if (flow == null)
+            {
+                return NotFound();
+            }
+
             try
             {
-                var flowService = await _factory.FindExisted(request.RecoveryId);
-                if (flowService == null)
-                {
-                    return NotFound();
-                }
-                await _clientAccountClient.ChangeClientPasswordAsync(flowService.Context.ClientId, request.PasswordHash);
-                await flowService.UpdatePasswordComplete();
+
+                flow.Context.Initiator = Consts.InitiatorUser;
+                await _clientAccountClient.ChangeClientPasswordAsync(flow.Context.ClientId, request.PasswordHash);
+                await flow.UpdatePasswordComplete();
             }
             catch (InvalidActionException ex)
             {
                 return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _log.WriteWarning("UpdatePassword", request.RecoveryId, "Unable to update password", ex);
-                throw;
             }
 
             return Ok();
         }
 
-        [Authorize]
-        [HttpPut("challenge/approval")]
+        // [Authorize]
+        /// <summary>
+        /// Approves user challenges. Only for support.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("challenge/challenge/checkResult")]
         [SwaggerOperation("ApproveChallenge")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> ApproveChallenge([FromBody]ApproveChallengeRequest request)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || request.CheckResult == CheckResult.Unknown)
             {
                 return BadRequest(ModelState);
             }
+
+            var flow = await _factory.FindExisted(request.RecoveryId);
+            if (flow == null)
+            {
+                return NotFound();
+            }
+
             try
             {
-                var flowService = await _factory.FindExisted(request.RecoveryId);
-                if (flowService == null)
+                flow.Context.Initiator = request.AgentId;
+                if (request.CheckResult == CheckResult.Approved)
                 {
-                    return NotFound();
+                    await flow.SelfieVerificationComplete(); // In a moment supporting only selfie
                 }
-
-                flowService.Context.Initiator = request.AgentId;
-                await flowService.SelfieVerificationComplete(); // In a moment supporting only selfie
+                else
+                {
+                    await flow.SelfieVerificationFail();
+                }
             }
             catch (InvalidActionException ex)
             {
                 return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _log.WriteWarning("ApproveChallenge", request.RecoveryId, "Unable to approve challenge", ex);
-                throw;
             }
 
             return Ok();
         }
 
         //[Authorize]
+        /// <summary>
+        /// Updates current state of the recovery process. Only for support.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("challenge/resolution")]
         [SwaggerOperation("SubmitResolution")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
@@ -187,29 +222,30 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             {
                 return BadRequest(ModelState);
             }
+
+            var flow = await _factory.FindExisted(request.RecoveryId);
+            if (flow == null)
+            {
+                return NotFound();
+            }
+
             try
             {
-                var flowService = await _factory.FindExisted(request.RecoveryId);
-                if (flowService == null)
-                {
-                    return NotFound();
-                }
-
-                flowService.Context.Initiator = request.AgentId;
-                flowService.Context.Comment = request.Comment;
+                flow.Context.Initiator = request.AgentId;
+                flow.Context.Comment = request.Comment;
                 switch (request.Resolution)
                 {
                     case Resolution.Suspend:
-                        await flowService.JumpToSuspendAsync();
+                        await flow.JumpToSuspendAsync();
                         break;
                     case Resolution.Interview:
-                        await flowService.JumpToSupportAsync();
+                        await flow.JumpToSupportAsync();
                         break;
                     case Resolution.Freeze:
-                        await flowService.JumpToFrozenAsync();
+                        await flow.JumpToFrozenAsync();
                         break;
                     case Resolution.Allow:
-                        await flowService.JumpToAllowAsync();
+                        await flow.JumpToAllowAsync();
                         break;
                     default:
                         return BadRequest();
@@ -219,15 +255,15 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
-            {
-                _log.WriteWarning("SubmitResolution", request.RecoveryId, "Unable to submit resolution", ex);
-                throw;
-            }
             return Ok();
         }
 
         //[Authorize]
+        /// <summary>
+        /// Returns brief information about all client's recoveries
+        /// </summary>
+        /// <param name="clientId">The client id</param>
+        /// <returns></returns>
         [HttpGet("client/{clientId}")]
         [SwaggerOperation("GetClientRecoveries")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<ClientRecoveryHistoryResponse>))]
@@ -257,6 +293,11 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Returns detailed information about the recovery
+        /// </summary>
+        /// <param name="recoveryId">The recovery id</param>
+        /// <returns></returns>
         // [Authorize]
         [HttpGet("client/trace/{recoveryId}")]
         [SwaggerOperation("GetRecoveryTrace")]
@@ -269,7 +310,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             }
 
             var unit = await _logRepository.GetAsync(recoveryId);
-            if (unit == null)
+            if (unit.Empty)
             {
                 return NotFound();
             }
@@ -278,11 +319,5 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
 
             return Ok(response);
         }
-
-
-
-
     }
-
-
 }

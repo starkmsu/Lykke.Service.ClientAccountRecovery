@@ -47,6 +47,7 @@ namespace Lykke.Service.ClientAccountRecovery.Models
                 prev.NewState = context.State;
                 var next = new RecoveryTraceResponse { PreviousState = context.State };
                 result.Add(next);
+                counter++;
             }
 
             return result.Take(result.Count - 1);

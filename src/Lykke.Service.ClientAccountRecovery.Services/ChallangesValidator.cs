@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
@@ -7,6 +8,7 @@ using Lykke.Service.ConfirmationCodes.Client.Models.Request;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
 {
+    [UsedImplicitly]
     public class ChallengesValidator : IChallengesValidator
     {
         private readonly IConfirmationCodesClient _conformationClient;

@@ -35,7 +35,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             }
 
             /// <summary>
-            /// Checks service is alive
+            /// Starts password recovering process
             /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
@@ -53,10 +53,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 }
             }
 
+            /// <summary>
+            /// Returns the current recovery state
+            /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
             /// <param name='recoveryId'>
+            /// Recovery Id
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
@@ -69,6 +73,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 }
             }
 
+            /// <summary>
+            /// Accepts challenge values
+            /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
@@ -77,11 +84,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task GetNextChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task SubmitChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
-                (await operations.GetNextChallengeWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
+                (await operations.SubmitChallengeWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
             }
 
+            /// <summary>
+            /// Updates the user password
+            /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
@@ -95,6 +105,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 (await operations.UpdatePasswordWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
             }
 
+            /// <summary>
+            /// Approves user challenges. Only for support.
+            /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
@@ -108,6 +121,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 (await operations.ApproveChallengeWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
             }
 
+            /// <summary>
+            /// Updates current state of the recovery process. Only for support.
+            /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
@@ -121,10 +137,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 (await operations.SubmitResolutionWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
             }
 
+            /// <summary>
+            /// Returns brief information about all client's recoveries
+            /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
             /// <param name='clientId'>
+            /// The client id
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
@@ -137,10 +157,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 }
             }
 
+            /// <summary>
+            /// Returns detailed information about the recovery
+            /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
             /// <param name='recoveryId'>
+            /// The recovery id
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.

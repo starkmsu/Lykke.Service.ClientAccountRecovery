@@ -62,7 +62,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         [EnumMember(Value = "JumpToFrozen")]
         JumpToFrozen,
         [EnumMember(Value = "JumpToAllowed")]
-        JumpToAllowed
+        JumpToAllowed,
+        [EnumMember(Value = "UpdatePassword")]
+        UpdatePassword
     }
     internal static class TriggerEnumExtension
     {
@@ -121,6 +123,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
                     return "JumpToFrozen";
                 case Trigger.JumpToAllowed:
                     return "JumpToAllowed";
+                case Trigger.UpdatePassword:
+                    return "UpdatePassword";
             }
             return null;
         }
@@ -175,6 +179,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
                     return Trigger.JumpToFrozen;
                 case "JumpToAllowed":
                     return Trigger.JumpToAllowed;
+                case "UpdatePassword":
+                    return Trigger.UpdatePassword;
             }
             return null;
         }

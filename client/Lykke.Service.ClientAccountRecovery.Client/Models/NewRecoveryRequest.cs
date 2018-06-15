@@ -6,6 +6,7 @@
 
 namespace Lykke.Service.ClientAccountRecovery.Client.Models
 {
+    using Microsoft.Rest;
     using Newtonsoft.Json;
     using System.Linq;
 
@@ -38,5 +39,21 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         [JsonProperty(PropertyName = "clientId")]
         public string ClientId { get; set; }
 
+        /// <summary>
+        /// Validate the object.
+        /// </summary>
+        /// <exception cref="ValidationException">
+        /// Thrown if validation fails
+        /// </exception>
+        public virtual void Validate()
+        {
+            if (ClientId != null)
+            {
+                if (ClientId.Length < 8)
+                {
+                    throw new ValidationException(ValidationRules.MinLength, "ClientId", 8);
+                }
+            }
+        }
     }
 }

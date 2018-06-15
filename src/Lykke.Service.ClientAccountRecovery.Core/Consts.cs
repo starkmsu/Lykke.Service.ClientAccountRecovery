@@ -4,5 +4,6 @@
     {
         public const int MinClientIdLength = 8;
         public const int MinRecoveryIdLength = 8;
+        public const string InitiatorUser = "User";
     }
 }

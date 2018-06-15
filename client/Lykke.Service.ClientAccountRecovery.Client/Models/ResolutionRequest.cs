@@ -69,6 +69,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// </exception>
         public virtual void Validate()
         {
+            if (RecoveryId != null)
+            {
+                if (RecoveryId.Length < 8)
+                {
+                    throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
+                }
+            }
             if (Comment != null)
             {
                 if (Comment.Length > 256)

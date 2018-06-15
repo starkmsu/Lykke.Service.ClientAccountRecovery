@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Lykke.Service.ConfirmationCodes.Client;
@@ -6,6 +7,7 @@ using Lykke.Service.ConfirmationCodes.Client.Models.Request;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
 {
+    [UsedImplicitly]
     public class SmsSender : ISmsSender
     {
         private readonly IConfirmationCodesClient _conformationClient;

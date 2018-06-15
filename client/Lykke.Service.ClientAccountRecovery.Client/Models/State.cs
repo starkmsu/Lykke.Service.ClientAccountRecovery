@@ -44,7 +44,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         [EnumMember(Value = "PasswordChangeAllowed")]
         PasswordChangeAllowed,
         [EnumMember(Value = "PasswordChangeForbidden")]
-        PasswordChangeForbidden
+        PasswordChangeForbidden,
+        [EnumMember(Value = "PasswordUpdated")]
+        PasswordUpdated
     }
     internal static class StateEnumExtension
     {
@@ -85,6 +87,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
                     return "PasswordChangeAllowed";
                 case State.PasswordChangeForbidden:
                     return "PasswordChangeForbidden";
+                case State.PasswordUpdated:
+                    return "PasswordUpdated";
             }
             return null;
         }
@@ -121,6 +125,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
                     return State.PasswordChangeAllowed;
                 case "PasswordChangeForbidden":
                     return State.PasswordChangeForbidden;
+                case "PasswordUpdated":
+                    return State.PasswordUpdated;
             }
             return null;
         }

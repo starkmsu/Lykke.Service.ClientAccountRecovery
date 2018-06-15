@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
@@ -7,6 +8,7 @@ using Action = Lykke.Service.ClientAccountRecovery.Core.Domain.Action;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
 {
+    [UsedImplicitly]
     public class ChallengeManager : IChallengeManager
     {
         private readonly IChallengesValidator _validator;

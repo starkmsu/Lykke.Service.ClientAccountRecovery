@@ -25,7 +25,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             var initialContext = new RecoveryContext
             {
                 RecoveryId = Guid.NewGuid().ToString(),
-                ClientId = clientId
+                ClientId = clientId,
             };
             var service = _container.Resolve<IRecoveryFlowService>(TypedParameter.From(initialContext));
             return service;

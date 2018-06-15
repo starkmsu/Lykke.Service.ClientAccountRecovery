@@ -19,5 +19,9 @@ namespace Lykke.Service.ClientAccountRecovery.Models
         [Required]
         public string AgentId { get;  set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        [Required]
+        public CheckResult CheckResult { get;  set; }
+
     }
 }
