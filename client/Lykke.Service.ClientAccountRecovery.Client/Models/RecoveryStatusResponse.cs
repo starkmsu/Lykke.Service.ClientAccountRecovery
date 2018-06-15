@@ -23,9 +23,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// Initializes a new instance of the RecoveryStatusResponse class.
         /// </summary>
         /// <param name="challenge">Possible values include: 'Unknown', 'Sms',
-        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'None'</param>
+        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
         /// <param name="overallProgress">Possible values include: 'Ongoing',
-        /// 'WaitingForSupport', 'Frozen', 'Suspended', 'Allowed'</param>
+        /// 'WaitingForSupport', 'Frozen', 'Suspended', 'Allowed',
+        /// 'Undefined'</param>
         public RecoveryStatusResponse(Challenge challenge, Progress overallProgress)
         {
             Challenge = challenge;
@@ -40,14 +41,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
 
         /// <summary>
         /// Gets possible values include: 'Unknown', 'Sms', 'Email', 'Selfie',
-        /// 'Words', 'Device', 'Pin', 'None'
+        /// 'Words', 'Device', 'Pin', 'Undefined'
         /// </summary>
         [JsonProperty(PropertyName = "challenge")]
         public Challenge Challenge { get; private set; }
 
         /// <summary>
         /// Gets possible values include: 'Ongoing', 'WaitingForSupport',
-        /// 'Frozen', 'Suspended', 'Allowed'
+        /// 'Frozen', 'Suspended', 'Allowed', 'Undefined'
         /// </summary>
         [JsonProperty(PropertyName = "overallProgress")]
         public Progress OverallProgress { get; private set; }

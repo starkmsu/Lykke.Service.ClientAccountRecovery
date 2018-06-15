@@ -26,7 +26,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         [EnumMember(Value = "Suspended")]
         Suspended,
         [EnumMember(Value = "Allowed")]
-        Allowed
+        Allowed,
+        [EnumMember(Value = "Undefined")]
+        Undefined
     }
     internal static class ProgressEnumExtension
     {
@@ -49,6 +51,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
                     return "Suspended";
                 case Progress.Allowed:
                     return "Allowed";
+                case Progress.Undefined:
+                    return "Undefined";
             }
             return null;
         }
@@ -67,6 +71,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
                     return Progress.Suspended;
                 case "Allowed":
                     return Progress.Allowed;
+                case "Undefined":
+                    return Progress.Undefined;
             }
             return null;
         }

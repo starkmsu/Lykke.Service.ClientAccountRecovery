@@ -24,7 +24,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// Initializes a new instance of the ChallengeRequest class.
         /// </summary>
         /// <param name="challenge">Possible values include: 'Unknown', 'Sms',
-        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'None'</param>
+        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
         /// <param name="action">Possible values include: 'Undefined',
         /// 'Complete', 'Restart', 'Skip'</param>
         public ChallengeRequest(Challenge challenge, Action action, string recoveryId = default(string), string value = default(string))
@@ -48,7 +48,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
 
         /// <summary>
         /// Gets or sets possible values include: 'Unknown', 'Sms', 'Email',
-        /// 'Selfie', 'Words', 'Device', 'Pin', 'None'
+        /// 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'
         /// </summary>
         [JsonProperty(PropertyName = "challenge")]
         public Challenge Challenge { get; set; }

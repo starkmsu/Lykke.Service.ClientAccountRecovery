@@ -31,8 +31,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         Device,
         [EnumMember(Value = "Pin")]
         Pin,
-        [EnumMember(Value = "None")]
-        None
+        [EnumMember(Value = "Undefined")]
+        Undefined
     }
     internal static class ChallengeEnumExtension
     {
@@ -59,8 +59,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
                     return "Device";
                 case Challenge.Pin:
                     return "Pin";
-                case Challenge.None:
-                    return "None";
+                case Challenge.Undefined:
+                    return "Undefined";
             }
             return null;
         }
@@ -83,8 +83,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
                     return Challenge.Device;
                 case "Pin":
                     return Challenge.Pin;
-                case "None":
-                    return Challenge.None;
+                case "Undefined":
+                    return Challenge.Undefined;
             }
             return null;
         }

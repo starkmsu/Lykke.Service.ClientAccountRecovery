@@ -24,7 +24,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// Initializes a new instance of the ApproveChallengeRequest class.
         /// </summary>
         /// <param name="challenge">Possible values include: 'Unknown', 'Sms',
-        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'None'</param>
+        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
         /// <param name="checkResult">Possible values include: 'Unknown',
         /// 'Approved', 'Rejected'</param>
         public ApproveChallengeRequest(Challenge challenge, CheckResult checkResult, string recoveryId = default(string), string agentId = default(string))
@@ -48,7 +48,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
 
         /// <summary>
         /// Gets or sets possible values include: 'Unknown', 'Sms', 'Email',
-        /// 'Selfie', 'Words', 'Device', 'Pin', 'None'
+        /// 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'
         /// </summary>
         [JsonProperty(PropertyName = "challenge")]
         public Challenge Challenge { get; set; }
