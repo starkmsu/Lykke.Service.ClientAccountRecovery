@@ -29,8 +29,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
         /// 'AwaitKycVerification', 'KycInProgress', 'AwaitPinCode',
         /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
-        /// 'Transfer', 'PasswordChangeAllowed',
-        /// 'PasswordChangeForbidden'</param>
+        /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
+        /// 'PasswordUpdated'</param>
         public ClientRecoveryHistoryResponse(System.DateTime time, State state, string recoveryId = default(string), string initiator = default(string))
         {
             RecoveryId = recoveryId;
@@ -61,7 +61,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
         /// 'AwaitKycVerification', 'KycInProgress', 'AwaitPinCode',
         /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
-        /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden'
+        /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
+        /// 'PasswordUpdated'
         /// </summary>
         [JsonProperty(PropertyName = "state")]
         public State State { get; private set; }

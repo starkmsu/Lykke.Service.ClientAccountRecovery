@@ -6,5 +6,7 @@ namespace Lykke.Service.ClientAccountRecovery.Settings.ServiceSettings
     public class ClientAccountRecoverySettings
     {
         public DbSettings Db { get; set; }
+
+
     }
 }

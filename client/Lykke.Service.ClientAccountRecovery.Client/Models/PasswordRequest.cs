@@ -6,6 +6,7 @@
 
 namespace Lykke.Service.ClientAccountRecovery.Client.Models
 {
+    using Microsoft.Rest;
     using Newtonsoft.Json;
     using System.Linq;
 
@@ -44,5 +45,21 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         [JsonProperty(PropertyName = "passwordHash")]
         public string PasswordHash { get; set; }
 
+        /// <summary>
+        /// Validate the object.
+        /// </summary>
+        /// <exception cref="ValidationException">
+        /// Thrown if validation fails
+        /// </exception>
+        public virtual void Validate()
+        {
+            if (RecoveryId != null)
+            {
+                if (RecoveryId.Length < 8)
+                {
+                    throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
+                }
+            }
+        }
     }
 }

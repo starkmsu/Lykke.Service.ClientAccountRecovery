@@ -6,6 +6,7 @@
 
 namespace Lykke.Service.ClientAccountRecovery.Client.Models
 {
+    using Microsoft.Rest;
     using Newtonsoft.Json;
     using System.Linq;
 
@@ -24,11 +25,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// </summary>
         /// <param name="challenge">Possible values include: 'Unknown', 'Sms',
         /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'None'</param>
-        public ApproveChallengeRequest(Challenge challenge, string recoveryId = default(string), string agentId = default(string))
+        /// <param name="checkResult">Possible values include: 'Unknown',
+        /// 'Approved', 'Rejected'</param>
+        public ApproveChallengeRequest(Challenge challenge, CheckResult checkResult, string recoveryId = default(string), string agentId = default(string))
         {
             RecoveryId = recoveryId;
             Challenge = challenge;
             AgentId = agentId;
+            CheckResult = checkResult;
             CustomInit();
         }
 
@@ -55,13 +59,27 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         public string AgentId { get; set; }
 
         /// <summary>
+        /// Gets or sets possible values include: 'Unknown', 'Approved',
+        /// 'Rejected'
+        /// </summary>
+        [JsonProperty(PropertyName = "checkResult")]
+        public CheckResult CheckResult { get; set; }
+
+        /// <summary>
         /// Validate the object.
         /// </summary>
-        /// <exception cref="Microsoft.Rest.ValidationException">
+        /// <exception cref="ValidationException">
         /// Thrown if validation fails
         /// </exception>
         public virtual void Validate()
         {
+            if (RecoveryId != null)
+            {
+                if (RecoveryId.Length < 8)
+                {
+                    throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
+                }
+            }
         }
     }
 }

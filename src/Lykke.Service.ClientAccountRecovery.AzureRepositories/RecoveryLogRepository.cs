@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AzureStorage;
@@ -17,10 +16,11 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
             _storage = storage;
         }
 
-        public async Task<IEnumerable<RecoveryContext>> GetAsync(string recoveryId)
+        public async Task<RecoveryUnit> GetAsync(string recoveryId)
         {
             var entities = await _storage.GetDataAsync(recoveryId);
-            return entities.Select(e => e.Convert());
+            var log = entities.Select(e => e.Convert());
+            return new RecoveryUnit(log.ToArray());
         }
 
 

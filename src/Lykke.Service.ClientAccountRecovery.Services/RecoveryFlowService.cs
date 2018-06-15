@@ -1,29 +1,52 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
+using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Stateless;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
 {
+    [UsedImplicitly]
     public class RecoveryFlowService : IRecoveryFlowService
     {
         private readonly ISmsSender _smsSender;
         private readonly IEmailSender _emailSender;
         private readonly ISelfieSender _selfieSender;
+        private readonly IStateRepository _stateRepository;
         private readonly RecoveryContext _ctx;
         private readonly StateMachine<State, Trigger> _stateMachine;
         private const int MaxRecoveryAttempts = 3;
 
-        public State State => _stateMachine.State;
+        public RecoveryContext Context => _ctx;
 
-        public RecoveryFlowService(ISmsSender smsSender, IEmailSender emailSender, ISelfieSender selfieSender, RecoveryContext ctx)
+        public RecoveryFlowService(ISmsSender smsSender, IEmailSender emailSender, ISelfieSender selfieSender, IStateRepository stateRepository, RecoveryContext ctx)
         {
             _smsSender = smsSender;
             _emailSender = emailSender;
             _selfieSender = selfieSender;
+            _stateRepository = stateRepository;
             _ctx = ctx;
             _stateMachine = new StateMachine<State, Trigger>(ctx.State);
+            _stateMachine.OnTransitionedAsync(OnTransitionActionAsync);
+            _stateMachine.OnUnhandledTrigger(UnhandledTriggerAction);
             Configure();
+        }
+
+        private void UnhandledTriggerAction(State state, Trigger trigger)
+        {
+            var msg = $"Unable to change state {state} by action {trigger}. Permitted actions {string.Join(',', _stateMachine.GetPermittedTriggers())}";
+            throw new InvalidActionException(msg);
+        }
+
+        private Task OnTransitionActionAsync(StateMachine<State, Trigger>.Transition transition)
+        {
+            _ctx.State = transition.Destination;
+            _ctx.Time = DateTime.UtcNow;
+            _ctx.Action = transition.Trigger;
+            _ctx.SeqNo++; // Under any condition SenNo should be incremented only one time per client call
+            return _stateRepository.InsertAsync(_ctx);
         }
 
         private void Configure()
@@ -117,8 +140,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
 
             _stateMachine.Configure(State.Transfer)
-                .PermitSupportStates();  
-            
+                .PermitSupportStates();
+
             _stateMachine.Configure(State.PasswordChangeForbidden)
                 .PermitSupportStates();
 
@@ -145,7 +168,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .PermitReentry(Trigger.JumpToAllowed)
                 .Permit(Trigger.JumpToCallSupport, State.CallSupport)
                 .Permit(Trigger.JumpToFrozen, State.PasswordChangeFrozen)
-                .Permit(Trigger.JumpToSuspended, State.PasswordChangeSuspended);
+                .Permit(Trigger.JumpToSuspended, State.PasswordChangeSuspended)
+                .Permit(Trigger.UpdatePassword, State.PasswordUpdated);
         }
 
 
@@ -227,6 +251,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         {
             _ctx.EmailVerified = true;
             return _stateMachine.FireAsync(Trigger.EmailVerificationComplete);
+        }
+
+        public Task UpdatePasswordComplete()
+        {
+            return _stateMachine.FireAsync(Trigger.UpdatePassword);
         }
 
         public Task EmailVerificationSkip()

@@ -5,8 +5,17 @@ using Common.Log;
 
 namespace Lykke.Service.ClientAccountRecovery.Client
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class AutofacExtension
     {
+        /// <summary>
+        /// Registers a client implementation in the container
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="serviceUrl"></param>
+        /// <param name="log"></param>
         public static void RegisterClientAccountRecoveryClient(this ContainerBuilder builder, string serviceUrl, ILog log)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
@@ -19,6 +28,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 .SingleInstance();
         }
 
+        /// <summary>
+        /// Registers a client implementation in the container
+        /// </summary>
         public static void RegisterClientAccountRecoveryClient(this ContainerBuilder builder, ClientAccountRecoveryServiceClientSettings settings, ILog log)
         {
             builder.RegisterClientAccountRecoveryClient(settings?.ServiceUrl, log);

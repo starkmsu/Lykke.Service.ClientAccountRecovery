@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
+using JetBrains.Annotations;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
 {
+    [UsedImplicitly]
     public class RecoveryFlowServiceFactory : IRecoveryFlowServiceFactory
     {
         private readonly ILifetimeScope _container;
@@ -24,15 +25,20 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             var initialContext = new RecoveryContext
             {
                 RecoveryId = Guid.NewGuid().ToString(),
-                ClientId = clientId
+                ClientId = clientId,
             };
             var service = _container.Resolve<IRecoveryFlowService>(TypedParameter.From(initialContext));
             return service;
         }
 
-        public async Task<IRecoveryFlowService> GetExisted(string recoveryId)
+        public async Task<IRecoveryFlowService> FindExisted(string recoveryId)
         {
-            var context = (await _repository.GetAsync(recoveryId)).OrderBy(c => c.SeqNo).First();
+            var log = await _repository.GetAsync(recoveryId);
+            if (log == null)
+            {
+                return null;
+            }
+            var context = log.ActualStatus;
             var service = _container.Resolve<IRecoveryFlowService>(TypedParameter.From(context));
             return service;
         }

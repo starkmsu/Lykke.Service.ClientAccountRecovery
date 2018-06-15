@@ -5,7 +5,7 @@ namespace Lykke.Service.ClientAccountRecovery.Models
 {
     public static class ChallengeEx
     {
-        public static Challenge MapToState(this State state)
+        public static Challenge MapToChallenge(this State state)
         {
             switch (state)
             {
@@ -38,7 +38,7 @@ namespace Lykke.Service.ClientAccountRecovery.Models
 
     public static class ProgressEx
     {
-        public static Progress MapToState(this State state)
+        public static Progress MapToProgress(this State state)
         {
             switch (state)
             {

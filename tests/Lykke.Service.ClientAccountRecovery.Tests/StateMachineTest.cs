@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Lykke.Service.ClientAccountRecovery.Services;
@@ -16,6 +17,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         private readonly ISmsSender _smsSender;
         private readonly IEmailSender _emailSender;
         private readonly ISelfieSender _selfieSender;
+        private readonly IStateRepository _stateRepository;
         private RecoveryContext _attr;
 
         public StateMachineTest()
@@ -23,8 +25,9 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             _smsSender = Substitute.For<ISmsSender>();
             _emailSender = Substitute.For<IEmailSender>();
             _selfieSender = Substitute.For<ISelfieSender>();
+            _stateRepository = Substitute.For<IStateRepository>();
             _attr = new RecoveryContext { State = State.RecoveryStarted };
-            _flowService = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, _attr);
+            _flowService = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, _stateRepository, _attr);
         }
 
         [Theory]
@@ -77,9 +80,9 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             await Fire(kycPass, _flowService.SelfieVerificationComplete, null, _flowService.SelfieVerificationFail);
             await Fire(pin, _flowService.PinCodeVerificationComplete, _flowService.PinCodeVerificationSkip);
 
-            if (resolution != _flowService.State)
+            if (resolution != _flowService.Context.State)
             {
-                Assert.True(false, $"Expected {resolution} but was {_flowService.State} for line {line}");
+                Assert.True(false, $"Expected {resolution} but was {_flowService.Context.State} for line {line}");
             }
         }
 
@@ -97,7 +100,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
                 {
                     State = state
                 };
-                var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, context);
+                var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, _stateRepository, context);
                 switch (supportState)
                 {
                     case State.PasswordChangeAllowed:
@@ -113,8 +116,41 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
                         await stateMachine.JumpToFrozenAsync();
                         break;
                 }
-                Assert.Equal(supportState, stateMachine.State);
+                Assert.Equal(supportState, stateMachine.Context.State);
             }
+        }
+
+        [Fact]
+        public async Task ShouldAllowToGoFinalState()
+        {
+            var context = new RecoveryContext
+            {
+                State = State.PasswordChangeAllowed
+            };
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, _stateRepository, context);
+
+            await stateMachine.UpdatePasswordComplete();
+
+            Assert.Equal(State.PasswordUpdated, stateMachine.Context.State);
+        }
+
+        [Fact]
+        public async Task ShouldSealState()
+        {
+            var context = new RecoveryContext
+            {
+                State = State.PasswordUpdated
+            };
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, _stateRepository, context);
+
+
+
+            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.UpdatePasswordComplete());
+            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSuspendAsync());
+            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToAllowAsync());
+            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToFrozenAsync());
+            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSupportAsync());
+            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.StartRecoveryAsync());
         }
 
         private Task Fire(SS state, Func<Task> ok, Func<Task> skip, Func<Task> fail = null, Func<Task> restart = null)

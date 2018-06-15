@@ -40,7 +40,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <param name='handlers'>
         /// Optional. The delegating handlers to add to the http client pipeline.
         /// </param>
-        public ClientAccountRecoveryServiceClient(params DelegatingHandler[] handlers) : base(handlers)
+        internal ClientAccountRecoveryServiceClient(params DelegatingHandler[] handlers) : base(handlers)
         {
             Initialize();
         }
@@ -54,7 +54,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <param name='handlers'>
         /// Optional. The delegating handlers to add to the http client pipeline.
         /// </param>
-        public ClientAccountRecoveryServiceClient(HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : base(rootHandler, handlers)
+        internal ClientAccountRecoveryServiceClient(HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : base(rootHandler, handlers)
         {
             Initialize();
         }
@@ -71,7 +71,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        public ClientAccountRecoveryServiceClient(System.Uri baseUri, params DelegatingHandler[] handlers) : this(handlers)
+        internal ClientAccountRecoveryServiceClient(System.Uri baseUri, params DelegatingHandler[] handlers) : this(handlers)
         {
             if (baseUri == null)
             {
@@ -95,7 +95,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
-        public ClientAccountRecoveryServiceClient(System.Uri baseUri, HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : this(rootHandler, handlers)
+        internal ClientAccountRecoveryServiceClient(System.Uri baseUri, HttpClientHandler rootHandler, params DelegatingHandler[] handlers) : this(rootHandler, handlers)
         {
             if (baseUri == null)
             {
@@ -280,7 +280,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         }
 
         /// <summary>
-        /// Checks service is alive
+        /// Starts password recovering process
         /// </summary>
         /// <param name='request'>
         /// </param>
@@ -301,6 +301,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </return>
         public async Task<HttpOperationResponse<NewRecoveryResponse>> StartNewRecoveryWithHttpMessagesAsync(NewRecoveryRequest request = default(NewRecoveryRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (request != null)
+            {
+                request.Validate();
+            }
             // Tracing
             bool _shouldTrace = ServiceClientTracing.IsEnabled;
             string _invocationId = null;
@@ -408,7 +412,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             return _result;
         }
 
+        /// <summary>
+        /// Returns the current recovery state
+        /// </summary>
         /// <param name='recoveryId'>
+        /// Recovery Id
         /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.
@@ -539,6 +547,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             return _result;
         }
 
+        /// <summary>
+        /// Accepts challenge values
+        /// </summary>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -553,7 +564,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<HttpOperationResponse> GetNextChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<HttpOperationResponse> SubmitChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (request != null)
             {
@@ -568,7 +579,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
                 tracingParameters.Add("request", request);
                 tracingParameters.Add("cancellationToken", cancellationToken);
-                ServiceClientTracing.Enter(_invocationId, this, "GetNextChallenge", tracingParameters);
+                ServiceClientTracing.Enter(_invocationId, this, "SubmitChallenge", tracingParameters);
             }
             // Construct URL
             var _baseUrl = BaseUri.AbsoluteUri;
@@ -648,6 +659,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             return _result;
         }
 
+        /// <summary>
+        /// Updates the user password
+        /// </summary>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -664,6 +678,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </return>
         public async Task<HttpOperationResponse> UpdatePasswordWithHttpMessagesAsync(PasswordRequest request = default(PasswordRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if (request != null)
+            {
+                request.Validate();
+            }
             // Tracing
             bool _shouldTrace = ServiceClientTracing.IsEnabled;
             string _invocationId = null;
@@ -753,6 +771,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             return _result;
         }
 
+        /// <summary>
+        /// Approves user challenges. Only for support.
+        /// </summary>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -786,7 +807,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             }
             // Construct URL
             var _baseUrl = BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery/challenge/approval").ToString();
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery/challenge/challenge/checkResult").ToString();
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;
@@ -862,6 +883,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             return _result;
         }
 
+        /// <summary>
+        /// Updates current state of the recovery process. Only for support.
+        /// </summary>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -971,7 +995,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             return _result;
         }
 
+        /// <summary>
+        /// Returns brief information about all client's recoveries
+        /// </summary>
         /// <param name='clientId'>
+        /// The client id
         /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.
@@ -1102,7 +1130,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             return _result;
         }
 
+        /// <summary>
+        /// Returns detailed information about the recovery
+        /// </summary>
         /// <param name='recoveryId'>
+        /// The recovery id
         /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.

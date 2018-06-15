@@ -1,6 +1,8 @@
 ﻿using JetBrains.Annotations;
+using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Settings.ServiceSettings;
 using Lykke.Service.ClientAccountRecovery.Settings.SlackNotifications;
+using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.SettingsReader.Attributes;
 
 namespace Lykke.Service.ClientAccountRecovery.Settings
@@ -14,5 +16,9 @@ namespace Lykke.Service.ClientAccountRecovery.Settings
 
         [Optional]
         public MonitoringServiceClientSettings MonitoringServiceClient { get; set; }
+
+        public ClientAccountServiceClientSettings ClientAccountClient { get; set; }
+
+        public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { get; set; }
     }
 }
