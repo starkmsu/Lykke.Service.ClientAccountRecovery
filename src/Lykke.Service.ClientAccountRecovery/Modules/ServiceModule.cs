@@ -105,13 +105,13 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
         {
             builder.Register(c =>
             {
-                return AzureTableStorage<StateTableEntity>.Create(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.ClientAccountRecoveryService.Db.LogsConnString), "AccountRecoveries", c.Resolve<ILog>());
+                return AzureTableStorage<StateTableEntity>.Create(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.ClientAccountRecoveryService.Db.RecoveryActivitiesConnString), "AccountRecoveries", c.Resolve<ILog>());
             }).As<INoSQLTableStorage<StateTableEntity>>()
                 .SingleInstance();
 
             builder.Register(c =>
             {
-                return AzureTableStorage<LogTableEntity>.Create(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.ClientAccountRecoveryService.Db.LogsConnString), "AccountRecoveryEvents", c.Resolve<ILog>());
+                return AzureTableStorage<LogTableEntity>.Create(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.ClientAccountRecoveryService.Db.RecoveryActivitiesConnString), "AccountRecoveryEvents", c.Resolve<ILog>());
             }).As<INoSQLTableStorage<LogTableEntity>>()
                 .SingleInstance();
         }
