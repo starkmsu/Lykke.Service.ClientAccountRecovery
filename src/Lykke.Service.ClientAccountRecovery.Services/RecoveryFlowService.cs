@@ -46,7 +46,17 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _ctx.Time = DateTime.UtcNow;
             _ctx.Action = transition.Trigger;
             _ctx.SeqNo++; // Under any condition SenNo should be incremented only one time per client call
-            return _stateRepository.InsertAsync(_ctx);
+
+            switch (transition.Destination)
+            {
+                // For this states Insert will be called only after successful calling of external API
+                case State.AwaitSmsVerification:
+                case State.AwaitEmailVerification:
+                case State.KycInProgress:
+                    return Task.CompletedTask;
+                default:
+                    return _stateRepository.InsertAsync(_ctx);
+            }
         }
 
         private void Configure()
@@ -175,19 +185,23 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
 
 
-        private Task SendSmsAsync()
+        private async Task SendSmsAsync()
         {
-            return _smsSender.SendCodeAsync(_ctx.ClientId);
+            await _smsSender.SendCodeAsync(_ctx.ClientId);
+            await _stateRepository.InsertAsync(_ctx);
         }
 
-        private Task SendEmailAsync()
+        private async Task SendEmailAsync()
         {
-            return _emailSender.SendCodeAsync(_ctx.ClientId);
+            await _emailSender.SendCodeAsync(_ctx.ClientId);
+            await _stateRepository.InsertAsync(_ctx);
+
         }
 
-        private Task SendKycVerification()
+        private async Task SendKycVerification()
         {
-            return _selfieSender.Send(_ctx.ClientId);
+            await _selfieSender.Send(_ctx.ClientId);
+            await _emailSender.SendCodeAsync(_ctx.ClientId);
         }
 
         public Task StartRecoveryAsync()
