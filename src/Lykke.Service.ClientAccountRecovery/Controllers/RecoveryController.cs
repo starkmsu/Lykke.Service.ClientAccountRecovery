@@ -155,6 +155,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             {
 
                 flow.Context.Initiator = Consts.InitiatorUser;
+                flow.Context.Comment = null;
                 await _clientAccountClient.ChangeClientPasswordAsync(flow.Context.ClientId, request.PasswordHash);
                 await flow.UpdatePasswordComplete();
             }
