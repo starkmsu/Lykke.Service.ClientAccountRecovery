@@ -8,6 +8,7 @@ using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
+using Lykke.Service.ClientAccountRecovery.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccountRecovery.Models;
@@ -174,6 +175,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [HttpPut("challenge/challenge/checkResult")]
         [SwaggerOperation("ApproveChallenge")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ApiKeyAuth]
         public async Task<IActionResult> ApproveChallenge([FromBody]ApproveChallengeRequest request)
         {
             if (!ModelState.IsValid || request.CheckResult == CheckResult.Unknown)
@@ -216,6 +218,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [HttpPost("challenge/resolution")]
         [SwaggerOperation("SubmitResolution")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ApiKeyAuth]
         public async Task<IActionResult> SubmitResolution([FromBody]ResolutionRequest request)
         {
             if (!ModelState.IsValid)

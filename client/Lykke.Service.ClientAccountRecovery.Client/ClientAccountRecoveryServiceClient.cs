@@ -774,6 +774,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <summary>
         /// Approves user challenges. Only for support.
         /// </summary>
+        /// <param name='xApiKey'>
+        /// An API key.
+        /// </param>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -785,14 +788,24 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <exception cref="HttpOperationException">
         /// Thrown when the operation returned an invalid status code
         /// </exception>
+        /// <exception cref="ValidationException">
+        /// Thrown when a required parameter is null
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when a required parameter is null
+        /// </exception>
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<HttpOperationResponse> ApproveChallengeWithHttpMessagesAsync(ApproveChallengeRequest request = default(ApproveChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<HttpOperationResponse> ApproveChallengeWithHttpMessagesAsync(string xApiKey, ApproveChallengeRequest request = default(ApproveChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (request != null)
             {
                 request.Validate();
+            }
+            if (xApiKey == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "xApiKey");
             }
             // Tracing
             bool _shouldTrace = ServiceClientTracing.IsEnabled;
@@ -802,6 +815,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 _invocationId = ServiceClientTracing.NextInvocationId.ToString();
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
                 tracingParameters.Add("request", request);
+                tracingParameters.Add("xApiKey", xApiKey);
                 tracingParameters.Add("cancellationToken", cancellationToken);
                 ServiceClientTracing.Enter(_invocationId, this, "ApproveChallenge", tracingParameters);
             }
@@ -814,6 +828,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             _httpRequest.Method = new HttpMethod("PUT");
             _httpRequest.RequestUri = new System.Uri(_url);
             // Set Headers
+            if (xApiKey != null)
+            {
+                if (_httpRequest.Headers.Contains("X-ApiKey"))
+                {
+                    _httpRequest.Headers.Remove("X-ApiKey");
+                }
+                _httpRequest.Headers.TryAddWithoutValidation("X-ApiKey", xApiKey);
+            }
 
 
             if (customHeaders != null)
@@ -886,6 +908,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <summary>
         /// Updates current state of the recovery process. Only for support.
         /// </summary>
+        /// <param name='xApiKey'>
+        /// An API key.
+        /// </param>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -897,14 +922,24 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <exception cref="HttpOperationException">
         /// Thrown when the operation returned an invalid status code
         /// </exception>
+        /// <exception cref="ValidationException">
+        /// Thrown when a required parameter is null
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when a required parameter is null
+        /// </exception>
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<HttpOperationResponse> SubmitResolutionWithHttpMessagesAsync(ResolutionRequest request = default(ResolutionRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<HttpOperationResponse> SubmitResolutionWithHttpMessagesAsync(string xApiKey, ResolutionRequest request = default(ResolutionRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (request != null)
             {
                 request.Validate();
+            }
+            if (xApiKey == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "xApiKey");
             }
             // Tracing
             bool _shouldTrace = ServiceClientTracing.IsEnabled;
@@ -914,6 +949,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 _invocationId = ServiceClientTracing.NextInvocationId.ToString();
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
                 tracingParameters.Add("request", request);
+                tracingParameters.Add("xApiKey", xApiKey);
                 tracingParameters.Add("cancellationToken", cancellationToken);
                 ServiceClientTracing.Enter(_invocationId, this, "SubmitResolution", tracingParameters);
             }
@@ -926,6 +962,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             _httpRequest.Method = new HttpMethod("POST");
             _httpRequest.RequestUri = new System.Uri(_url);
             // Set Headers
+            if (xApiKey != null)
+            {
+                if (_httpRequest.Headers.Contains("X-ApiKey"))
+                {
+                    _httpRequest.Headers.Remove("X-ApiKey");
+                }
+                _httpRequest.Headers.TryAddWithoutValidation("X-ApiKey", xApiKey);
+            }
 
 
             if (customHeaders != null)

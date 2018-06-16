@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -13,9 +14,11 @@ using Lykke.Service.ClientAccountRecovery.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.MonitoringServiceApiCaller;
+using Lykke.Service.ClientAccountRecovery.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Serialization;
@@ -55,6 +58,7 @@ namespace Lykke.Service.ClientAccountRecovery
                 services.AddSwaggerGen(options =>
                 {
                     options.DefaultLykkeConfiguration("v1", "ClientAccountRecovery API");
+                    options.OperationFilter<AddRequiredHeaderParameter>();
                 });
                 services.Configure<MvcJsonOptions>(c =>
                 {
@@ -68,6 +72,7 @@ namespace Lykke.Service.ClientAccountRecovery
                 if (appSettings.CurrentValue.MonitoringServiceClient != null)
                     _monitoringServiceUrl = appSettings.CurrentValue.MonitoringServiceClient.MonitoringServiceUrl;
 
+                ApiKeyAuthAttribute.ApiKey = appSettings.CurrentValue.ClientAccountRecoveryService.ApiKey;
                 Log = CreateLogWithSlack(services, appSettings);
 
                 builder.RegisterModule(new ServiceModule(appSettings, Log));

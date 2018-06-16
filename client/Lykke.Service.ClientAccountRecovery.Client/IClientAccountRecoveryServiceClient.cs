@@ -101,6 +101,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <summary>
         /// Approves user challenges. Only for support.
         /// </summary>
+        /// <param name='xApiKey'>
+        /// An API key.
+        /// </param>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -109,11 +112,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task<HttpOperationResponse> ApproveChallengeWithHttpMessagesAsync(ApproveChallengeRequest request = default(ApproveChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse> ApproveChallengeWithHttpMessagesAsync(string xApiKey, ApproveChallengeRequest request = default(ApproveChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Updates current state of the recovery process. Only for support.
         /// </summary>
+        /// <param name='xApiKey'>
+        /// An API key.
+        /// </param>
         /// <param name='request'>
         /// </param>
         /// <param name='customHeaders'>
@@ -122,7 +128,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task<HttpOperationResponse> SubmitResolutionWithHttpMessagesAsync(ResolutionRequest request = default(ResolutionRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse> SubmitResolutionWithHttpMessagesAsync(string xApiKey, ResolutionRequest request = default(ResolutionRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Returns brief information about all client's recoveries

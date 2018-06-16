@@ -7,6 +7,6 @@ namespace Lykke.Service.ClientAccountRecovery.Settings.ServiceSettings
     {
         public DbSettings Db { get; set; }
 
-
+        public string ApiKey { get; set; }
     }
 }

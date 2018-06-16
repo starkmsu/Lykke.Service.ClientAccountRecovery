@@ -34,7 +34,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         public async Task<IRecoveryFlowService> FindExisted(string recoveryId)
         {
             var log = await _repository.GetAsync(recoveryId);
-            if (log == null)
+            if (log.Empty)
             {
                 return null;
             }
