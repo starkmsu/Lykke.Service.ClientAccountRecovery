@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.7.2" />
+    <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.7.4" />
     <PackageReference Include="Lykke.Logs" Version="4.3.4" />
     <PackageReference Include="Lykke.MonitoringServiceApiCaller" Version="1.4.0" />
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.4.6" />
@@ -41,7 +41,6 @@
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="1.2.0" />
   </ItemGroup>
   
   <ItemGroup>

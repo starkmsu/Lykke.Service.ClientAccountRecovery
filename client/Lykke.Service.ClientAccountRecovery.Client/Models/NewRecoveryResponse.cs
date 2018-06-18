@@ -22,7 +22,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// <summary>
         /// Initializes a new instance of the NewRecoveryResponse class.
         /// </summary>
-        public NewRecoveryResponse(string recoveryId = default(string))
+        public NewRecoveryResponse(string recoveryId)
         {
             RecoveryId = recoveryId;
             CustomInit();
@@ -38,5 +38,15 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         [JsonProperty(PropertyName = "recoveryId")]
         public string RecoveryId { get; private set; }
 
+        /// <summary>
+        /// Validate the object.
+        /// </summary>
+        /// <exception cref="Microsoft.Rest.ValidationException">
+        /// Thrown if validation fails
+        /// </exception>
+        public virtual void Validate()
+        {
+            //Nothing to validate
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
         /// <param name="action">Possible values include: 'Undefined',
         /// 'Complete', 'Restart', 'Skip'</param>
-        public ChallengeRequest(Challenge challenge, Action action, string recoveryId = default(string), string value = default(string))
+        public ChallengeRequest(string recoveryId, Challenge challenge, Action action, string value)
         {
             RecoveryId = recoveryId;
             Challenge = challenge;
@@ -73,6 +73,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// </exception>
         public virtual void Validate()
         {
+            if (RecoveryId == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "RecoveryId");
+            }
+            if (Value == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "Value");
+            }
             if (RecoveryId != null)
             {
                 if (RecoveryId.Length < 8)

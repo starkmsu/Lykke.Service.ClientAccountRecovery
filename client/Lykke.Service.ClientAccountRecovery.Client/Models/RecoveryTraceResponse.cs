@@ -47,7 +47,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
         /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
         /// 'PasswordUpdated'</param>
-        public RecoveryTraceResponse(System.DateTime time, State previousState, Trigger action, State newState, string initiator = default(string), string comment = default(string))
+        public RecoveryTraceResponse(System.DateTime time, State previousState, Trigger action, State newState, string initiator, string comment)
         {
             Time = time;
             PreviousState = previousState;

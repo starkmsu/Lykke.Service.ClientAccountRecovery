@@ -23,7 +23,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// <summary>
         /// Initializes a new instance of the NewRecoveryRequest class.
         /// </summary>
-        public NewRecoveryRequest(string clientId = default(string))
+        public NewRecoveryRequest(string clientId)
         {
             ClientId = clientId;
             CustomInit();
@@ -47,6 +47,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// </exception>
         public virtual void Validate()
         {
+            if (ClientId == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "ClientId");
+            }
             if (ClientId != null)
             {
                 if (ClientId.Length < 8)

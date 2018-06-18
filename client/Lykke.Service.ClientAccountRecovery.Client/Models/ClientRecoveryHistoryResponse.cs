@@ -31,7 +31,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
         /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
         /// 'PasswordUpdated'</param>
-        public ClientRecoveryHistoryResponse(System.DateTime time, State state, string recoveryId = default(string), string initiator = default(string))
+        public ClientRecoveryHistoryResponse(string recoveryId, System.DateTime time, State state, string initiator)
         {
             RecoveryId = recoveryId;
             Time = time;

@@ -23,7 +23,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// <summary>
         /// Initializes a new instance of the PasswordRequest class.
         /// </summary>
-        public PasswordRequest(string recoveryId = default(string), string passwordHash = default(string))
+        public PasswordRequest(string recoveryId, string passwordHash)
         {
             RecoveryId = recoveryId;
             PasswordHash = passwordHash;
@@ -53,6 +53,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// </exception>
         public virtual void Validate()
         {
+            if (RecoveryId == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "RecoveryId");
+            }
+            if (PasswordHash == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "PasswordHash");
+            }
             if (RecoveryId != null)
             {
                 if (RecoveryId.Length < 8)

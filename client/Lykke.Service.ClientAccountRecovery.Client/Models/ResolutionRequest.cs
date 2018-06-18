@@ -25,7 +25,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// </summary>
         /// <param name="resolution">Possible values include: 'Unknown',
         /// 'Suspend', 'Interview', 'Freeze', 'Allow'</param>
-        public ResolutionRequest(Resolution resolution, string recoveryId = default(string), string agentId = default(string), string comment = default(string))
+        public ResolutionRequest(string recoveryId, Resolution resolution, string agentId, string comment)
         {
             RecoveryId = recoveryId;
             Resolution = resolution;
@@ -69,6 +69,18 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// </exception>
         public virtual void Validate()
         {
+            if (RecoveryId == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "RecoveryId");
+            }
+            if (AgentId == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "AgentId");
+            }
+            if (Comment == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "Comment");
+            }
             if (RecoveryId != null)
             {
                 if (RecoveryId.Length < 8)
