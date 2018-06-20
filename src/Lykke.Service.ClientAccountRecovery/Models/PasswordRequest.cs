@@ -11,5 +11,11 @@ namespace Lykke.Service.ClientAccountRecovery.Models
 
         [Required]
         public string PasswordHash { get; set; }
+
+        [Required]
+        public string Ip { get; set; }
+
+        [MaxLength(Consts.MaxUserAgentLength)]
+        public string UserAgent { get; set; }
     }
 }

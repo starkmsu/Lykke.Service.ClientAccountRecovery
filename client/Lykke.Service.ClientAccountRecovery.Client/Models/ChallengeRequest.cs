@@ -27,12 +27,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
         /// <param name="action">Possible values include: 'Undefined',
         /// 'Complete', 'Restart', 'Skip'</param>
-        public ChallengeRequest(string recoveryId, Challenge challenge, Action action, string value)
+        public ChallengeRequest(string recoveryId, Challenge challenge, Action action, string value, string ip, string userAgent)
         {
             RecoveryId = recoveryId;
             Challenge = challenge;
             Action = action;
             Value = value;
+            Ip = ip;
+            UserAgent = userAgent;
             CustomInit();
         }
 
@@ -66,6 +68,16 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         public string Value { get; set; }
 
         /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "ip")]
+        public string Ip { get; set; }
+
+        /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "userAgent")]
+        public string UserAgent { get; set; }
+
+        /// <summary>
         /// Validate the object.
         /// </summary>
         /// <exception cref="ValidationException">
@@ -81,11 +93,26 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "Value");
             }
+            if (Ip == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "Ip");
+            }
+            if (UserAgent == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "UserAgent");
+            }
             if (RecoveryId != null)
             {
                 if (RecoveryId.Length < 8)
                 {
                     throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
+                }
+            }
+            if (UserAgent != null)
+            {
+                if (UserAgent.Length > 128)
+                {
+                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 128);
                 }
             }
         }

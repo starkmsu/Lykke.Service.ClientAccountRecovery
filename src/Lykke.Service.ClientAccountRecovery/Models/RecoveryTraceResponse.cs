@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -30,6 +31,13 @@ namespace Lykke.Service.ClientAccountRecovery.Models
 
         public string Comment { get; internal set; }
 
+        [Required]
+        public string Ip { get;internal set; }
+
+        [MaxLength(Consts.MaxUserAgentLength)]
+        public string UserAgent { get;internal set; }
+
+
 
         public static IEnumerable<RecoveryTraceResponse> Convert(RecoveryUnit unit)
         {
@@ -45,6 +53,8 @@ namespace Lykke.Service.ClientAccountRecovery.Models
                 prev.Comment = context.Comment;
                 prev.Initiator = context.Initiator;
                 prev.NewState = context.State;
+                prev.Ip = context.Ip;
+                prev.UserAgent = context.UserAgent;
                 var next = new RecoveryTraceResponse { PreviousState = context.State };
                 result.Add(next);
                 counter++;

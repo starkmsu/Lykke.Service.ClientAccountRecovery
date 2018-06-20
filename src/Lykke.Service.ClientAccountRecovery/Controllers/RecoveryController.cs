@@ -53,6 +53,8 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
 
             var flow = _factory.InitiateNew(request.ClientId);
             flow.Context.Initiator = Consts.InitiatorUser;
+            flow.Context.Ip = request.Ip;
+            flow.Context.UserAgent = request.UserAgent;
 
             try
             {
@@ -115,6 +117,8 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             }
 
             flow.Context.Initiator = Consts.InitiatorUser;
+            flow.Context.Ip = request.Ip;
+            flow.Context.UserAgent = request.UserAgent;
             try
             {
                 await _challengeManager.ExecuteAction(request.Challenge, request.Action, request.Value, flow);
@@ -156,6 +160,8 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
 
                 flow.Context.Initiator = Consts.InitiatorUser;
                 flow.Context.Comment = null;
+                flow.Context.Ip = request.Ip;
+                flow.Context.UserAgent = request.UserAgent;
                 await _clientAccountClient.ChangeClientPasswordAsync(flow.Context.ClientId, request.PasswordHash);
                 await flow.UpdatePasswordComplete();
             }
@@ -167,7 +173,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             return Ok();
         }
 
-        // [Authorize]
         /// <summary>
         /// Approves user challenges. Only for support.
         /// </summary>
@@ -193,6 +198,8 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             try
             {
                 flow.Context.Initiator = request.AgentId;
+                flow.Context.Ip = null;
+                flow.Context.UserAgent = null;
                 if (request.CheckResult == CheckResult.Approved)
                 {
                     await flow.SelfieVerificationComplete(); // In a moment supporting only selfie
@@ -237,6 +244,8 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             {
                 flow.Context.Initiator = request.AgentId;
                 flow.Context.Comment = request.Comment;
+                flow.Context.Ip = null;
+                flow.Context.UserAgent = null;
                 switch (request.Resolution)
                 {
                     case Resolution.Suspend:
@@ -302,7 +311,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         /// </summary>
         /// <param name="recoveryId">The recovery id</param>
         /// <returns></returns>
-        // [Authorize]
         [HttpGet("client/trace/{recoveryId}")]
         [SwaggerOperation("GetRecoveryTrace")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<RecoveryTraceResponse>))]

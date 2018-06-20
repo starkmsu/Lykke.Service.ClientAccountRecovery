@@ -23,10 +23,12 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// <summary>
         /// Initializes a new instance of the PasswordRequest class.
         /// </summary>
-        public PasswordRequest(string recoveryId, string passwordHash)
+        public PasswordRequest(string recoveryId, string passwordHash, string ip, string userAgent)
         {
             RecoveryId = recoveryId;
             PasswordHash = passwordHash;
+            Ip = ip;
+            UserAgent = userAgent;
             CustomInit();
         }
 
@@ -46,6 +48,16 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         public string PasswordHash { get; set; }
 
         /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "ip")]
+        public string Ip { get; set; }
+
+        /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "userAgent")]
+        public string UserAgent { get; set; }
+
+        /// <summary>
         /// Validate the object.
         /// </summary>
         /// <exception cref="ValidationException">
@@ -61,11 +73,26 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "PasswordHash");
             }
+            if (Ip == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "Ip");
+            }
+            if (UserAgent == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "UserAgent");
+            }
             if (RecoveryId != null)
             {
                 if (RecoveryId.Length < 8)
                 {
                     throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
+                }
+            }
+            if (UserAgent != null)
+            {
+                if (UserAgent.Length > 128)
+                {
+                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 128);
                 }
             }
         }

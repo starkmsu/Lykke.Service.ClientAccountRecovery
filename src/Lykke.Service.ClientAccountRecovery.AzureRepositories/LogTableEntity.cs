@@ -24,7 +24,9 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
         public int EmailRecoveryAttempts { get; set; }
         public string Initiator { get; set; }
         public string Comment { get; set; }
-
+        public string Ip { get; set; }
+        public string UserAgent { get; set; }
+        
         public static LogTableEntity CreateNew(RecoveryContext context)
         {
             return new LogTableEntity
@@ -45,7 +47,9 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 KycPassed = context.KycPassed,
                 HasPin = context.HasPin,
                 SmsRecoveryAttempts = context.SmsRecoveryAttempts,
-                EmailRecoveryAttempts = context.EmailRecoveryAttempts
+                EmailRecoveryAttempts = context.EmailRecoveryAttempts,
+                Ip = context.Ip,
+                UserAgent = context.UserAgent
             };
         }
 
@@ -69,7 +73,9 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 KycPassed = KycPassed,
                 HasPin = HasPin,
                 SmsRecoveryAttempts = SmsRecoveryAttempts,
-                EmailRecoveryAttempts = EmailRecoveryAttempts
+                EmailRecoveryAttempts = EmailRecoveryAttempts,
+                Ip = Ip,
+                UserAgent = UserAgent
             };
             return context;
         }

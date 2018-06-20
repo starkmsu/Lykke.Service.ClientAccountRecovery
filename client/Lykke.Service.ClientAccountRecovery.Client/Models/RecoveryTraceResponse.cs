@@ -6,6 +6,7 @@
 
 namespace Lykke.Service.ClientAccountRecovery.Client.Models
 {
+    using Microsoft.Rest;
     using Newtonsoft.Json;
     using System.Linq;
 
@@ -47,7 +48,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
         /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
         /// 'PasswordUpdated'</param>
-        public RecoveryTraceResponse(System.DateTime time, State previousState, Trigger action, State newState, string initiator, string comment)
+        public RecoveryTraceResponse(System.DateTime time, State previousState, Trigger action, State newState, string initiator, string comment, string ip, string userAgent)
         {
             Time = time;
             PreviousState = previousState;
@@ -55,6 +56,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
             NewState = newState;
             Initiator = initiator;
             Comment = comment;
+            Ip = ip;
+            UserAgent = userAgent;
             CustomInit();
         }
 
@@ -119,13 +122,30 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         public string Comment { get; private set; }
 
         /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "ip")]
+        public string Ip { get; private set; }
+
+        /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "userAgent")]
+        public string UserAgent { get; private set; }
+
+        /// <summary>
         /// Validate the object.
         /// </summary>
-        /// <exception cref="Microsoft.Rest.ValidationException">
+        /// <exception cref="ValidationException">
         /// Thrown if validation fails
         /// </exception>
         public virtual void Validate()
         {
+            if (UserAgent != null)
+            {
+                if (UserAgent.Length > 128)
+                {
+                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 128);
+                }
+            }
         }
     }
 }

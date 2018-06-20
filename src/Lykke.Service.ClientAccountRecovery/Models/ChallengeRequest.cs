@@ -19,5 +19,11 @@ namespace Lykke.Service.ClientAccountRecovery.Models
         public Action Action { get;  set; }
         [Required]
         public string Value { get;  set; }
+        [Required]
+        public string Ip { get; set; }
+
+        [MaxLength(Consts.MaxUserAgentLength)]
+        public string UserAgent { get; set; }
+
     }
 }

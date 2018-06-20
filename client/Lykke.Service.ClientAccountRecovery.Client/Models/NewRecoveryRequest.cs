@@ -23,9 +23,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         /// <summary>
         /// Initializes a new instance of the NewRecoveryRequest class.
         /// </summary>
-        public NewRecoveryRequest(string clientId)
+        public NewRecoveryRequest(string clientId, string ip, string userAgent)
         {
             ClientId = clientId;
+            Ip = ip;
+            UserAgent = userAgent;
             CustomInit();
         }
 
@@ -40,6 +42,16 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         public string ClientId { get; set; }
 
         /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "ip")]
+        public string Ip { get; set; }
+
+        /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "userAgent")]
+        public string UserAgent { get; set; }
+
+        /// <summary>
         /// Validate the object.
         /// </summary>
         /// <exception cref="ValidationException">
@@ -51,11 +63,26 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "ClientId");
             }
+            if (Ip == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "Ip");
+            }
+            if (UserAgent == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "UserAgent");
+            }
             if (ClientId != null)
             {
                 if (ClientId.Length < 8)
                 {
                     throw new ValidationException(ValidationRules.MinLength, "ClientId", 8);
+                }
+            }
+            if (UserAgent != null)
+            {
+                if (UserAgent.Length > 128)
+                {
+                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 128);
                 }
             }
         }
