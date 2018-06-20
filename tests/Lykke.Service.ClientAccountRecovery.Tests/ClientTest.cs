@@ -17,9 +17,9 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             var container = builder.Build();
 
             var client = container.Resolve<IClientAccountRecoveryServiceClient>();
-            var callResult = await client.StartNewRecoveryAsync(new NewRecoveryRequest("sdfdsf"));
-        }    
-        
+            var callResult = await client.StartNewRecoveryAsync(new NewRecoveryRequest("sdfdsf", "myIp", "MyUserAgent"));
+        }
+
         [Fact(Skip = "Manual testing")]
         public async Task ShouldThrowException()
         {
