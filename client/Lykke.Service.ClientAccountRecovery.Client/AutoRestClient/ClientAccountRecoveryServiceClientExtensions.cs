@@ -4,7 +4,7 @@
 // regenerated.
 // </auto-generated>
 
-namespace Lykke.Service.ClientAccountRecovery.Client
+namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
 {
     using Models;
     using System.Collections;
@@ -111,17 +111,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
-            /// <param name='xApiKey'>
-            /// An API key.
-            /// </param>
             /// <param name='request'>
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task ApproveChallengeAsync(this IClientAccountRecoveryServiceClient operations, string xApiKey, ApproveChallengeRequest request = default(ApproveChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task ApproveChallengeAsync(this IClientAccountRecoveryServiceClient operations, ApproveChallengeRequest request = default(ApproveChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
-                (await operations.ApproveChallengeWithHttpMessagesAsync(xApiKey, request, null, cancellationToken).ConfigureAwait(false)).Dispose();
+                (await operations.ApproveChallengeWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
             }
 
             /// <summary>
@@ -130,17 +127,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
-            /// <param name='xApiKey'>
-            /// An API key.
-            /// </param>
             /// <param name='request'>
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task SubmitResolutionAsync(this IClientAccountRecoveryServiceClient operations, string xApiKey, ResolutionRequest request = default(ResolutionRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task SubmitResolutionAsync(this IClientAccountRecoveryServiceClient operations, ResolutionRequest request = default(ResolutionRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
-                (await operations.SubmitResolutionWithHttpMessagesAsync(xApiKey, request, null, cancellationToken).ConfigureAwait(false)).Dispose();
+                (await operations.SubmitResolutionWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
             }
 
             /// <summary>

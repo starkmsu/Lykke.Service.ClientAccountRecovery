@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using Autofac;
-using Common.Log;
+using JetBrains.Annotations;
 
 namespace Lykke.Service.ClientAccountRecovery.Client
 {
@@ -15,25 +15,31 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="serviceUrl"></param>
+        /// <param name="apiKey"></param>
         /// <param name="log"></param>
-        public static void RegisterClientAccountRecoveryClient(this ContainerBuilder builder, string serviceUrl, ILog log)
+        public static void RegisterClientAccountRecoveryClient([NotNull] this ContainerBuilder builder, [NotNull] string serviceUrl, [CanBeNull] string apiKey)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
-            if (log == null) throw new ArgumentNullException(nameof(log));
             if (string.IsNullOrWhiteSpace(serviceUrl))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(serviceUrl));
 
-            builder.Register(c => new ClientAccountRecoveryServiceClient(new Uri(serviceUrl), new HttpClient()))
-                .As<IClientAccountRecoveryServiceClient>()
+            var cred = new ClientCredentials(apiKey);
+            builder.Register(c => new AccountRecoveryService(new Uri(serviceUrl), new HttpClient(), cred))
+                .As<IAccountRecoveryService>()
                 .SingleInstance();
         }
 
         /// <summary>
         /// Registers a client implementation in the container
         /// </summary>
-        public static void RegisterClientAccountRecoveryClient(this ContainerBuilder builder, ClientAccountRecoveryServiceClientSettings settings, ILog log)
+        public static void RegisterClientAccountRecoveryClient(this ContainerBuilder builder, [NotNull] ClientAccountRecoveryServiceClientSettings settings)
         {
-            builder.RegisterClientAccountRecoveryClient(settings?.ServiceUrl, log);
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            builder.RegisterClientAccountRecoveryClient(settings.ServiceUrl, settings.ApiKey);
         }
     }
 }

@@ -4,33 +4,35 @@
 // regenerated.
 // </auto-generated>
 
-namespace Lykke.Service.ClientAccountRecovery.Client.Models
+namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
 {
     using Microsoft.Rest;
     using Newtonsoft.Json;
     using System.Linq;
 
-    public partial class ResolutionRequest
+    public partial class ApproveChallengeRequest
     {
         /// <summary>
-        /// Initializes a new instance of the ResolutionRequest class.
+        /// Initializes a new instance of the ApproveChallengeRequest class.
         /// </summary>
-        public ResolutionRequest()
+        public ApproveChallengeRequest()
         {
             CustomInit();
         }
 
         /// <summary>
-        /// Initializes a new instance of the ResolutionRequest class.
+        /// Initializes a new instance of the ApproveChallengeRequest class.
         /// </summary>
-        /// <param name="resolution">Possible values include: 'Unknown',
-        /// 'Suspend', 'Interview', 'Freeze', 'Allow'</param>
-        public ResolutionRequest(string recoveryId, Resolution resolution, string agentId, string comment)
+        /// <param name="challenge">Possible values include: 'Unknown', 'Sms',
+        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
+        /// <param name="checkResult">Possible values include: 'Unknown',
+        /// 'Approved', 'Rejected'</param>
+        public ApproveChallengeRequest(string recoveryId, Challenge challenge, string agentId, CheckResult checkResult)
         {
             RecoveryId = recoveryId;
-            Resolution = resolution;
+            Challenge = challenge;
             AgentId = agentId;
-            Comment = comment;
+            CheckResult = checkResult;
             CustomInit();
         }
 
@@ -45,11 +47,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         public string RecoveryId { get; set; }
 
         /// <summary>
-        /// Gets or sets possible values include: 'Unknown', 'Suspend',
-        /// 'Interview', 'Freeze', 'Allow'
+        /// Gets or sets possible values include: 'Unknown', 'Sms', 'Email',
+        /// 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'
         /// </summary>
-        [JsonProperty(PropertyName = "resolution")]
-        public Resolution Resolution { get; set; }
+        [JsonProperty(PropertyName = "challenge")]
+        public Challenge Challenge { get; set; }
 
         /// <summary>
         /// </summary>
@@ -57,9 +59,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         public string AgentId { get; set; }
 
         /// <summary>
+        /// Gets or sets possible values include: 'Unknown', 'Approved',
+        /// 'Rejected'
         /// </summary>
-        [JsonProperty(PropertyName = "comment")]
-        public string Comment { get; set; }
+        [JsonProperty(PropertyName = "checkResult")]
+        public CheckResult CheckResult { get; set; }
 
         /// <summary>
         /// Validate the object.
@@ -77,22 +81,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "AgentId");
             }
-            if (Comment == null)
-            {
-                throw new ValidationException(ValidationRules.CannotBeNull, "Comment");
-            }
             if (RecoveryId != null)
             {
                 if (RecoveryId.Length < 8)
                 {
                     throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
-                }
-            }
-            if (Comment != null)
-            {
-                if (Comment.Length > 256)
-                {
-                    throw new ValidationException(ValidationRules.MaxLength, "Comment", 256);
                 }
             }
         }

@@ -6,5 +6,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client
     {
         [HttpCheck("/api/isalive")]
         public string ServiceUrl {get; set;}
+
+        [Optional]
+        public string ApiKey { get; set; }
     }
 }

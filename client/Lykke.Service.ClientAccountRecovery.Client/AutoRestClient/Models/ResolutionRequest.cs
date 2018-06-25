@@ -4,31 +4,33 @@
 // regenerated.
 // </auto-generated>
 
-namespace Lykke.Service.ClientAccountRecovery.Client.Models
+namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
 {
     using Microsoft.Rest;
     using Newtonsoft.Json;
     using System.Linq;
 
-    public partial class PasswordRequest
+    public partial class ResolutionRequest
     {
         /// <summary>
-        /// Initializes a new instance of the PasswordRequest class.
+        /// Initializes a new instance of the ResolutionRequest class.
         /// </summary>
-        public PasswordRequest()
+        public ResolutionRequest()
         {
             CustomInit();
         }
 
         /// <summary>
-        /// Initializes a new instance of the PasswordRequest class.
+        /// Initializes a new instance of the ResolutionRequest class.
         /// </summary>
-        public PasswordRequest(string recoveryId, string passwordHash, string ip, string userAgent)
+        /// <param name="resolution">Possible values include: 'Unknown',
+        /// 'Suspend', 'Interview', 'Freeze', 'Allow'</param>
+        public ResolutionRequest(string recoveryId, Resolution resolution, string agentId, string comment)
         {
             RecoveryId = recoveryId;
-            PasswordHash = passwordHash;
-            Ip = ip;
-            UserAgent = userAgent;
+            Resolution = resolution;
+            AgentId = agentId;
+            Comment = comment;
             CustomInit();
         }
 
@@ -43,19 +45,21 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         public string RecoveryId { get; set; }
 
         /// <summary>
+        /// Gets or sets possible values include: 'Unknown', 'Suspend',
+        /// 'Interview', 'Freeze', 'Allow'
         /// </summary>
-        [JsonProperty(PropertyName = "passwordHash")]
-        public string PasswordHash { get; set; }
+        [JsonProperty(PropertyName = "resolution")]
+        public Resolution Resolution { get; set; }
 
         /// <summary>
         /// </summary>
-        [JsonProperty(PropertyName = "ip")]
-        public string Ip { get; set; }
+        [JsonProperty(PropertyName = "agentId")]
+        public string AgentId { get; set; }
 
         /// <summary>
         /// </summary>
-        [JsonProperty(PropertyName = "userAgent")]
-        public string UserAgent { get; set; }
+        [JsonProperty(PropertyName = "comment")]
+        public string Comment { get; set; }
 
         /// <summary>
         /// Validate the object.
@@ -69,17 +73,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "RecoveryId");
             }
-            if (PasswordHash == null)
+            if (AgentId == null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "PasswordHash");
+                throw new ValidationException(ValidationRules.CannotBeNull, "AgentId");
             }
-            if (Ip == null)
+            if (Comment == null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "Ip");
-            }
-            if (UserAgent == null)
-            {
-                throw new ValidationException(ValidationRules.CannotBeNull, "UserAgent");
+                throw new ValidationException(ValidationRules.CannotBeNull, "Comment");
             }
             if (RecoveryId != null)
             {
@@ -88,11 +88,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
                     throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
                 }
             }
-            if (UserAgent != null)
+            if (Comment != null)
             {
-                if (UserAgent.Length > 128)
+                if (Comment.Length > 256)
                 {
-                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 128);
+                    throw new ValidationException(ValidationRules.MaxLength, "Comment", 256);
                 }
             }
         }

@@ -4,7 +4,7 @@
 // regenerated.
 // </auto-generated>
 
-namespace Lykke.Service.ClientAccountRecovery.Client.Models
+namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
 {
     using Microsoft.Rest;
     using Newtonsoft.Json;

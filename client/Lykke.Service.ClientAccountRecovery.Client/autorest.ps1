@@ -7,4 +7,4 @@
 # Autorest version >= 1.2.2 - https://www.npmjs.com/package/autorest
 
 # Run this file if you use PowerShell directly
-autorest --input-file=http://localhost:5000/swagger/v1/swagger.json --csharp --output-folder=. --namespace=Lykke.Service.ClientAccountRecovery.Client --use-internal-constructors --sync-methods=none --override-client-name=ClientAccountRecoveryServiceClient
+autorest --input-file=http://localhost:5000/swagger/v1/swagger.json --csharp --output-folder=.\AutoRestClient --namespace=Lykke.Service.ClientAccountRecovery.Client.AutoRestClient --use-internal-constructors --sync-methods=none --override-client-name=ClientAccountRecoveryServiceClient --add-credentials

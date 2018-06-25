@@ -4,35 +4,31 @@
 // regenerated.
 // </auto-generated>
 
-namespace Lykke.Service.ClientAccountRecovery.Client.Models
+namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
 {
     using Microsoft.Rest;
     using Newtonsoft.Json;
     using System.Linq;
 
-    public partial class ApproveChallengeRequest
+    public partial class PasswordRequest
     {
         /// <summary>
-        /// Initializes a new instance of the ApproveChallengeRequest class.
+        /// Initializes a new instance of the PasswordRequest class.
         /// </summary>
-        public ApproveChallengeRequest()
+        public PasswordRequest()
         {
             CustomInit();
         }
 
         /// <summary>
-        /// Initializes a new instance of the ApproveChallengeRequest class.
+        /// Initializes a new instance of the PasswordRequest class.
         /// </summary>
-        /// <param name="challenge">Possible values include: 'Unknown', 'Sms',
-        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
-        /// <param name="checkResult">Possible values include: 'Unknown',
-        /// 'Approved', 'Rejected'</param>
-        public ApproveChallengeRequest(string recoveryId, Challenge challenge, string agentId, CheckResult checkResult)
+        public PasswordRequest(string recoveryId, string passwordHash, string ip, string userAgent)
         {
             RecoveryId = recoveryId;
-            Challenge = challenge;
-            AgentId = agentId;
-            CheckResult = checkResult;
+            PasswordHash = passwordHash;
+            Ip = ip;
+            UserAgent = userAgent;
             CustomInit();
         }
 
@@ -47,23 +43,19 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
         public string RecoveryId { get; set; }
 
         /// <summary>
-        /// Gets or sets possible values include: 'Unknown', 'Sms', 'Email',
-        /// 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'
         /// </summary>
-        [JsonProperty(PropertyName = "challenge")]
-        public Challenge Challenge { get; set; }
+        [JsonProperty(PropertyName = "passwordHash")]
+        public string PasswordHash { get; set; }
 
         /// <summary>
         /// </summary>
-        [JsonProperty(PropertyName = "agentId")]
-        public string AgentId { get; set; }
+        [JsonProperty(PropertyName = "ip")]
+        public string Ip { get; set; }
 
         /// <summary>
-        /// Gets or sets possible values include: 'Unknown', 'Approved',
-        /// 'Rejected'
         /// </summary>
-        [JsonProperty(PropertyName = "checkResult")]
-        public CheckResult CheckResult { get; set; }
+        [JsonProperty(PropertyName = "userAgent")]
+        public string UserAgent { get; set; }
 
         /// <summary>
         /// Validate the object.
@@ -77,15 +69,30 @@ namespace Lykke.Service.ClientAccountRecovery.Client.Models
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "RecoveryId");
             }
-            if (AgentId == null)
+            if (PasswordHash == null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "AgentId");
+                throw new ValidationException(ValidationRules.CannotBeNull, "PasswordHash");
+            }
+            if (Ip == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "Ip");
+            }
+            if (UserAgent == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "UserAgent");
             }
             if (RecoveryId != null)
             {
                 if (RecoveryId.Length < 8)
                 {
                     throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
+                }
+            }
+            if (UserAgent != null)
+            {
+                if (UserAgent.Length > 128)
+                {
+                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 128);
                 }
             }
         }
