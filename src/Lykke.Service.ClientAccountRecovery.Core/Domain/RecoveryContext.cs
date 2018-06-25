@@ -6,7 +6,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
     {
         public string RecoveryId { get; set; }
         public string ClientId { get; set; }
-        public int SeqNo { get;set; }
+        public int SeqNo { get; set; }
         public DateTime Time { get; set; }
         public State State { get; set; }
         public Trigger Action { get; set; }

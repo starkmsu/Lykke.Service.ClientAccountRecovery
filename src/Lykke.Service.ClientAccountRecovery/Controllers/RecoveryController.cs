@@ -44,6 +44,9 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [HttpPost]
         [SwaggerOperation("StartNewRecovery")]
         [ProducesResponseType(typeof(NewRecoveryResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.Conflict)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Index([FromBody]NewRecoveryRequest request)
         {
             if (!ModelState.IsValid)
@@ -63,7 +66,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             catch (InvalidActionException ex)
             {
                 _log.WriteWarning("StartNewRecovery", request, "Unable to start new account recovery process", ex);
-                return BadRequest(ex.Message);
+                return Conflict(ex.Message);
             }
 
             return Ok(new NewRecoveryResponse { RecoveryId = flow.Context.RecoveryId });
@@ -77,6 +80,9 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [HttpGet("{recoveryId}")]
         [SwaggerOperation("GetRecoveryStatus")]
         [ProducesResponseType(typeof(RecoveryStatusResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetRecoveryStatus([FromRoute]string recoveryId)
         {
             if (!ModelState.IsValid)
@@ -92,7 +98,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
 
             var challenge = state.ActualStatus.State.MapToChallenge();
             var progress = state.ActualStatus.State.MapToProgress();
-            return Ok(new RecoveryStatusResponse() { Challenge = challenge, OverallProgress = progress });
+            return Ok(new RecoveryStatusResponse { Challenge = challenge, OverallProgress = progress });
         }
 
         /// <summary>
@@ -103,6 +109,10 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [HttpPost("challenge")]
         [SwaggerOperation("SubmitChallenge")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.Conflict)]
         public async Task<IActionResult> PostChallenge([FromBody]ChallengeRequest request)
         {
             if (!ModelState.IsValid)
@@ -129,7 +139,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             }
             catch (InvalidActionException ex)
             {
-                return BadRequest(ex.Message);
+                return Conflict(ex.Message);
             }
             return Ok();
         }
@@ -142,6 +152,10 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [HttpPost("password")]
         [SwaggerOperation("UpdatePassword")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.Conflict)]
         public async Task<IActionResult> PostPassword([FromBody]PasswordRequest request)
         {
             if (!ModelState.IsValid)
@@ -167,7 +181,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             }
             catch (InvalidActionException ex)
             {
-                return BadRequest(ex.Message);
+                return Conflict(ex.Message);
             }
 
             return Ok();
@@ -182,6 +196,11 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [SwaggerOperation("ApproveChallenge")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ApiKeyAuth]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.Conflict)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> ApproveChallenge([FromBody]ApproveChallengeRequest request)
         {
             if (!ModelState.IsValid || request.CheckResult == CheckResult.Unknown)
@@ -211,7 +230,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             }
             catch (InvalidActionException ex)
             {
-                return BadRequest(ex.Message);
+                return Conflict(ex.Message);
             }
 
             return Ok();
@@ -227,6 +246,11 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [SwaggerOperation("SubmitResolution")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ApiKeyAuth]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.Conflict)]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> SubmitResolution([FromBody]ResolutionRequest request)
         {
             if (!ModelState.IsValid)
@@ -266,7 +290,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             }
             catch (InvalidActionException ex)
             {
-                return BadRequest(ex.Message);
+                return Conflict(ex.Message);
             }
             return Ok();
         }
@@ -280,6 +304,9 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [HttpGet("client/{clientId}")]
         [SwaggerOperation("GetClientRecoveries")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<ClientRecoveryHistoryResponse>))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetClientRecoveries([FromRoute]string clientId)
         {
             if (!ModelState.IsValid)
@@ -314,6 +341,9 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [HttpGet("client/trace/{recoveryId}")]
         [SwaggerOperation("GetRecoveryTrace")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<RecoveryTraceResponse>))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetRecoveryTrace([FromRoute]string recoveryId)
         {
             if (!ModelState.IsValid)

@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Common.Log;
+using JetBrains.Annotations;
+using Lykke.Cqrs;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
@@ -10,14 +12,14 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     // or any incoming message will be processed and so on.
     // Do not forget to remove As<IStartable>() and AutoActivate() from DI registartions of services, 
     // which you want to startup explicitly.
-
+    [UsedImplicitly]
     public class StartupManager : IStartupManager
     {
-        private readonly ILog _log;
+        private readonly ICqrsEngine _cqrs; // Just create an instance
 
-        public StartupManager(ILog log)
+        public StartupManager(ILog log, ICqrsEngine cqrs)
         {
-            _log = log;
+            _cqrs = cqrs;
         }
 
         public async Task StartAsync()

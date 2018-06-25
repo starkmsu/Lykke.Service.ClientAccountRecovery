@@ -16,7 +16,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         private readonly RecoveryFlowService _flowService;
         private readonly ISmsSender _smsSender;
         private readonly IEmailSender _emailSender;
-        private readonly ISelfieSender _selfieSender;
+        private readonly ISelfieNotificationSender _selfieNotificationSender;
         private readonly IStateRepository _stateRepository;
         private RecoveryContext _attr;
 
@@ -24,10 +24,10 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         {
             _smsSender = Substitute.For<ISmsSender>();
             _emailSender = Substitute.For<IEmailSender>();
-            _selfieSender = Substitute.For<ISelfieSender>();
+            _selfieNotificationSender = Substitute.For<ISelfieNotificationSender>();
             _stateRepository = Substitute.For<IStateRepository>();
             _attr = new RecoveryContext { State = State.RecoveryStarted };
-            _flowService = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, _stateRepository, _attr);
+            _flowService = new RecoveryFlowService(_smsSender, _emailSender, _selfieNotificationSender, _stateRepository, _attr);
         }
 
         [Theory]
@@ -100,7 +100,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
                 {
                     State = state
                 };
-                var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, _stateRepository, context);
+                var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieNotificationSender, _stateRepository, context);
                 switch (supportState)
                 {
                     case State.PasswordChangeAllowed:
@@ -127,7 +127,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             {
                 State = State.PasswordChangeAllowed
             };
-            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, _stateRepository, context);
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieNotificationSender, _stateRepository, context);
 
             await stateMachine.UpdatePasswordComplete();
 
@@ -141,7 +141,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             {
                 State = State.PasswordUpdated
             };
-            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieSender, _stateRepository, context);
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieNotificationSender, _stateRepository, context);
 
 
 

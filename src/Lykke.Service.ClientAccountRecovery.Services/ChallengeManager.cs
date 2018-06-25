@@ -12,10 +12,12 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     public class ChallengeManager : IChallengeManager
     {
         private readonly IChallengesValidator _validator;
+        private readonly ISelfieNotificationSender _selfieNotificationSender;
 
-        public ChallengeManager(IChallengesValidator validator)
+        public ChallengeManager(IChallengesValidator validator, ISelfieNotificationSender selfieNotificationSender)
         {
             _validator = validator;
+            _selfieNotificationSender = selfieNotificationSender;
         }
 
         public Task ExecuteAction(Challenge challenge, Action action, string code, IRecoveryFlowService flow)
@@ -44,7 +46,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 case var a when a.Item1 == Challenge.Email && a.Item2 == Action.Restart:
                     return flow.EmailVerificationRestart();
                 case var a when a.Item1 == Challenge.Selfie && a.Item2 == Action.Complete:
-                    return flow.SelfieVerificationRequest();
+                    return NotifySelfiePosted(flow, code);
                 case var a when a.Item1 == Challenge.Selfie && a.Item2 == Action.Skip:
                     return flow.SelfieVerificationSkip();
                 case var a when a.Item1 == Challenge.Pin && a.Item2 == Action.Complete:
@@ -65,6 +67,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private Task ValidateSms(IRecoveryFlowService flow, string code)
         {
             return _validator.ConfirmSmsCode(flow, code);
+        }
+
+        private Task NotifySelfiePosted(IRecoveryFlowService flow, string code)
+        {
+            return _selfieNotificationSender.Send(flow, code);
         }
     }
 }

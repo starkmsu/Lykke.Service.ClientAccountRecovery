@@ -1,12 +1,13 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using AzureStorage;
+using JetBrains.Annotations;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 
 namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
 {
+    [UsedImplicitly]
     public class RecoveryLogRepository : IRecoveryLogRepository
     {
         private readonly INoSQLTableStorage<LogTableEntity> _storage;
@@ -30,9 +31,9 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
             return _storage.InsertAsync(entity);
         }
 
-        public Task DeleteAsync(string recoveryId, DateTime time)
+        public Task DeleteAsync(string recoveryId, int seqNo)
         {
-            return _storage.DeleteIfExistAsync(LogTableEntity.GetPartitionKey(recoveryId), LogTableEntity.GetRowKey(time));
+            return _storage.DeleteIfExistAsync(LogTableEntity.GetPartitionKey(recoveryId), LogTableEntity.GetRowKey(seqNo));
         }
     }
 }

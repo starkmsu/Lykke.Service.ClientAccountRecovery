@@ -13,7 +13,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     {
         private readonly ISmsSender _smsSender;
         private readonly IEmailSender _emailSender;
-        private readonly ISelfieSender _selfieSender;
+        private readonly ISelfieNotificationSender _selfieNotificationSender;
         private readonly IStateRepository _stateRepository;
         private readonly RecoveryContext _ctx;
         private readonly StateMachine<State, Trigger> _stateMachine;
@@ -21,11 +21,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
         public RecoveryContext Context => _ctx;
 
-        public RecoveryFlowService(ISmsSender smsSender, IEmailSender emailSender, ISelfieSender selfieSender, IStateRepository stateRepository, RecoveryContext ctx)
+        public RecoveryFlowService(ISmsSender smsSender, IEmailSender emailSender, ISelfieNotificationSender selfieNotificationSender, IStateRepository stateRepository, RecoveryContext ctx)
         {
             _smsSender = smsSender;
             _emailSender = emailSender;
-            _selfieSender = selfieSender;
+            _selfieNotificationSender = selfieNotificationSender;
             _stateRepository = stateRepository;
             _ctx = ctx;
             _stateMachine = new StateMachine<State, Trigger>(ctx.State);
@@ -200,8 +200,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
         private async Task SendKycVerification()
         {
-            await _selfieSender.Send(_ctx.ClientId);
-            await _emailSender.SendCodeAsync(_ctx.ClientId);
+            await _stateRepository.InsertAsync(_ctx);
         }
 
         public Task StartRecoveryAsync()

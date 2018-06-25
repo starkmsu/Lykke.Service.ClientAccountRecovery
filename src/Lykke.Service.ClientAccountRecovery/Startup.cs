@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -15,13 +14,14 @@ using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Lykke.MonitoringServiceApiCaller;
 using Lykke.Service.ClientAccountRecovery.Middleware;
+using Lykke.Service.Session.Modules;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Serialization;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Lykke.Service.ClientAccountRecovery
 {
@@ -59,6 +59,7 @@ namespace Lykke.Service.ClientAccountRecovery
                 {
                     options.DefaultLykkeConfiguration("v1", "ClientAccountRecovery API");
                     options.OperationFilter<AddRequiredHeaderParameter>();
+                    options.AddSecurityDefinition("CustomScheme", new ApiKeyScheme { In = "header", Description = "Please insert API key into field", Name = ApiKeyAuthAttribute.HeaderName, Type = "apiKey" });
                 });
                 services.Configure<MvcJsonOptions>(c =>
                 {
@@ -76,6 +77,7 @@ namespace Lykke.Service.ClientAccountRecovery
                 Log = CreateLogWithSlack(services, appSettings);
 
                 builder.RegisterModule(new ServiceModule(appSettings, Log));
+                builder.RegisterModule<CqrsModule>();
                 builder.Populate(services);
                 ApplicationContainer = builder.Build();
 

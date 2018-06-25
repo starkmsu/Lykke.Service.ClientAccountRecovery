@@ -79,8 +79,8 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             builder.RegisterType<EmailSender>()
                 .As<IEmailSender>();
 
-            builder.RegisterType<SelfieSender>()
-                .As<ISelfieSender>();
+            builder.RegisterType<SelfieNotificationSender>()
+                .As<ISelfieNotificationSender>();
 
             builder.RegisterType<ChallengeManager>()
                 .As<IChallengeManager>();    

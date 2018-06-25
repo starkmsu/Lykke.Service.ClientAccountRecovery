@@ -8,6 +8,6 @@ namespace Lykke.Service.ClientAccountRecovery.Core
     {
         Task<RecoveryUnit> GetAsync(string recoveryId);
         Task InsertAsync(RecoveryContext context);
-        Task DeleteAsync(string recoveryId, DateTime time);
+        Task DeleteAsync(string recoveryId, int seqNo);
     }
 }

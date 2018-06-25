@@ -1,5 +1,4 @@
-﻿using System;
-using Lykke.Service.ClientAccountRecovery.Core.Domain;
+﻿using Lykke.Service.ClientAccountRecovery.Core.Domain;
 
 namespace Lykke.Service.ClientAccountRecovery.Models
 {

@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Lykke.Service.ClientAccountRecovery.Middleware;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Lykke.Service.ClientAccountRecovery
 {
+    [UsedImplicitly]
     internal class AddRequiredHeaderParameter : IOperationFilter
     {
         public void Apply(Operation operation, OperationFilterContext context)
@@ -23,14 +25,14 @@ namespace Lykke.Service.ClientAccountRecovery
             {
                 operation.Parameters = new List<IParameter>();
             }
-            operation.Parameters.Add(new NonBodyParameter
+
+            operation.Security = new List<IDictionary<string, IEnumerable<string>>>
             {
-                Required = true,
-                In = "header",
-                Type = "string",
-                Name = ApiKeyAuthAttribute.HeaderName,
-                Description = "An API key."
-            });
+                new Dictionary<string, IEnumerable<string>>
+                {
+                    { "CustomScheme", new string[]{ } }
+                }
+            };
         }
     }
 }

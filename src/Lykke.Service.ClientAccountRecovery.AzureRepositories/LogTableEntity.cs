@@ -26,7 +26,8 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
         public string Comment { get; set; }
         public string Ip { get; set; }
         public string UserAgent { get; set; }
-        
+        public string SelfieId { get; set; }
+
         public static LogTableEntity CreateNew(RecoveryContext context)
         {
             return new LogTableEntity
@@ -49,7 +50,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 SmsRecoveryAttempts = context.SmsRecoveryAttempts,
                 EmailRecoveryAttempts = context.EmailRecoveryAttempts,
                 Ip = context.Ip,
-                UserAgent = context.UserAgent
+                UserAgent = context.UserAgent,
             };
         }
 
@@ -85,9 +86,9 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
             return recoveryId;
         }
 
-        public static string GetRowKey(DateTime time)
+        public static string GetRowKey(int seqNo)
         {
-            return time.ToString("O");
+            return seqNo.ToString();
         }
     }
 }

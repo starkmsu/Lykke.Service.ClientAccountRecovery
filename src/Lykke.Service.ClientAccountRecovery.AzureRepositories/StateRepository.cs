@@ -33,7 +33,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 try
                 {
                     await _stateRepository.DeleteAsync(context.ClientId, context.RecoveryId);
-                    await _logRepository.DeleteAsync(context.RecoveryId, context.Time);
+                    await _logRepository.DeleteAsync(context.RecoveryId, context.SeqNo);
                 }
                 catch (Exception innerEx)
                 {
