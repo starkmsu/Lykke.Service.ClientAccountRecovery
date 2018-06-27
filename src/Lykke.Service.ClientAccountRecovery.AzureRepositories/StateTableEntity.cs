@@ -1,7 +1,9 @@
-﻿using Lykke.AzureStorage.Tables;
+﻿using JetBrains.Annotations;
+using Lykke.AzureStorage.Tables;
 
 namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
 {
+    [UsedImplicitly]
     public class StateTableEntity : AzureTableEntity
     {
         public string ClientId => PartitionKey;

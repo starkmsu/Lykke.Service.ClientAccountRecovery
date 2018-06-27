@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
+using JetBrains.Annotations;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 
 namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
 {
+    [UsedImplicitly]
     public class StateRepository : IStateRepository
     {
         private readonly IRecoveryLogRepository _logRepository;
@@ -45,15 +47,17 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
 
         public async Task<RecoverySummaryForClient> GetRecoverySummary(string clientId)
         {
-            var recoveries = await _stateRepository.GetAsync(clientId);
+            var recoveries = (await _stateRepository.GetAsync(clientId)).ToArray();
             if (!recoveries.Any())
             {
                 return null;
             }
+
+            // It safe to run queries in parallel
             var logItems = recoveries.Select(async r => await _logRepository.GetAsync(r.RecoveryID)).ToArray();
             await Task.WhenAll(logItems);
 
-            var result = new RecoverySummaryForClient();
+            var result = new RecoverySummaryForClient(clientId);
             foreach (var logItem in logItems.Select(t => t.Result))
             {
                 result.AddItem(logItem);

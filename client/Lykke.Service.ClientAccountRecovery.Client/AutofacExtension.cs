@@ -8,6 +8,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
     /// <summary>
     /// 
     /// </summary>
+    [PublicAPI]
     public static class AutofacExtension
     {
         /// <summary>

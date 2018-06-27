@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models;
 using Microsoft.Rest;
 
 namespace Lykke.Service.ClientAccountRecovery.Client
 {
+    [PublicAPI]
     public interface IAccountRecoveryService
     {
         /// <summary>

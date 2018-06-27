@@ -200,7 +200,7 @@ namespace Lykke.Service.ClientAccountRecovery
 
             if (string.IsNullOrEmpty(dbLogConnectionString))
             {
-                consoleLogger.WriteWarningAsync(nameof(Startup), nameof(CreateLogWithSlack), "Table loggger is not inited").Wait();
+                consoleLogger.WriteWarningAsync(nameof(Startup), nameof(CreateLogWithSlack), "Table logger is not inited").Wait();
                 return aggregateLogger;
             }
 

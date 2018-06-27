@@ -13,20 +13,19 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     {
         private readonly ISmsSender _smsSender;
         private readonly IEmailSender _emailSender;
-        private readonly ISelfieNotificationSender _selfieNotificationSender;
         private readonly IStateRepository _stateRepository;
+        private readonly RecoveryConditions _recoveryConditions;
         private readonly RecoveryContext _ctx;
         private readonly StateMachine<State, Trigger> _stateMachine;
-        private const int MaxRecoveryAttempts = 3;
 
         public RecoveryContext Context => _ctx;
 
-        public RecoveryFlowService(ISmsSender smsSender, IEmailSender emailSender, ISelfieNotificationSender selfieNotificationSender, IStateRepository stateRepository, RecoveryContext ctx)
+        public RecoveryFlowService(ISmsSender smsSender, IEmailSender emailSender, IStateRepository stateRepository, RecoveryConditions recoveryConditions, RecoveryContext ctx)
         {
             _smsSender = smsSender;
             _emailSender = emailSender;
-            _selfieNotificationSender = selfieNotificationSender;
             _stateRepository = stateRepository;
+            _recoveryConditions = recoveryConditions;
             _ctx = ctx;
             _stateMachine = new StateMachine<State, Trigger>(ctx.State);
             _stateMachine.OnTransitionedAsync(OnTransitionActionAsync);
@@ -49,15 +48,18 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
             switch (transition.Destination)
             {
-                // For this states Insert will be called only after successful calling of external API
+                // For these states Insert will be called only after successful calling of external API
                 case State.AwaitSmsVerification:
                 case State.AwaitEmailVerification:
-                case State.KycInProgress:
+                case State.PasswordChangeFrozen:
                     return Task.CompletedTask;
                 default:
                     return _stateRepository.InsertAsync(_ctx);
             }
         }
+
+        public bool IsPasswordUpdateAllowed => _stateMachine.CanFire(Trigger.UpdatePassword);
+
 
         private void Configure()
         {
@@ -66,36 +68,41 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
             _stateMachine.Configure(State.AwaitSecretPhrases)
                 .PermitSupportStates()
+                .Ignore(Trigger.TryUnfreeze)
                 .Permit(Trigger.SecretPhrasesComplete, State.AwaitSmsVerification) // 3 - 6
                 .Permit(Trigger.SecretPhrasesSkip, State.AwaitDeviceVerification); // 8 - 28
                                                                                    //
             _stateMachine.Configure(State.AwaitDeviceVerification)
                 .PermitSupportStates()
+                .Ignore(Trigger.TryUnfreeze)
                 .Permit(Trigger.DeviceVerificationComplete, State.AwaitSmsVerification) //For all cases unconditional go to SMS verification
                 .Permit(Trigger.DeviceVerificationSkip, State.AwaitSmsVerification);
 
             _stateMachine.Configure(State.AwaitSmsVerification)
                 .OnEntryAsync(SendSmsAsync)
                 .PermitSupportStates()
+                .Ignore(Trigger.TryUnfreeze)
                 .Permit(Trigger.SmsVerificationComplete, State.AwaitEmailVerification) // For all cases unconditional go to email verification
                 .Permit(Trigger.SmsVerificationSkip, State.AwaitEmailVerification) // For all cases unconditional go to email verification
-                .PermitIf(Trigger.SmsVerificationFail, State.AwaitEmailVerification, () => _ctx.SmsRecoveryAttempts > MaxRecoveryAttempts)
-                .PermitReentryIf(Trigger.SmsVerificationFail, () => _ctx.SmsRecoveryAttempts <= MaxRecoveryAttempts)
-                .PermitIf(Trigger.SmsVerificationRestart, State.AwaitEmailVerification, () => _ctx.SmsRecoveryAttempts > MaxRecoveryAttempts)
-                .PermitReentryIf(Trigger.SmsVerificationRestart, () => _ctx.SmsRecoveryAttempts <= MaxRecoveryAttempts);
+                .PermitIf(Trigger.SmsVerificationFail, State.AwaitEmailVerification, () => _ctx.SmsRecoveryAttempts > _recoveryConditions.SmsCodeMaxAttempts)
+                .PermitReentryIf(Trigger.SmsVerificationFail, () => _ctx.SmsRecoveryAttempts <= _recoveryConditions.SmsCodeMaxAttempts)
+                .PermitIf(Trigger.SmsVerificationRestart, State.AwaitEmailVerification, () => _ctx.SmsRecoveryAttempts > _recoveryConditions.SmsCodeMaxAttempts)
+                .PermitReentryIf(Trigger.SmsVerificationRestart, () => _ctx.SmsRecoveryAttempts <= _recoveryConditions.SmsCodeMaxAttempts);
 
             _stateMachine.Configure(State.AwaitEmailVerification)
+                .Ignore(Trigger.TryUnfreeze)
                 .OnEntryAsync(SendEmailAsync)
                 .PermitSupportStates()
                 .PermitIf(Trigger.EmailVerificationComplete, State.PasswordChangeAllowed, () => _ctx.HasSecretPhrases && _ctx.SmsVerified) // 3
                 .PermitIf(Trigger.EmailVerificationComplete, State.AwaitKycVerification, () => !(_ctx.HasSecretPhrases && _ctx.SmsVerified)) // All other cases
                 .PermitIf(Trigger.EmailVerificationSkip, State.AwaitKycVerification) // All cases
-                .PermitIf(Trigger.EmailVerificationFail, State.AwaitKycVerification, () => _ctx.EmailRecoveryAttempts > MaxRecoveryAttempts)
-                .PermitReentryIf(Trigger.EmailVerificationFail, () => _ctx.EmailRecoveryAttempts <= MaxRecoveryAttempts)
-                .PermitIf(Trigger.EmailVerificationRestart, State.AwaitKycVerification, () => _ctx.EmailRecoveryAttempts > MaxRecoveryAttempts)
-                .PermitReentryIf(Trigger.EmailVerificationRestart, () => _ctx.EmailRecoveryAttempts <= MaxRecoveryAttempts);
+                .PermitIf(Trigger.EmailVerificationFail, State.AwaitKycVerification, () => _ctx.EmailRecoveryAttempts > _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitReentryIf(Trigger.EmailVerificationFail, () => _ctx.EmailRecoveryAttempts <= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIf(Trigger.EmailVerificationRestart, State.AwaitKycVerification, () => _ctx.EmailRecoveryAttempts > _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitReentryIf(Trigger.EmailVerificationRestart, () => _ctx.EmailRecoveryAttempts <= _recoveryConditions.EmailCodeMaxAttempts);
 
             _stateMachine.Configure(State.AwaitKycVerification)
+                .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
                 .PermitIf(Trigger.SelfieVerificationSkip, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified) // 4
                 .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified) // 5
@@ -120,7 +127,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
 
             _stateMachine.Configure(State.KycInProgress)
-                .OnEntryAsync(SendKycVerification)
+                .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
                 .PermitIf(Trigger.SelfieVerificationComplete, State.PasswordChangeAllowed, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified)  // 5
                 .PermitIf(Trigger.SelfieVerificationComplete, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && !_ctx.SmsVerified && !_ctx.EmailVerified)  // 6
@@ -135,6 +142,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .PermitIf(Trigger.SelfieVerificationFail, State.CallSupport); // All other cases go to support
 
             _stateMachine.Configure(State.AwaitPinCode)
+                .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
                 .PermitIf(Trigger.PinComplete, State.PasswordChangeFrozen, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.KycPassed) // 9
                 .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.KycPassed) // 10
@@ -150,39 +158,59 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
 
             _stateMachine.Configure(State.Transfer)
+                .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates();
 
             _stateMachine.Configure(State.PasswordChangeForbidden)
+                .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates();
 
 
             _stateMachine.Configure(State.PasswordChangeFrozen)
+                .OnEntryAsync(Freeze)
                .PermitReentry(Trigger.JumpToFrozen)
+                .IgnoreIf(Trigger.TryUnfreeze, () => DateTime.UtcNow - (_ctx.FrozenDate ?? DateTime.MaxValue) < TimeSpan.FromDays(_recoveryConditions.FrozenPeriodInDays))
+                .PermitIf(Trigger.TryUnfreeze, State.PasswordChangeAllowed, () => DateTime.UtcNow - (_ctx.FrozenDate ?? DateTime.MaxValue) > TimeSpan.FromDays(_recoveryConditions.FrozenPeriodInDays))
                 .Permit(Trigger.JumpToAllowed, State.PasswordChangeAllowed)
                 .Permit(Trigger.JumpToCallSupport, State.CallSupport)
                 .Permit(Trigger.JumpToSuspended, State.PasswordChangeSuspended);
 
             _stateMachine.Configure(State.PasswordChangeSuspended)
+                .Ignore(Trigger.TryUnfreeze)
                 .PermitReentry(Trigger.JumpToSuspended)
                 .Permit(Trigger.JumpToAllowed, State.PasswordChangeAllowed)
                 .Permit(Trigger.JumpToCallSupport, State.CallSupport)
                 .Permit(Trigger.JumpToFrozen, State.PasswordChangeFrozen);
             //            
             _stateMachine.Configure(State.CallSupport)
+                .Ignore(Trigger.TryUnfreeze)
                 .PermitReentry(Trigger.JumpToCallSupport)
                 .Permit(Trigger.JumpToAllowed, State.PasswordChangeAllowed)
                 .Permit(Trigger.JumpToFrozen, State.PasswordChangeFrozen)
                 .Permit(Trigger.JumpToSuspended, State.PasswordChangeSuspended);
             //            
             _stateMachine.Configure(State.PasswordChangeAllowed)
+                .Ignore(Trigger.TryUnfreeze)
                 .PermitReentry(Trigger.JumpToAllowed)
                 .Permit(Trigger.JumpToCallSupport, State.CallSupport)
                 .Permit(Trigger.JumpToFrozen, State.PasswordChangeFrozen)
                 .Permit(Trigger.JumpToSuspended, State.PasswordChangeSuspended)
                 .Permit(Trigger.UpdatePassword, State.PasswordUpdated);
+
+            _stateMachine.Configure(State.PasswordUpdated)
+                .Ignore(Trigger.TryUnfreeze);
         }
 
+        private Task Freeze()
+        {
+            _ctx.FrozenDate = DateTime.UtcNow;
+            return _stateRepository.InsertAsync(_ctx);
+        }
 
+        public Task TryUnfreeze()
+        {
+            return _stateMachine.FireAsync(Trigger.TryUnfreeze);
+        }
 
 
         private async Task SendSmsAsync()
@@ -198,10 +226,6 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
         }
 
-        private async Task SendKycVerification()
-        {
-            await _stateRepository.InsertAsync(_ctx);
-        }
 
         public Task StartRecoveryAsync()
         {
@@ -367,15 +391,5 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Permit(Trigger.JumpToSuspended, State.PasswordChangeSuspended);
             return result;
         }
-
-        //        public static StateMachine<State, Trigger>.StateConfiguration PermitReentrySupportStates(this StateMachine<State, Trigger>.StateConfiguration stateMachine)
-        //        {
-        //            var result = stateMachine
-        //                .PermitReentry(Trigger.JumpToAllowed)
-        //                .PermitReentry(Trigger.JumpToCallSupport)
-        //                .PermitReentry(Trigger.JumpToFrozen)
-        //                .PermitReentry(Trigger.JumpToSuspended);
-        //            return result;
-        //        }
     }
 }

@@ -25,6 +25,7 @@
         JumpToCallSupport,
         JumpToFrozen,
         JumpToAllowed,
-        UpdatePassword
+        UpdatePassword,
+        TryUnfreeze
     }
 }

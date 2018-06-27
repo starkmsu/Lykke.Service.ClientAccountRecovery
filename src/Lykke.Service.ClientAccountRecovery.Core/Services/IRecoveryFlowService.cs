@@ -30,5 +30,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
         Task JumpToFrozenAsync();
         Task JumpToSuspendAsync();
         Task UpdatePasswordComplete();
+        Task TryUnfreeze();
+        bool IsPasswordUpdateAllowed { get; }
     }
 }

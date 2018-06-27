@@ -4,8 +4,11 @@ using Lykke.Service.ClientAccountRecovery.Core.Domain;
 
 namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
 {
+
     public class LogTableEntity : AzureTableEntity
     {
+
+        private const string KeyLength = "00000000000";
         public string RecoveryId => PartitionKey;
         public int SeqNo => int.Parse(RowKey);
         public string ClientId { get; set; }
@@ -26,7 +29,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
         public string Comment { get; set; }
         public string Ip { get; set; }
         public string UserAgent { get; set; }
-        public string SelfieId { get; set; }
+        public DateTime? FrozenDate { get; set; }
 
         public static LogTableEntity CreateNew(RecoveryContext context)
         {
@@ -34,7 +37,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
             {
                 ClientId = context.ClientId,
                 PartitionKey = GetPartitionKey(context.RecoveryId),
-                RowKey = context.SeqNo.ToString(),
+                RowKey = GetRowKey(context.SeqNo),
                 Time = context.Time,
                 Action = context.Action,
                 State = context.State,
@@ -51,6 +54,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 EmailRecoveryAttempts = context.EmailRecoveryAttempts,
                 Ip = context.Ip,
                 UserAgent = context.UserAgent,
+                FrozenDate = context.FrozenDate
             };
         }
 
@@ -76,7 +80,8 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 SmsRecoveryAttempts = SmsRecoveryAttempts,
                 EmailRecoveryAttempts = EmailRecoveryAttempts,
                 Ip = Ip,
-                UserAgent = UserAgent
+                UserAgent = UserAgent,
+                FrozenDate = FrozenDate
             };
             return context;
         }
@@ -88,7 +93,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
 
         public static string GetRowKey(int seqNo)
         {
-            return seqNo.ToString();
+            return seqNo.ToString(KeyLength);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using AzureStorage;
 using AzureStorage.Tables;
 using Common.Log;
@@ -11,7 +10,6 @@ using Lykke.Service.ClientAccountRecovery.Services;
 using Lykke.Service.ClientAccountRecovery.Settings;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.SettingsReader;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Lykke.Service.ClientAccountRecovery.Modules
 {
@@ -20,23 +18,17 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
         private readonly IReloadingManager<AppSettings> _settings;
         private readonly ILog _log;
         // NOTE: you can remove it if you don't need to use IServiceCollection extensions to register service specific dependencies
-        private readonly IServiceCollection _services;
 
         public ServiceModule(IReloadingManager<AppSettings> settings, ILog log)
         {
             _settings = settings;
             _log = log;
 
-            _services = new ServiceCollection();
         }
 
         protected override void Load(ContainerBuilder builder)
         {
-            // TODO: Do not register entire settings in container, pass necessary settings to services which requires them
-            // ex:
-            //  builder.RegisterType<QuotesPublisher>()
-            //      .As<IQuotesPublisher>()
-            //      .WithParameter(TypedParameter.From(_settings.CurrentValue.QuotesPublication))
+            builder.Register(c => _settings.Nested(n => n.ClientAccountRecoveryService.RecoveryConditions));
 
             builder.RegisterInstance(_log)
                 .As<ILog>()
@@ -83,16 +75,13 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
                 .As<ISelfieNotificationSender>();
 
             builder.RegisterType<ChallengeManager>()
-                .As<IChallengeManager>();    
-            
+                .As<IChallengeManager>();
+
             builder.RegisterType<ChallengesValidator>()
                 .As<IChallengesValidator>();
 
             RegisterStorage(builder);
             RegisterClients(builder);
-
-            builder.Populate(_services);
-
         }
 
         private void RegisterClients(ContainerBuilder builder)

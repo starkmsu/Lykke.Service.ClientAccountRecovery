@@ -90,14 +90,14 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return BadRequest(ModelState);
             }
 
-            var state = await _logRepository.GetAsync(recoveryId);
-            if (state.Empty)
+            var flow = await _factory.FindExisted(recoveryId);
+            if (flow == null)
             {
                 return NotFound();
             }
 
-            var challenge = state.ActualStatus.State.MapToChallenge();
-            var progress = state.ActualStatus.State.MapToProgress();
+            var challenge = flow.Context.State.MapToChallenge();
+            var progress = flow.Context.State.MapToProgress();
             return Ok(new RecoveryStatusResponse { Challenge = challenge, OverallProgress = progress });
         }
 
@@ -169,6 +169,11 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return NotFound();
             }
 
+            if (!flow.IsPasswordUpdateAllowed)
+            {
+                return Conflict($"Unable to update the password from this state: {flow.Context.State}");
+            }
+
             try
             {
 
@@ -203,7 +208,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> ApproveChallenge([FromBody]ApproveChallengeRequest request)
         {
-            if (!ModelState.IsValid || request.CheckResult == CheckResult.Unknown)
+            if (!ModelState.IsValid || request.CheckResult == CheckResult.Unknown || request.Challenge != Core.Domain.Challenge.Selfie)
             {
                 return BadRequest(ModelState);
             }

@@ -7,68 +7,75 @@ using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Lykke.Service.ClientAccountRecovery.Services;
 using NSubstitute;
-using Xunit;
+using NUnit.Framework;
 
 namespace Lykke.Service.ClientAccountRecovery.Tests
 {
+    [TestFixture]
     public class StateMachineTest
     {
-        private readonly RecoveryFlowService _flowService;
-        private readonly ISmsSender _smsSender;
-        private readonly IEmailSender _emailSender;
-        private readonly ISelfieNotificationSender _selfieNotificationSender;
-        private readonly IStateRepository _stateRepository;
+        private RecoveryFlowService _flowService;
+        private ISmsSender _smsSender;
+        private IEmailSender _emailSender;
+        private IStateRepository _stateRepository;
         private RecoveryContext _attr;
+        private RecoveryConditions _recoveryConditions;
 
-        public StateMachineTest()
+        [SetUp]
+        public void SetUp()
         {
+            _recoveryConditions = new RecoveryConditions
+            {
+                EmailCodeMaxAttempts = 3,
+                SmsCodeMaxAttempts = 3,
+                FrozenPeriodInDays = 5
+            };
             _smsSender = Substitute.For<ISmsSender>();
             _emailSender = Substitute.For<IEmailSender>();
-            _selfieNotificationSender = Substitute.For<ISelfieNotificationSender>();
             _stateRepository = Substitute.For<IStateRepository>();
             _attr = new RecoveryContext { State = State.RecoveryStarted };
-            _flowService = new RecoveryFlowService(_smsSender, _emailSender, _selfieNotificationSender, _stateRepository, _attr);
+            _flowService = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, _attr);
         }
 
-        [Theory]
-        [InlineData(SS.Ok, SS.Ignore, SS.Ok, SS.Ok, SS.Ignore, SS.Ignore, SS.Ignore, State.PasswordChangeAllowed, 3)]
-        [InlineData(SS.Ok, SS.Ignore, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 4.1)]
-        [InlineData(SS.Ok, SS.Ignore, SS.Skip, SS.Ok, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 4.2)]
-        [InlineData(SS.Ok, SS.Ignore, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.PasswordChangeAllowed, 5.1)]
-        [InlineData(SS.Ok, SS.Ignore, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Ignore, State.PasswordChangeAllowed, 5.2)]
-        [InlineData(SS.Ok, SS.Ignore, SS.Ok, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 5.3)]
-        [InlineData(SS.Ok, SS.Ignore, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 6.1)]
-        [InlineData(SS.Ok, SS.Ignore, SS.Skip, SS.Skip, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 6.2)]
-        [InlineData(SS.Ok, SS.Ignore, SS.Skip, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 6.3)]
-        [InlineData(SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.PasswordChangeAllowed, 8.1)]
-        [InlineData(SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 8.2)]
-        [InlineData(SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Skip, SS.Ignore, SS.Ok, State.PasswordChangeFrozen, 9.1)]
-        [InlineData(SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Skip, SS.Ignore, SS.Skip, State.CallSupport, 10)]
-        [InlineData(SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Ok, State.PasswordChangeFrozen, 11.1)]
-        [InlineData(SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 11.2)]
-        [InlineData(SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Ok, State.CallSupport, 12)]
-        [InlineData(SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Skip, State.CallSupport, 13)]
-        [InlineData(SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 14.1)]
-        [InlineData(SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 14.2)]
-        [InlineData(SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 15)]
-        [InlineData(SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 16.1)]
-        [InlineData(SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 16.2)]
-        [InlineData(SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Skip, SS.Ignore, SS.Ignore, State.PasswordChangeForbidden, 17)]
-        [InlineData(SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.Transfer, 19.1)]
-        [InlineData(SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 19.2)]
-        [InlineData(SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Ignore, SS.Ok, State.Transfer, 20)]
-        [InlineData(SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Ignore, SS.Skip, State.CallSupport, 21)]
-        [InlineData(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Ok, State.Transfer, 22.1)]
-        [InlineData(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Skip, State.CallSupport, 22.2)]
-        [InlineData(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 22.3)]
-        [InlineData(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Ok, State.CallSupport, 23)]
-        [InlineData(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Skip, State.CallSupport, 24)]
-        [InlineData(SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 25.1)]
-        [InlineData(SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 25.2)]
-        [InlineData(SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 26)]
-        [InlineData(SS.Skip, SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 27.1)]
-        [InlineData(SS.Skip, SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 27.2)]
-        [InlineData(SS.Skip, SS.Skip, SS.Skip, SS.Skip, SS.Skip, SS.Ignore, SS.Ignore, State.PasswordChangeForbidden, 28)]
+
+        [TestCase(SS.Ok, SS.Ignore, SS.Ok, SS.Ok, SS.Ignore, SS.Ignore, SS.Ignore, State.PasswordChangeAllowed, 3)]
+        [TestCase(SS.Ok, SS.Ignore, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 4.1)]
+        [TestCase(SS.Ok, SS.Ignore, SS.Skip, SS.Ok, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 4.2)]
+        [TestCase(SS.Ok, SS.Ignore, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.PasswordChangeAllowed, 5.1)]
+        [TestCase(SS.Ok, SS.Ignore, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Ignore, State.PasswordChangeAllowed, 5.2)]
+        [TestCase(SS.Ok, SS.Ignore, SS.Ok, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 5.3)]
+        [TestCase(SS.Ok, SS.Ignore, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 6.1)]
+        [TestCase(SS.Ok, SS.Ignore, SS.Skip, SS.Skip, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 6.2)]
+        [TestCase(SS.Ok, SS.Ignore, SS.Skip, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 6.3)]
+        [TestCase(SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.PasswordChangeAllowed, 8.1)]
+        [TestCase(SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 8.2)]
+        [TestCase(SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Skip, SS.Ignore, SS.Ok, State.PasswordChangeFrozen, 9.1)]
+        [TestCase(SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Skip, SS.Ignore, SS.Skip, State.CallSupport, 10)]
+        [TestCase(SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Ok, State.PasswordChangeFrozen, 11.1)]
+        [TestCase(SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 11.2)]
+        [TestCase(SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Ok, State.CallSupport, 12)]
+        [TestCase(SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Skip, State.CallSupport, 13)]
+        [TestCase(SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 14.1)]
+        [TestCase(SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 14.2)]
+        [TestCase(SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 15)]
+        [TestCase(SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 16.1)]
+        [TestCase(SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 16.2)]
+        [TestCase(SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Skip, SS.Ignore, SS.Ignore, State.PasswordChangeForbidden, 17)]
+        [TestCase(SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.Transfer, 19.1)]
+        [TestCase(SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 19.2)]
+        [TestCase(SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Ignore, SS.Ok, State.Transfer, 20)]
+        [TestCase(SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Skip, SS.Ignore, SS.Skip, State.CallSupport, 21)]
+        [TestCase(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Ok, State.Transfer, 22.1)]
+        [TestCase(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Ok, SS.Skip, State.CallSupport, 22.2)]
+        [TestCase(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 22.3)]
+        [TestCase(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Ok, State.CallSupport, 23)]
+        [TestCase(SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Skip, SS.Ignore, SS.Skip, State.CallSupport, 24)]
+        [TestCase(SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 25.1)]
+        [TestCase(SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 25.2)]
+        [TestCase(SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Skip, SS.Ignore, SS.Ignore, State.CallSupport, 26)]
+        [TestCase(SS.Skip, SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Ok, SS.Ignore, State.CallSupport, 27.1)]
+        [TestCase(SS.Skip, SS.Skip, SS.Skip, SS.Skip, SS.Ok, SS.Fail, SS.Ignore, State.CallSupport, 27.2)]
+        [TestCase(SS.Skip, SS.Skip, SS.Skip, SS.Skip, SS.Skip, SS.Ignore, SS.Ignore, State.PasswordChangeForbidden, 28)]
         public async Task ShouldHaveCorrectFinalState(SS secretPhrases, SS deviceVerified, SS sms, SS email, SS selfieReceived, SS kycPass, SS pin, State resolution, double line)
         {
             await _flowService.StartRecoveryAsync();
@@ -86,11 +93,11 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             }
         }
 
-        [Theory]
-        [InlineData(State.PasswordChangeAllowed)]
-        [InlineData(State.CallSupport)]
-        [InlineData(State.PasswordChangeSuspended)]
-        [InlineData(State.PasswordChangeFrozen)]
+        [Test]
+        [TestCase(State.PasswordChangeAllowed)]
+        [TestCase(State.CallSupport)]
+        [TestCase(State.PasswordChangeSuspended)]
+        [TestCase(State.PasswordChangeFrozen)]
         public async Task ShouldJumpFromAllAnyStateToSupportState(State supportState)
         {
             var allStates = Enum.GetValues(typeof(State)).Cast<State>().Except(new[] { supportState, State.RecoveryStarted, State.PasswordUpdated });
@@ -100,7 +107,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
                 {
                     State = state
                 };
-                var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieNotificationSender, _stateRepository, context);
+                var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
                 switch (supportState)
                 {
                     case State.PasswordChangeAllowed:
@@ -116,41 +123,126 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
                         await stateMachine.JumpToFrozenAsync();
                         break;
                 }
-                Assert.Equal(supportState, stateMachine.Context.State);
+                Assert.That(supportState, Is.EqualTo(stateMachine.Context.State));
             }
         }
 
-        [Fact]
+        [Test]
         public async Task ShouldAllowToGoFinalState()
         {
             var context = new RecoveryContext
             {
                 State = State.PasswordChangeAllowed
             };
-            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieNotificationSender, _stateRepository, context);
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
 
             await stateMachine.UpdatePasswordComplete();
 
-            Assert.Equal(State.PasswordUpdated, stateMachine.Context.State);
+            Assert.That(State.PasswordUpdated, Is.EqualTo(stateMachine.Context.State));
         }
 
-        [Fact]
-        public async Task ShouldSealState()
+        [Test]
+        public void ShouldSealState()
         {
             var context = new RecoveryContext
             {
                 State = State.PasswordUpdated
             };
-            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _selfieNotificationSender, _stateRepository, context);
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
 
 
 
-            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.UpdatePasswordComplete());
-            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSuspendAsync());
-            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToAllowAsync());
-            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToFrozenAsync());
-            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSupportAsync());
-            await Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.StartRecoveryAsync());
+            Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.UpdatePasswordComplete());
+            Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSuspendAsync());
+            Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToAllowAsync());
+            Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToFrozenAsync());
+            Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSupportAsync());
+            Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.StartRecoveryAsync());
+        }
+
+
+        [Test]
+        public async Task ShouldSendSmsRequest()
+        {
+            var context = new RecoveryContext
+            {
+                State = State.AwaitDeviceVerification
+            };
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+            await stateMachine.DeviceVerifiedCompleteAsync();
+
+            await _smsSender.ReceivedWithAnyArgs().SendCodeAsync("1");
+        }
+
+        [Test]
+        public async Task ShouldUnfreezeAfterPeriod()
+        {
+            var context = new RecoveryContext
+            {
+                State = State.AwaitSecretPhrases
+            };
+            _recoveryConditions.FrozenPeriodInDays = TimeSpan.FromSeconds(1).TotalDays;
+
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+            await stateMachine.JumpToFrozenAsync();
+
+
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            await stateMachine.TryUnfreeze();
+
+            Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeAllowed));
+        }
+
+        [Test]
+        public async Task ShouldKeepFrozen()
+        {
+            var context = new RecoveryContext
+            {
+                State = State.AwaitSecretPhrases
+            };
+            _recoveryConditions.FrozenPeriodInDays = TimeSpan.FromSeconds(2).TotalDays;
+
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+            await stateMachine.JumpToFrozenAsync();
+
+
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            await stateMachine.TryUnfreeze();
+
+            Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeFrozen));
+        }
+
+
+        [Test]
+        public void ShouldIgnoreFreezeTrigger()
+        {
+            var allStates = Enum.GetValues(typeof(State)).Cast<State>().Except(new[]
+            {
+                State.RecoveryStarted, State.PasswordChangeFrozen, State.PasswordChangeAllowed, State.PasswordUpdated
+            });
+            foreach (var state in allStates)
+            {
+                var context = new RecoveryContext
+                {
+                    State = state
+                };
+                var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+
+                Assert.That(state, Is.EqualTo(stateMachine.Context.State));
+            }
+        }
+
+        [Test]
+        public async Task ShouldSendEmailRequest()
+        {
+            var context = new RecoveryContext
+            {
+                State = State.AwaitSmsVerification
+            };
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+            await stateMachine.SmsVerificationComplete();
+
+            await _emailSender.ReceivedWithAnyArgs().SendCodeAsync("1");
         }
 
         private Task Fire(SS state, Func<Task> ok, Func<Task> skip, Func<Task> fail = null, Func<Task> restart = null)

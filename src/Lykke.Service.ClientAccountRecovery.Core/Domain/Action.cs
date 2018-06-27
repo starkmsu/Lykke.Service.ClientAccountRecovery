@@ -1,5 +1,8 @@
-﻿namespace Lykke.Service.ClientAccountRecovery.Core.Domain
+﻿using JetBrains.Annotations;
+
+namespace Lykke.Service.ClientAccountRecovery.Core.Domain
 {
+    [PublicAPI]
     public enum Action
     {
         Undefined = 0,

@@ -1,8 +1,11 @@
-﻿namespace Lykke.Service.ClientAccountRecovery.Core.Domain
+﻿using JetBrains.Annotations;
+
+namespace Lykke.Service.ClientAccountRecovery.Core.Domain
 {
     /// <summary>
     /// Available client challenges
     /// </summary>
+    [PublicAPI]
     public enum Challenge
     {
         Unknown = 0,

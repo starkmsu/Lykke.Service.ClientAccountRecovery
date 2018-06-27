@@ -23,5 +23,6 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
         public string Comment { get; set; }
         public string Ip { get; set; }
         public string UserAgent { get; set; }
+        public DateTime? FrozenDate { get; set; }
     }
 }

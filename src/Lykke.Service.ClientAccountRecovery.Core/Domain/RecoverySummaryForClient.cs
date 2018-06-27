@@ -9,6 +9,12 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
     {
         private readonly Dictionary<string, RecoveryUnit> _recoveryUnits = new Dictionary<string, RecoveryUnit>();
         public string ClientId { get; private set; }
+
+        public RecoverySummaryForClient(string clientId)
+        {
+            ClientId = clientId;
+        }
+
         public IReadOnlyList<RecoveryUnit> Log
         {
             get
@@ -23,11 +29,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
 
         public void AddItem(RecoveryUnit unit)
         {
-            if (ClientId == null)
-            {
-                ClientId = unit.ClientId;
-            }
-            Debug.Assert(ClientId == unit.ClientId);
+
 
             _recoveryUnits[unit.RecoveryId] = unit;
         }

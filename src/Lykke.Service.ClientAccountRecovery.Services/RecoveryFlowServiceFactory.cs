@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
+using Lykke.SettingsReader;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
 {
@@ -27,7 +28,10 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 RecoveryId = Guid.NewGuid().ToString(),
                 ClientId = clientId,
             };
-            var service = _container.Resolve<IRecoveryFlowService>(TypedParameter.From(initialContext));
+            var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
+            var service = _container.Resolve<IRecoveryFlowService>(
+                TypedParameter.From(initialContext),
+                TypedParameter.From(recoveryConditions));
             return service;
         }
 
@@ -39,7 +43,12 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 return null;
             }
             var context = log.ActualStatus;
-            var service = _container.Resolve<IRecoveryFlowService>(TypedParameter.From(context));
+            var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
+
+            var service = _container.Resolve<IRecoveryFlowService>(
+                TypedParameter.From(context),
+                TypedParameter.From(recoveryConditions));
+           await service.TryUnfreeze();
             return service;
         }
     }
