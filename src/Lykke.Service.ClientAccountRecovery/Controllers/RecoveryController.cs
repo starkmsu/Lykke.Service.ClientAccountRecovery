@@ -25,15 +25,23 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         private readonly IRecoveryFlowServiceFactory _factory;
         private readonly IClientAccountClient _clientAccountClient;
         private readonly IChallengeManager _challengeManager;
+        private readonly IBrutForceDetector _brutForceDetector;
         private readonly ILog _log;
 
-        public RecoveryController(IStateRepository stateRepository, IRecoveryLogRepository logRepository, IRecoveryFlowServiceFactory factory, IClientAccountClient clientAccountClient, IChallengeManager challengeManager, ILog log)
+        public RecoveryController(IStateRepository stateRepository,
+            IRecoveryLogRepository logRepository,
+            IRecoveryFlowServiceFactory factory,
+            IClientAccountClient clientAccountClient,
+            IChallengeManager challengeManager,
+            IBrutForceDetector brutForceDetector,
+            ILog log)
         {
             _stateRepository = stateRepository;
             _logRepository = logRepository;
             _factory = factory;
             _clientAccountClient = clientAccountClient;
             _challengeManager = challengeManager;
+            _brutForceDetector = brutForceDetector;
             _log = log.CreateComponentScope(nameof(RecoveryController));
         }
 
@@ -47,11 +55,17 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.Conflict)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
         public async Task<IActionResult> Index([FromBody]NewRecoveryRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            if (!await _brutForceDetector.IsNewRecoveryAllowedAsync(request.ClientId))
+            {
+                return StatusCode((int) HttpStatusCode.Forbidden, "Recovery attempts limits reached");
             }
 
             var flow = _factory.InitiateNew(request.ClientId);
@@ -319,7 +333,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return BadRequest(ModelState);
             }
 
-            var summary = await _stateRepository.GetRecoverySummary(clientId);
+            var summary = await _stateRepository.FindRecoverySummary(clientId);
 
             if (summary == null)
             {

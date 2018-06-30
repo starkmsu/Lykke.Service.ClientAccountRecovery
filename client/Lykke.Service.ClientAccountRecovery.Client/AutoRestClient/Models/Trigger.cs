@@ -64,7 +64,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         [EnumMember(Value = "JumpToAllowed")]
         JumpToAllowed,
         [EnumMember(Value = "UpdatePassword")]
-        UpdatePassword
+        UpdatePassword,
+        [EnumMember(Value = "TryUnfreeze")]
+        TryUnfreeze
     }
     internal static class TriggerEnumExtension
     {
@@ -125,6 +127,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return "JumpToAllowed";
                 case Trigger.UpdatePassword:
                     return "UpdatePassword";
+                case Trigger.TryUnfreeze:
+                    return "TryUnfreeze";
             }
             return null;
         }
@@ -181,6 +185,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return Trigger.JumpToAllowed;
                 case "UpdatePassword":
                     return Trigger.UpdatePassword;
+                case "TryUnfreeze":
+                    return Trigger.TryUnfreeze;
             }
             return null;
         }

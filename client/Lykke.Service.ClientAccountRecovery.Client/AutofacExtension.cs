@@ -17,7 +17,6 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <param name="builder"></param>
         /// <param name="serviceUrl"></param>
         /// <param name="apiKey"></param>
-        /// <param name="log"></param>
         public static void RegisterClientAccountRecoveryClient([NotNull] this ContainerBuilder builder, [NotNull] string serviceUrl, [CanBeNull] string apiKey)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));

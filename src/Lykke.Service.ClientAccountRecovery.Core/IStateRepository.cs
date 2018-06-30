@@ -6,6 +6,6 @@ namespace Lykke.Service.ClientAccountRecovery.Core
     public interface IStateRepository
     {
         Task InsertAsync(RecoveryContext context);
-        Task<RecoverySummaryForClient> GetRecoverySummary(string clientId);
+        Task<RecoverySummaryForClient> FindRecoverySummary(string clientId);
     }
 }

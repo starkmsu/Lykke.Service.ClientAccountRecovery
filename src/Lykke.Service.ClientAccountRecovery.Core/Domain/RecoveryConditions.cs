@@ -11,5 +11,8 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
 
         [Optional]
         public int EmailCodeMaxAttempts { get; set; } = 3;
+
+        [Optional]
+        public int MaxUnsuccessfulRecoveryAttempts { get; set; } = 3;
     }
 }

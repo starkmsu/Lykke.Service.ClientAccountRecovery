@@ -54,7 +54,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client
                 case HttpStatusCode.BadRequest:
                     throw new BadRequestException(result.Response.Content.AsString());
                 case HttpStatusCode.Unauthorized:
-                    throw new UnauthorizedException(result.Response.Content.AsString());
+                    throw new UnauthorizedException(result.Response.Content.AsString()); 
+                case HttpStatusCode.Forbidden:
+                    throw new ForbiddenException(result.Response.Content.AsString());
             }
         }
 
