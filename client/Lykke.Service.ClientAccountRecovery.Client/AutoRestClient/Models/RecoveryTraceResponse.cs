@@ -26,10 +26,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <param name="previousState">Possible values include:
         /// 'RecoveryStarted', 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
-        /// 'AwaitKycVerification', 'KycInProgress', 'AwaitPinCode',
-        /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
-        /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
-        /// 'PasswordUpdated'</param>
+        /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
+        /// 'AwaitPinCode', 'PasswordChangeFrozen', 'PasswordChangeSuspended',
+        /// 'CallSupport', 'Transfer', 'PasswordChangeAllowed',
+        /// 'PasswordChangeForbidden', 'PasswordUpdated'</param>
         /// <param name="action">Possible values include: 'RecoveryRequest',
         /// 'SecretPhrasesComplete', 'SecretPhrasesSkip',
         /// 'DeviceVerificationComplete', 'DeviceVerificationSkip',
@@ -45,10 +45,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <param name="newState">Possible values include: 'RecoveryStarted',
         /// 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
-        /// 'AwaitKycVerification', 'KycInProgress', 'AwaitPinCode',
-        /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
-        /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
-        /// 'PasswordUpdated'</param>
+        /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
+        /// 'AwaitPinCode', 'PasswordChangeFrozen', 'PasswordChangeSuspended',
+        /// 'CallSupport', 'Transfer', 'PasswordChangeAllowed',
+        /// 'PasswordChangeForbidden', 'PasswordUpdated'</param>
         public RecoveryTraceResponse(System.DateTime time, State previousState, Trigger action, State newState, string initiator, string comment, string ip, string userAgent)
         {
             Time = time;
@@ -76,10 +76,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// Gets possible values include: 'RecoveryStarted',
         /// 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
-        /// 'AwaitKycVerification', 'KycInProgress', 'AwaitPinCode',
-        /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
-        /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
-        /// 'PasswordUpdated'
+        /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
+        /// 'AwaitPinCode', 'PasswordChangeFrozen', 'PasswordChangeSuspended',
+        /// 'CallSupport', 'Transfer', 'PasswordChangeAllowed',
+        /// 'PasswordChangeForbidden', 'PasswordUpdated'
         /// </summary>
         [JsonProperty(PropertyName = "previousState")]
         public State PreviousState { get; private set; }
@@ -104,10 +104,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// Gets possible values include: 'RecoveryStarted',
         /// 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
-        /// 'AwaitKycVerification', 'KycInProgress', 'AwaitPinCode',
-        /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
-        /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
-        /// 'PasswordUpdated'
+        /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
+        /// 'AwaitPinCode', 'PasswordChangeFrozen', 'PasswordChangeSuspended',
+        /// 'CallSupport', 'Transfer', 'PasswordChangeAllowed',
+        /// 'PasswordChangeForbidden', 'PasswordUpdated'
         /// </summary>
         [JsonProperty(PropertyName = "newState")]
         public State NewState { get; private set; }

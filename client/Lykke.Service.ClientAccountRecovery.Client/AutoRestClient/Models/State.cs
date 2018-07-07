@@ -27,10 +27,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         AwaitSmsVerification,
         [EnumMember(Value = "AwaitEmailVerification")]
         AwaitEmailVerification,
-        [EnumMember(Value = "AwaitKycVerification")]
-        AwaitKycVerification,
-        [EnumMember(Value = "KycInProgress")]
-        KycInProgress,
+        [EnumMember(Value = "AwaitSelfieVerification")]
+        AwaitSelfieVerification,
+        [EnumMember(Value = "SelfieVerificationInProgress")]
+        SelfieVerificationInProgress,
         [EnumMember(Value = "AwaitPinCode")]
         AwaitPinCode,
         [EnumMember(Value = "PasswordChangeFrozen")]
@@ -69,10 +69,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return "AwaitSmsVerification";
                 case State.AwaitEmailVerification:
                     return "AwaitEmailVerification";
-                case State.AwaitKycVerification:
-                    return "AwaitKycVerification";
-                case State.KycInProgress:
-                    return "KycInProgress";
+                case State.AwaitSelfieVerification:
+                    return "AwaitSelfieVerification";
+                case State.SelfieVerificationInProgress:
+                    return "SelfieVerificationInProgress";
                 case State.AwaitPinCode:
                     return "AwaitPinCode";
                 case State.PasswordChangeFrozen:
@@ -107,10 +107,10 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return State.AwaitSmsVerification;
                 case "AwaitEmailVerification":
                     return State.AwaitEmailVerification;
-                case "AwaitKycVerification":
-                    return State.AwaitKycVerification;
-                case "KycInProgress":
-                    return State.KycInProgress;
+                case "AwaitSelfieVerification":
+                    return State.AwaitSelfieVerification;
+                case "SelfieVerificationInProgress":
+                    return State.SelfieVerificationInProgress;
                 case "AwaitPinCode":
                     return State.AwaitPinCode;
                 case "PasswordChangeFrozen":
