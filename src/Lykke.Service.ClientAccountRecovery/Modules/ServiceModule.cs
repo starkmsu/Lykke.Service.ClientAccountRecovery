@@ -9,6 +9,8 @@ using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Lykke.Service.ClientAccountRecovery.Services;
 using Lykke.Service.ClientAccountRecovery.Settings;
 using Lykke.Service.ConfirmationCodes.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Kyc.Client;
 using Lykke.SettingsReader;
 
 namespace Lykke.Service.ClientAccountRecovery.Modules
@@ -91,6 +93,8 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
         {
             builder.RegisterLykkeServiceClient(_settings.Nested(r => r.ClientAccountClient.ServiceUrl).CurrentValue);
             builder.RegisterConfirmationCodesClient(_settings.Nested(r => r.ConfirmationCodesClient).CurrentValue, _log);
+            builder.Register(c => new KycStatusServiceClient(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.KycServiceClient).CurrentValue, c.Resolve<ILog>()))
+                .As<IKycStatusService>();
         }
 
         private void RegisterStorage(ContainerBuilder builder)

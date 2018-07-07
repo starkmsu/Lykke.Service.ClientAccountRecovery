@@ -68,7 +68,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return StatusCode((int) HttpStatusCode.Forbidden, "Recovery attempts limits reached");
             }
 
-            var flow = _factory.InitiateNew(request.ClientId);
+            var flow = await _factory.InitiateNew(request.ClientId);
             flow.Context.Initiator = Consts.InitiatorUser;
             flow.Context.Ip = request.Ip;
             flow.Context.UserAgent = request.UserAgent;

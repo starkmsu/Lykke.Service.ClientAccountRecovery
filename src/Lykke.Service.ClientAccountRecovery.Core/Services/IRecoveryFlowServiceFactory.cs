@@ -4,7 +4,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
 {
     public interface IRecoveryFlowServiceFactory
     {
-        IRecoveryFlowService InitiateNew(string clientId);
+        Task<IRecoveryFlowService> InitiateNew(string clientId);
         Task<IRecoveryFlowService> FindExisted(string recoveryId);
     }
 }

@@ -16,9 +16,9 @@ namespace Lykke.Service.ClientAccountRecovery.Models
                     return Challenge.Sms;
                 case State.AwaitEmailVerification:
                     return Challenge.Email;
-                case State.AwaitKycVerification:
+                case State.AwaitSelfieVerification:
                     return Challenge.Selfie;
-                case State.KycInProgress:
+                case State.SelfieVerificationInProgress:
                     return Challenge.Selfie;
                 case State.AwaitPinCode:
                     return Challenge.Pin;
@@ -39,9 +39,9 @@ namespace Lykke.Service.ClientAccountRecovery.Models
                 case State.AwaitDeviceVerification:
                 case State.AwaitSmsVerification:
                 case State.AwaitEmailVerification:
-                case State.AwaitKycVerification:
+                case State.AwaitSelfieVerification:
                     return Progress.Ongoing;
-                case State.KycInProgress:
+                case State.SelfieVerificationInProgress:
                     return Progress.WaitingForSupport;
                 case State.AwaitPinCode:
                     return Progress.Ongoing;

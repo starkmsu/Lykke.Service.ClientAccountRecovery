@@ -21,7 +21,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
         public bool DeviceVerificationRequested { get; set; }
         public bool SmsVerified { get; set; }
         public bool EmailVerified { get; set; }
-        public bool KycPassed { get; set; }
+        public bool SelfieApproved { get; set; }
         public bool HasPin { get; set; }
         public int SmsRecoveryAttempts { get; set; }
         public int EmailRecoveryAttempts { get; set; }
@@ -48,7 +48,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 DeviceVerificationRequested = context.DeviceVerificationRequested,
                 SmsVerified = context.SmsVerified,
                 EmailVerified = context.EmailVerified,
-                KycPassed = context.KycPassed,
+                SelfieApproved = context.SelfieApproved,
                 HasPin = context.HasPin,
                 SmsRecoveryAttempts = context.SmsRecoveryAttempts,
                 EmailRecoveryAttempts = context.EmailRecoveryAttempts,
@@ -75,7 +75,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 DeviceVerificationRequested = DeviceVerificationRequested,
                 SmsVerified = SmsVerified,
                 EmailVerified = EmailVerified,
-                KycPassed = KycPassed,
+                SelfieApproved = SelfieApproved,
                 HasPin = HasPin,
                 SmsRecoveryAttempts = SmsRecoveryAttempts,
                 EmailRecoveryAttempts = EmailRecoveryAttempts,

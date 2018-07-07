@@ -15,7 +15,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
         public bool DeviceVerificationRequested { get; set; }
         public bool SmsVerified { get; set; }
         public bool EmailVerified { get; set; }
-        public bool KycPassed { get; set; }
+        public bool SelfieApproved { get; set; }
         public bool HasPin { get; set; }
         public int SmsRecoveryAttempts { get; set; }
         public int EmailRecoveryAttempts { get; set; }
@@ -24,5 +24,6 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
         public string Ip { get; set; }
         public string UserAgent { get; set; }
         public DateTime? FrozenDate { get; set; }
+        public bool KycPassed { get; set; } // A transient state
     }
 }

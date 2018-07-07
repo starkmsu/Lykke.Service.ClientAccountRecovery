@@ -20,7 +20,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
         public RecoveryContext Context => _ctx;
 
-        public RecoveryFlowService(ISmsSender smsSender, IEmailSender emailSender, IStateRepository stateRepository, RecoveryConditions recoveryConditions, RecoveryContext ctx)
+        public RecoveryFlowService(ISmsSender smsSender,
+            IEmailSender emailSender,
+            IStateRepository stateRepository,
+            RecoveryConditions recoveryConditions,
+            RecoveryContext ctx)
         {
             _smsSender = smsSender;
             _emailSender = emailSender;
@@ -84,9 +88,9 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Ignore(Trigger.TryUnfreeze)
                 .Permit(Trigger.SmsVerificationComplete, State.AwaitEmailVerification) // For all cases unconditional go to email verification
                 .Permit(Trigger.SmsVerificationSkip, State.AwaitEmailVerification) // For all cases unconditional go to email verification
-                .PermitIf(Trigger.SmsVerificationFail, State.AwaitEmailVerification, () => _ctx.SmsRecoveryAttempts > _recoveryConditions.SmsCodeMaxAttempts)
+                .PermitIf(Trigger.SmsVerificationFail, State.PasswordChangeForbidden, () => _ctx.SmsRecoveryAttempts > _recoveryConditions.SmsCodeMaxAttempts)
                 .PermitReentryIf(Trigger.SmsVerificationFail, () => _ctx.SmsRecoveryAttempts <= _recoveryConditions.SmsCodeMaxAttempts)
-                .PermitIf(Trigger.SmsVerificationRestart, State.AwaitEmailVerification, () => _ctx.SmsRecoveryAttempts > _recoveryConditions.SmsCodeMaxAttempts)
+                .PermitIf(Trigger.SmsVerificationRestart, State.PasswordChangeForbidden, () => _ctx.SmsRecoveryAttempts > _recoveryConditions.SmsCodeMaxAttempts)
                 .PermitReentryIf(Trigger.SmsVerificationRestart, () => _ctx.SmsRecoveryAttempts <= _recoveryConditions.SmsCodeMaxAttempts);
 
             _stateMachine.Configure(State.AwaitEmailVerification)
@@ -94,39 +98,52 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .OnEntryAsync(SendEmailAsync)
                 .PermitSupportStates()
                 .PermitIf(Trigger.EmailVerificationComplete, State.PasswordChangeAllowed, () => _ctx.HasSecretPhrases && _ctx.SmsVerified) // 3
-                .PermitIf(Trigger.EmailVerificationComplete, State.AwaitKycVerification, () => !(_ctx.HasSecretPhrases && _ctx.SmsVerified)) // All other cases
-                .PermitIf(Trigger.EmailVerificationSkip, State.AwaitKycVerification) // All cases
-                .PermitIf(Trigger.EmailVerificationFail, State.AwaitKycVerification, () => _ctx.EmailRecoveryAttempts > _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIf(Trigger.EmailVerificationComplete, State.AwaitSelfieVerification, () => !(_ctx.HasSecretPhrases && _ctx.SmsVerified) && _ctx.KycPassed) // All other cases
+                .PermitIf(Trigger.EmailVerificationComplete, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ true && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationComplete, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationComplete, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationComplete, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationComplete, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.KycPassed)
+
+                .PermitIf(Trigger.EmailVerificationSkip, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ false && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationSkip, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && !_ctx.SmsVerified && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationSkip, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationSkip, State.PasswordChangeForbidden, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationSkip, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationSkip, State.PasswordChangeForbidden, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.KycPassed)
+                .PermitIf(Trigger.EmailVerificationSkip, State.AwaitSelfieVerification, () => _ctx.KycPassed) // All cases
+
+                .PermitIf(Trigger.EmailVerificationFail, State.PasswordChangeForbidden, () => _ctx.EmailRecoveryAttempts > _recoveryConditions.EmailCodeMaxAttempts)
                 .PermitReentryIf(Trigger.EmailVerificationFail, () => _ctx.EmailRecoveryAttempts <= _recoveryConditions.EmailCodeMaxAttempts)
-                .PermitIf(Trigger.EmailVerificationRestart, State.AwaitKycVerification, () => _ctx.EmailRecoveryAttempts > _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIf(Trigger.EmailVerificationRestart, State.PasswordChangeForbidden, () => _ctx.EmailRecoveryAttempts > _recoveryConditions.EmailCodeMaxAttempts)
                 .PermitReentryIf(Trigger.EmailVerificationRestart, () => _ctx.EmailRecoveryAttempts <= _recoveryConditions.EmailCodeMaxAttempts);
 
-            _stateMachine.Configure(State.AwaitKycVerification)
+            _stateMachine.Configure(State.AwaitSelfieVerification)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
                 .PermitIf(Trigger.SelfieVerificationSkip, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified) // 4
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified) // 5
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && !_ctx.SmsVerified && !_ctx.EmailVerified) // 6
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified) // 5
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && !_ctx.SmsVerified && !_ctx.EmailVerified) // 6
                 .PermitIf(Trigger.SelfieVerificationSkip, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && !_ctx.SmsVerified && !_ctx.EmailVerified) // 6.1
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified) // 8
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified) // 8
                 .PermitIf(Trigger.SelfieVerificationSkip, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified) // 9, 10
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified) // 11
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified) // 11
                 .PermitIf(Trigger.SelfieVerificationSkip, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified) // 12, 13
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && !_ctx.SmsVerified && _ctx.EmailVerified) // 14
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && !_ctx.SmsVerified && _ctx.EmailVerified) // 14
                 .PermitIf(Trigger.SelfieVerificationSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && !_ctx.SmsVerified && _ctx.EmailVerified) // 15
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.EmailVerified) // 16
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.EmailVerified) // 16
                 .PermitIf(Trigger.SelfieVerificationSkip, State.PasswordChangeForbidden, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.EmailVerified) // 17
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified) // 19
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified) // 19
                 .PermitIf(Trigger.SelfieVerificationSkip, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified) // 20, 21
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified) // 22
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified) // 22
                 .PermitIf(Trigger.SelfieVerificationSkip, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified) // 23, 24
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && _ctx.EmailVerified) // 25
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && _ctx.EmailVerified) // 25
                 .PermitIf(Trigger.SelfieVerificationSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && _ctx.EmailVerified) // 26
-                .PermitIf(Trigger.SelfieVerificationRequest, State.KycInProgress, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.EmailVerified) // 27
+                .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.EmailVerified) // 27
                 .PermitIf(Trigger.SelfieVerificationSkip, State.PasswordChangeForbidden, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.EmailVerified); // 28
 
 
-            _stateMachine.Configure(State.KycInProgress)
+            _stateMachine.Configure(State.SelfieVerificationInProgress)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
                 .PermitIf(Trigger.SelfieVerificationComplete, State.PasswordChangeAllowed, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified)  // 5
@@ -144,17 +161,17 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _stateMachine.Configure(State.AwaitPinCode)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
-                .PermitIf(Trigger.PinComplete, State.PasswordChangeFrozen, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.KycPassed) // 9
-                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.KycPassed) // 10
-                .PermitIf(Trigger.PinComplete, State.PasswordChangeFrozen, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && _ctx.KycPassed) // 11
-                .PermitIf(Trigger.PinComplete, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && !_ctx.KycPassed) // 12
-                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && !_ctx.KycPassed) // 13
-                .PermitIf(Trigger.PinComplete, State.Transfer, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.KycPassed) // 20
-                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.KycPassed) // 21
-                .PermitIf(Trigger.PinComplete, State.Transfer, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && _ctx.KycPassed) // 22.1
-                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && _ctx.KycPassed) // 22.2
-                .PermitIf(Trigger.PinComplete, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && !_ctx.KycPassed) // 23
-                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && !_ctx.KycPassed); // 24
+                .PermitIf(Trigger.PinComplete, State.PasswordChangeFrozen, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 9
+                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 10
+                .PermitIf(Trigger.PinComplete, State.PasswordChangeFrozen, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && _ctx.SelfieApproved) // 11
+                .PermitIf(Trigger.PinComplete, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && !_ctx.SelfieApproved) // 12
+                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && !_ctx.SelfieApproved) // 13
+                .PermitIf(Trigger.PinComplete, State.Transfer, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 20
+                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 21
+                .PermitIf(Trigger.PinComplete, State.Transfer, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && _ctx.SelfieApproved) // 22.1
+                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && _ctx.SelfieApproved) // 22.2
+                .PermitIf(Trigger.PinComplete, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && !_ctx.SelfieApproved) // 23
+                .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && !_ctx.SelfieApproved); // 24
 
 
             _stateMachine.Configure(State.Transfer)
@@ -317,25 +334,25 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
         public Task SelfieVerificationRequest()
         {
-            _ctx.KycPassed = false;
+            _ctx.SelfieApproved = false;
             return _stateMachine.FireAsync(Trigger.SelfieVerificationRequest);
         }
 
         public Task SelfieVerificationSkip()
         {
-            _ctx.KycPassed = false;
+            _ctx.SelfieApproved = false;
             return _stateMachine.FireAsync(Trigger.SelfieVerificationSkip);
         }
 
         public Task SelfieVerificationFail()
         {
-            _ctx.KycPassed = false;
+            _ctx.SelfieApproved = false;
             return _stateMachine.FireAsync(Trigger.SelfieVerificationFail);
         }
 
         public Task SelfieVerificationComplete()
         {
-            _ctx.KycPassed = true;
+            _ctx.SelfieApproved = true;
             return _stateMachine.FireAsync(Trigger.SelfieVerificationComplete);
         }
 
