@@ -40,8 +40,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// 'PinSkip', 'SelfieVerificationRequest',
         /// 'SelfieVerificationComplete', 'SelfieVerificationSkip',
         /// 'SelfieVerificationFail', 'JumpToSuspended', 'JumpToCallSupport',
-        /// 'JumpToFrozen', 'JumpToAllowed', 'UpdatePassword',
-        /// 'TryUnfreeze'</param>
+        /// 'JumpToFrozen', 'JumpToAllowed', 'JumpToForbidden',
+        /// 'UpdatePassword', 'TryUnfreeze'</param>
         /// <param name="newState">Possible values include: 'RecoveryStarted',
         /// 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
@@ -95,7 +95,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// 'PinSkip', 'SelfieVerificationRequest',
         /// 'SelfieVerificationComplete', 'SelfieVerificationSkip',
         /// 'SelfieVerificationFail', 'JumpToSuspended', 'JumpToCallSupport',
-        /// 'JumpToFrozen', 'JumpToAllowed', 'UpdatePassword', 'TryUnfreeze'
+        /// 'JumpToFrozen', 'JumpToAllowed', 'JumpToForbidden',
+        /// 'UpdatePassword', 'TryUnfreeze'
         /// </summary>
         [JsonProperty(PropertyName = "action")]
         public Trigger Action { get; private set; }

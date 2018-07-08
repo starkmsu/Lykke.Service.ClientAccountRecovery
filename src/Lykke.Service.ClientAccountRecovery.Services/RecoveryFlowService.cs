@@ -73,11 +73,13 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _stateMachine.Configure(State.AwaitSecretPhrases)
                 .PermitSupportStates()
                 .Ignore(Trigger.TryUnfreeze)
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .Permit(Trigger.SecretPhrasesComplete, State.AwaitSmsVerification) // 3 - 6
                 .Permit(Trigger.SecretPhrasesSkip, State.AwaitDeviceVerification); // 8 - 28
                                                                                    //
             _stateMachine.Configure(State.AwaitDeviceVerification)
                 .PermitSupportStates()
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .Ignore(Trigger.TryUnfreeze)
                 .Permit(Trigger.DeviceVerificationComplete, State.AwaitSmsVerification) //For all cases unconditional go to SMS verification
                 .Permit(Trigger.DeviceVerificationSkip, State.AwaitSmsVerification);
@@ -85,6 +87,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _stateMachine.Configure(State.AwaitSmsVerification)
                 .OnEntryAsync(SendSmsAsync)
                 .PermitSupportStates()
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .Ignore(Trigger.TryUnfreeze)
                 .Permit(Trigger.SmsVerificationComplete, State.AwaitEmailVerification) // For all cases unconditional go to email verification
                 .Permit(Trigger.SmsVerificationSkip, State.AwaitEmailVerification) // For all cases unconditional go to email verification
@@ -97,6 +100,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Ignore(Trigger.TryUnfreeze)
                 .OnEntryAsync(SendEmailAsync)
                 .PermitSupportStates()
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .PermitIf(Trigger.EmailVerificationComplete, State.PasswordChangeAllowed, () => _ctx.HasSecretPhrases && _ctx.SmsVerified) // 3
                 .PermitIf(Trigger.EmailVerificationComplete, State.AwaitSelfieVerification, () => !(_ctx.HasSecretPhrases && _ctx.SmsVerified) && _ctx.KycPassed) // All other cases
                 .PermitIf(Trigger.EmailVerificationComplete, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ true && !_ctx.KycPassed)
@@ -121,6 +125,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _stateMachine.Configure(State.AwaitSelfieVerification)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .PermitIf(Trigger.SelfieVerificationSkip, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified) // 4
                 .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified) // 5
                 .PermitIf(Trigger.SelfieVerificationRequest, State.SelfieVerificationInProgress, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && !_ctx.SmsVerified && !_ctx.EmailVerified) // 6
@@ -146,6 +151,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _stateMachine.Configure(State.SelfieVerificationInProgress)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .PermitIf(Trigger.SelfieVerificationComplete, State.PasswordChangeAllowed, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ _ctx.EmailVerified)  // 5
                 .PermitIf(Trigger.SelfieVerificationComplete, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && !_ctx.SmsVerified && !_ctx.EmailVerified)  // 6
                 .PermitIf(Trigger.SelfieVerificationComplete, State.PasswordChangeAllowed, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified) // 8
@@ -161,6 +167,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _stateMachine.Configure(State.AwaitPinCode)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .PermitIf(Trigger.PinComplete, State.PasswordChangeFrozen, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 9
                 .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 10
                 .PermitIf(Trigger.PinComplete, State.PasswordChangeFrozen, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.EmailVerified && _ctx.SelfieApproved) // 11
@@ -176,16 +183,19 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
             _stateMachine.Configure(State.Transfer)
                 .Ignore(Trigger.TryUnfreeze)
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .PermitSupportStates();
 
             _stateMachine.Configure(State.PasswordChangeForbidden)
+                .Ignore(Trigger.JumpToForbidden)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates();
 
 
             _stateMachine.Configure(State.PasswordChangeFrozen)
                 .OnEntryAsync(Freeze)
-               .PermitReentry(Trigger.JumpToFrozen)
+                .PermitReentry(Trigger.JumpToFrozen)
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .IgnoreIf(Trigger.TryUnfreeze, () => DateTime.UtcNow - (_ctx.FrozenDate ?? DateTime.MaxValue) < TimeSpan.FromDays(_recoveryConditions.FrozenPeriodInDays))
                 .PermitIf(Trigger.TryUnfreeze, State.PasswordChangeAllowed, () => DateTime.UtcNow - (_ctx.FrozenDate ?? DateTime.MaxValue) > TimeSpan.FromDays(_recoveryConditions.FrozenPeriodInDays))
                 .Permit(Trigger.JumpToAllowed, State.PasswordChangeAllowed)
@@ -193,6 +203,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Permit(Trigger.JumpToSuspended, State.PasswordChangeSuspended);
 
             _stateMachine.Configure(State.PasswordChangeSuspended)
+                .Ignore(Trigger.JumpToForbidden)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitReentry(Trigger.JumpToSuspended)
                 .Permit(Trigger.JumpToAllowed, State.PasswordChangeAllowed)
@@ -200,6 +211,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Permit(Trigger.JumpToFrozen, State.PasswordChangeFrozen);
             //            
             _stateMachine.Configure(State.CallSupport)
+                .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitReentry(Trigger.JumpToCallSupport)
                 .Permit(Trigger.JumpToAllowed, State.PasswordChangeAllowed)
@@ -208,6 +220,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             //            
             _stateMachine.Configure(State.PasswordChangeAllowed)
                 .Ignore(Trigger.TryUnfreeze)
+                .Ignore(Trigger.JumpToForbidden)
                 .PermitReentry(Trigger.JumpToAllowed)
                 .Permit(Trigger.JumpToCallSupport, State.CallSupport)
                 .Permit(Trigger.JumpToFrozen, State.PasswordChangeFrozen)
@@ -215,6 +228,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Permit(Trigger.UpdatePassword, State.PasswordUpdated);
 
             _stateMachine.Configure(State.PasswordUpdated)
+                .Ignore(Trigger.JumpToForbidden)
                 .Ignore(Trigger.TryUnfreeze);
         }
 
@@ -224,7 +238,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             return _stateRepository.InsertAsync(_ctx);
         }
 
-        public Task TryUnfreeze()
+        public Task TryUnfreezeAsync()
         {
             return _stateMachine.FireAsync(Trigger.TryUnfreeze);
         }
@@ -268,106 +282,111 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             return _stateMachine.FireAsync(Trigger.DeviceVerificationComplete);
         }
 
-        public Task DeviceVerificationSkip()
+        public Task DeviceVerificationSkipAsync()
         {
             _ctx.DeviceVerified = false;
             _ctx.DeviceVerificationRequested = true;
             return _stateMachine.FireAsync(Trigger.DeviceVerificationSkip);
         }
 
-        public Task SmsVerificationComplete()
+        public Task SmsVerificationCompleteAsync()
         {
             _ctx.SmsVerified = true;
             return _stateMachine.FireAsync(Trigger.SmsVerificationComplete);
         }
 
-        public Task SmsVerificationSkip()
+        public Task SmsVerificationSkipAsync()
         {
             _ctx.SmsVerified = false;
             return _stateMachine.FireAsync(Trigger.SmsVerificationSkip);
         }
 
-        public Task SmsVerificationRestart()
+        public Task SmsVerificationRestartAsync()
         {
             _ctx.SmsRecoveryAttempts++;
             _ctx.SmsVerified = false;
             return _stateMachine.FireAsync(Trigger.SmsVerificationRestart);
         }
 
-        public Task SmsVerificationFailed()
+        public Task SmsVerificationFailedAsync()
         {
             _ctx.SmsRecoveryAttempts++;
             _ctx.SmsVerified = false;
             return _stateMachine.FireAsync(Trigger.SmsVerificationFail);
         }
 
-        public Task EmailVerificationComplete()
+        public Task EmailVerificationCompleteAsync()
         {
             _ctx.EmailVerified = true;
             return _stateMachine.FireAsync(Trigger.EmailVerificationComplete);
         }
 
-        public Task UpdatePasswordComplete()
+        public Task UpdatePasswordCompleteAsync()
         {
             return _stateMachine.FireAsync(Trigger.UpdatePassword);
         }
 
-        public Task EmailVerificationSkip()
+        public Task EmailVerificationSkipAsync()
         {
             _ctx.EmailVerified = false;
             return _stateMachine.FireAsync(Trigger.EmailVerificationSkip);
         }
 
-        public Task EmailVerificationRestart()
+        public Task EmailVerificationRestartAsync()
         {
             _ctx.EmailRecoveryAttempts++;
             _ctx.EmailVerified = false;
             return _stateMachine.FireAsync(Trigger.EmailVerificationRestart);
         }
 
-        public Task EmailVerificationFailed()
+        public Task EmailVerificationFailedAsync()
         {
             _ctx.EmailRecoveryAttempts++;
             _ctx.EmailVerified = false;
             return _stateMachine.FireAsync(Trigger.EmailVerificationFail);
         }
 
-        public Task SelfieVerificationRequest()
+        public Task SelfieVerificationRequestAsync()
         {
             _ctx.SelfieApproved = false;
             return _stateMachine.FireAsync(Trigger.SelfieVerificationRequest);
         }
 
-        public Task SelfieVerificationSkip()
+        public Task SelfieVerificationSkipAsync()
         {
             _ctx.SelfieApproved = false;
             return _stateMachine.FireAsync(Trigger.SelfieVerificationSkip);
         }
 
-        public Task SelfieVerificationFail()
+        public Task SelfieVerificationFailAsync()
         {
             _ctx.SelfieApproved = false;
             return _stateMachine.FireAsync(Trigger.SelfieVerificationFail);
         }
 
-        public Task SelfieVerificationComplete()
+        public Task SelfieVerificationCompleteAsync()
         {
             _ctx.SelfieApproved = true;
             return _stateMachine.FireAsync(Trigger.SelfieVerificationComplete);
         }
 
-        public Task PinCodeVerificationComplete()
+        public Task PinCodeVerificationCompleteAsync()
         {
             _ctx.HasPin = true;
             return _stateMachine.FireAsync(Trigger.PinComplete);
         }
 
-        public Task PinCodeVerificationSkip()
+        public Task PinCodeVerificationSkipAsync()
         {
             _ctx.HasPin = false;
             return _stateMachine.FireAsync(Trigger.PinSkip);
         }
 
+
+        public Task JumpToForbiddenAsync()
+        {
+            return _stateMachine.FireAsync(Trigger.JumpToForbidden);
+        }
 
         #region Only for support
 
@@ -375,7 +394,6 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         {
             return _stateMachine.FireAsync(Trigger.JumpToAllowed);
         }
-
 
         public Task JumpToSupportAsync()
         {

@@ -63,6 +63,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         JumpToFrozen,
         [EnumMember(Value = "JumpToAllowed")]
         JumpToAllowed,
+        [EnumMember(Value = "JumpToForbidden")]
+        JumpToForbidden,
         [EnumMember(Value = "UpdatePassword")]
         UpdatePassword,
         [EnumMember(Value = "TryUnfreeze")]
@@ -125,6 +127,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return "JumpToFrozen";
                 case Trigger.JumpToAllowed:
                     return "JumpToAllowed";
+                case Trigger.JumpToForbidden:
+                    return "JumpToForbidden";
                 case Trigger.UpdatePassword:
                     return "UpdatePassword";
                 case Trigger.TryUnfreeze:
@@ -183,6 +187,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return Trigger.JumpToFrozen;
                 case "JumpToAllowed":
                     return Trigger.JumpToAllowed;
+                case "JumpToForbidden":
+                    return Trigger.JumpToForbidden;
                 case "UpdatePassword":
                     return Trigger.UpdatePassword;
                 case "TryUnfreeze":

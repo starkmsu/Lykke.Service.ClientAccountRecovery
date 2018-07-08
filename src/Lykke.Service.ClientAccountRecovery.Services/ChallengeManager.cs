@@ -32,27 +32,27 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 case var a when a.Item1 == Challenge.Device && a.Item2 == Action.Complete:
                     return flow.DeviceVerifiedCompleteAsync();
                 case var a when a.Item1 == Challenge.Device && a.Item2 == Action.Skip:
-                    return flow.DeviceVerificationSkip();
+                    return flow.DeviceVerificationSkipAsync();
                 case var a when a.Item1 == Challenge.Sms && a.Item2 == Action.Complete:
                     return ValidateSms(flow, code);
                 case var a when a.Item1 == Challenge.Sms && a.Item2 == Action.Skip:
-                    return flow.SmsVerificationSkip();
+                    return flow.SmsVerificationSkipAsync();
                 case var a when a.Item1 == Challenge.Sms && a.Item2 == Action.Restart:
-                    return flow.SmsVerificationRestart();
+                    return flow.SmsVerificationRestartAsync();
                 case var a when a.Item1 == Challenge.Email && a.Item2 == Action.Complete:
                     return ValidateEmail(flow, code);
                 case var a when a.Item1 == Challenge.Email && a.Item2 == Action.Skip:
-                    return flow.EmailVerificationSkip();
+                    return flow.EmailVerificationSkipAsync();
                 case var a when a.Item1 == Challenge.Email && a.Item2 == Action.Restart:
-                    return flow.EmailVerificationRestart();
+                    return flow.EmailVerificationRestartAsync();
                 case var a when a.Item1 == Challenge.Selfie && a.Item2 == Action.Complete:
                     return NotifySelfiePosted(flow, code);
                 case var a when a.Item1 == Challenge.Selfie && a.Item2 == Action.Skip:
-                    return flow.SelfieVerificationSkip();
+                    return flow.SelfieVerificationSkipAsync();
                 case var a when a.Item1 == Challenge.Pin && a.Item2 == Action.Complete:
-                    return flow.PinCodeVerificationComplete();
+                    return flow.PinCodeVerificationCompleteAsync();
                 case var a when a.Item1 == Challenge.Pin && a.Item2 == Action.Skip:
-                    return flow.PinCodeVerificationSkip();
+                    return flow.PinCodeVerificationSkipAsync();
             }
 
             throw new ArgumentException($"Invalid pair {challenge} {action}");

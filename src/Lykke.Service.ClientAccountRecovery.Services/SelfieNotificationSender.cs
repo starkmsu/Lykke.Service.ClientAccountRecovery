@@ -27,7 +27,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             };
             _cqrsEngine.PublishEvent(msg, Consts.BoundedContext);
             
-            return flow.SelfieVerificationRequest();
+            return flow.SelfieVerificationRequestAsync();
         }
     }
 }

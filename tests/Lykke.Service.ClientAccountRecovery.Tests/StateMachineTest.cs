@@ -99,12 +99,12 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             _flowService.Context.KycPassed = kycPassed == Ss.Ok;
             await _flowService.StartRecoveryAsync();
             await Fire(secretPhrases, _flowService.SecretPhrasesCompleteAsync, _flowService.SecretPhrasesSkipAsync);
-            await Fire(deviceVerified, _flowService.DeviceVerifiedCompleteAsync, _flowService.DeviceVerificationSkip);
-            await Fire(sms, _flowService.SmsVerificationComplete, _flowService.SmsVerificationSkip, _flowService.SmsVerificationFailed, _flowService.SmsVerificationRestart);
-            await Fire(email, _flowService.EmailVerificationComplete, _flowService.EmailVerificationSkip, _flowService.EmailVerificationFailed, _flowService.EmailVerificationRestart);
-            await Fire(selfieReceived, _flowService.SelfieVerificationRequest, _flowService.SelfieVerificationSkip);
-            await Fire(selfiePass, _flowService.SelfieVerificationComplete, null, _flowService.SelfieVerificationFail);
-            await Fire(pin, _flowService.PinCodeVerificationComplete, _flowService.PinCodeVerificationSkip);
+            await Fire(deviceVerified, _flowService.DeviceVerifiedCompleteAsync, _flowService.DeviceVerificationSkipAsync);
+            await Fire(sms, _flowService.SmsVerificationCompleteAsync, _flowService.SmsVerificationSkipAsync, _flowService.SmsVerificationFailedAsync, _flowService.SmsVerificationRestartAsync);
+            await Fire(email, _flowService.EmailVerificationCompleteAsync, _flowService.EmailVerificationSkipAsync, _flowService.EmailVerificationFailedAsync, _flowService.EmailVerificationRestartAsync);
+            await Fire(selfieReceived, _flowService.SelfieVerificationRequestAsync, _flowService.SelfieVerificationSkipAsync);
+            await Fire(selfiePass, _flowService.SelfieVerificationCompleteAsync, null, _flowService.SelfieVerificationFailAsync);
+            await Fire(pin, _flowService.PinCodeVerificationCompleteAsync, _flowService.PinCodeVerificationSkipAsync);
 
             if (resolution != _flowService.Context.State)
             {
@@ -155,7 +155,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             };
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
 
-            await stateMachine.UpdatePasswordComplete();
+            await stateMachine.UpdatePasswordCompleteAsync();
 
             Assert.That(State.PasswordUpdated, Is.EqualTo(stateMachine.Context.State));
         }
@@ -171,12 +171,46 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
 
 
-            Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.UpdatePasswordComplete());
+            Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.UpdatePasswordCompleteAsync());
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSuspendAsync());
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToAllowAsync());
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToFrozenAsync());
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSupportAsync());
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.StartRecoveryAsync());
+        }
+
+        [Test]
+        public async Task Should_Set_Forbidden([Values]State initialState)
+        {
+            if (initialState == State.RecoveryStarted)
+            {
+                Assert.Pass();
+            }
+            var ignoredStates = new[]
+            {
+                State.PasswordChangeAllowed,
+                State.PasswordUpdated,
+                State.PasswordChangeSuspended,
+                State.PasswordChangeForbidden,
+            };
+            var context = new RecoveryContext
+            {
+                State = initialState
+            };
+
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+
+            await stateMachine.JumpToForbiddenAsync();
+
+            if (ignoredStates.Contains(initialState))
+            {
+                Assert.That(stateMachine.Context.State, Is.EqualTo(initialState));
+            }
+            else
+            {
+                Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
+
+            }
         }
 
 
@@ -207,7 +241,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
 
             await Task.Delay(TimeSpan.FromSeconds(2));
-            await stateMachine.TryUnfreeze();
+            await stateMachine.TryUnfreezeAsync();
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeAllowed));
         }
@@ -226,7 +260,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
 
             await Task.Delay(TimeSpan.FromSeconds(1));
-            await stateMachine.TryUnfreeze();
+            await stateMachine.TryUnfreezeAsync();
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeFrozen));
         }
@@ -261,10 +295,10 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
 
-            await stateMachine.SmsVerificationFailed();
-            await stateMachine.SmsVerificationFailed();
-            await stateMachine.SmsVerificationFailed();
-            await stateMachine.SmsVerificationFailed();
+            await stateMachine.SmsVerificationFailedAsync();
+            await stateMachine.SmsVerificationFailedAsync();
+            await stateMachine.SmsVerificationFailedAsync();
+            await stateMachine.SmsVerificationFailedAsync();
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
         }
@@ -279,10 +313,10 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
 
-            await stateMachine.SmsVerificationRestart();
-            await stateMachine.SmsVerificationRestart();
-            await stateMachine.SmsVerificationRestart();
-            await stateMachine.SmsVerificationRestart();
+            await stateMachine.SmsVerificationRestartAsync();
+            await stateMachine.SmsVerificationRestartAsync();
+            await stateMachine.SmsVerificationRestartAsync();
+            await stateMachine.SmsVerificationRestartAsync();
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
         }
@@ -297,10 +331,10 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
 
-            await stateMachine.EmailVerificationFailed();
-            await stateMachine.EmailVerificationFailed();
-            await stateMachine.EmailVerificationFailed();
-            await stateMachine.EmailVerificationFailed();
+            await stateMachine.EmailVerificationFailedAsync();
+            await stateMachine.EmailVerificationFailedAsync();
+            await stateMachine.EmailVerificationFailedAsync();
+            await stateMachine.EmailVerificationFailedAsync();
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
         }
@@ -315,10 +349,10 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
 
-            await stateMachine.EmailVerificationRestart();
-            await stateMachine.EmailVerificationRestart();
-            await stateMachine.EmailVerificationRestart();
-            await stateMachine.EmailVerificationRestart();
+            await stateMachine.EmailVerificationRestartAsync();
+            await stateMachine.EmailVerificationRestartAsync();
+            await stateMachine.EmailVerificationRestartAsync();
+            await stateMachine.EmailVerificationRestartAsync();
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
         }
@@ -352,7 +386,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
                 State = State.AwaitSmsVerification
             };
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
-            await stateMachine.SmsVerificationComplete();
+            await stateMachine.SmsVerificationCompleteAsync();
 
             await _emailSender.ReceivedWithAnyArgs().SendCodeAsync("1");
         }

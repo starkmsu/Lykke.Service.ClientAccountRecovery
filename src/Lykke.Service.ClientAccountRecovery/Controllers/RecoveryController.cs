@@ -63,9 +63,11 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return BadRequest(ModelState);
             }
 
+            await _brutForceDetector.BlockPreviousRecoveries(request.ClientId,request.Ip,request.UserAgent);
+
             if (!await _brutForceDetector.IsNewRecoveryAllowedAsync(request.ClientId))
             {
-                return StatusCode((int) HttpStatusCode.Forbidden, "Recovery attempts limits reached");
+                return StatusCode((int)HttpStatusCode.Forbidden, "Recovery attempts limits reached");
             }
 
             var flow = await _factory.InitiateNew(request.ClientId);
@@ -109,7 +111,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             {
                 return NotFound();
             }
-
+            await flow.TryUnfreezeAsync();
             var challenge = flow.Context.State.MapToChallenge();
             var progress = flow.Context.State.MapToProgress();
             return Ok(new RecoveryStatusResponse { Challenge = challenge, OverallProgress = progress });
@@ -196,7 +198,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 flow.Context.Ip = request.Ip;
                 flow.Context.UserAgent = request.UserAgent;
                 await _clientAccountClient.ChangeClientPasswordAsync(flow.Context.ClientId, request.PasswordHash);
-                await flow.UpdatePasswordComplete();
+                await flow.UpdatePasswordCompleteAsync();
             }
             catch (InvalidActionException ex)
             {
@@ -240,11 +242,11 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 flow.Context.UserAgent = null;
                 if (request.CheckResult == CheckResult.Approved)
                 {
-                    await flow.SelfieVerificationComplete(); // In a moment supporting only selfie
+                    await flow.SelfieVerificationCompleteAsync(); // In a moment supporting only selfie
                 }
                 else
                 {
-                    await flow.SelfieVerificationFail();
+                    await flow.SelfieVerificationFailAsync();
                 }
             }
             catch (InvalidActionException ex)

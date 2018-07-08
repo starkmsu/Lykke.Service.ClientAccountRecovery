@@ -82,7 +82,9 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             builder.RegisterType<ChallengesValidator>()
                 .As<IChallengesValidator>();
 
-            builder.Register(c => new BrutForceDetector(c.Resolve<IStateRepository>(), _settings.CurrentValue.ClientAccountRecoveryService.RecoveryConditions))
+            builder.Register(c => new BrutForceDetector(c.Resolve<IStateRepository>(),
+                    c.Resolve<IRecoveryFlowServiceFactory>(),
+                    _settings.CurrentValue.ClientAccountRecoveryService.RecoveryConditions))
                 .As<IBrutForceDetector>();
 
             RegisterStorage(builder);

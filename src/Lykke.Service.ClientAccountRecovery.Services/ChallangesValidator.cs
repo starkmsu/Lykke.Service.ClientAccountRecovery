@@ -33,11 +33,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
             if (result.IsValid)
             {
-                await flowService.EmailVerificationComplete();
+                await flowService.EmailVerificationCompleteAsync();
             }
             else
             {
-                await flowService.EmailVerificationFailed();
+                await flowService.EmailVerificationFailedAsync();
             }
         }
 
@@ -53,11 +53,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
             if (result.IsValid)
             {
-                await flowService.SmsVerificationComplete();
+                await flowService.SmsVerificationCompleteAsync();
             }
             else
             {
-                await flowService.SmsVerificationFailed();
+                await flowService.SmsVerificationFailedAsync();
             }
         }
     }

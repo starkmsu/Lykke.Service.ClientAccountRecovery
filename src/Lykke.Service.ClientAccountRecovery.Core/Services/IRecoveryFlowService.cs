@@ -10,27 +10,28 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
         Task SecretPhrasesCompleteAsync();
         Task SecretPhrasesSkipAsync();
         Task DeviceVerifiedCompleteAsync();
-        Task DeviceVerificationSkip();
-        Task SmsVerificationComplete();
-        Task SmsVerificationSkip();
-        Task SmsVerificationRestart();
-        Task SmsVerificationFailed();
-        Task EmailVerificationComplete();
-        Task EmailVerificationSkip();
-        Task EmailVerificationRestart();
-        Task EmailVerificationFailed();
-        Task SelfieVerificationRequest();
-        Task SelfieVerificationSkip();
-        Task SelfieVerificationFail();
-        Task SelfieVerificationComplete();
-        Task PinCodeVerificationComplete();
-        Task PinCodeVerificationSkip();
+        Task DeviceVerificationSkipAsync();
+        Task SmsVerificationCompleteAsync();
+        Task SmsVerificationSkipAsync();
+        Task SmsVerificationRestartAsync();
+        Task SmsVerificationFailedAsync();
+        Task EmailVerificationCompleteAsync();
+        Task EmailVerificationSkipAsync();
+        Task EmailVerificationRestartAsync();
+        Task EmailVerificationFailedAsync();
+        Task SelfieVerificationRequestAsync();
+        Task SelfieVerificationSkipAsync();
+        Task SelfieVerificationFailAsync();
+        Task SelfieVerificationCompleteAsync();
+        Task PinCodeVerificationCompleteAsync();
+        Task PinCodeVerificationSkipAsync();
         Task JumpToAllowAsync();
         Task JumpToSupportAsync();
         Task JumpToFrozenAsync();
         Task JumpToSuspendAsync();
-        Task UpdatePasswordComplete();
-        Task TryUnfreeze();
+        Task UpdatePasswordCompleteAsync();
+        Task TryUnfreezeAsync();
         bool IsPasswordUpdateAllowed { get; }
+        Task JumpToForbiddenAsync();
     }
 }

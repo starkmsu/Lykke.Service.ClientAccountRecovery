@@ -10,13 +10,14 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     public class BrutForceDetector : IBrutForceDetector
     {
         private readonly IStateRepository _stateRepository;
+        private readonly IRecoveryFlowServiceFactory _factory;
         private readonly RecoveryConditions _recoveryConditions;
         private static readonly State[] UnsuccessfulStates;
         private static readonly State[] InProgressStates;
 
         static BrutForceDetector()
         {
-            UnsuccessfulStates = new[] { State.PasswordChangeSuspended, State.PasswordChangeForbidden };
+            UnsuccessfulStates = new[] { State.PasswordChangeForbidden };
             InProgressStates = Enum.GetValues(typeof(State)).Cast<State>().Except
             (
                 new[]
@@ -29,9 +30,10 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             ).ToArray();
         }
 
-        public BrutForceDetector(IStateRepository stateRepository, RecoveryConditions recoveryConditions)
+        public BrutForceDetector(IStateRepository stateRepository, IRecoveryFlowServiceFactory factory, RecoveryConditions recoveryConditions)
         {
             _stateRepository = stateRepository;
+            _factory = factory;
             _recoveryConditions = recoveryConditions;
         }
 
@@ -43,11 +45,6 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 return true;
             }
 
-            var noInProgress = history.Log.Count(l => InProgressStates.Contains(l.ActualStatus.State));
-            if (noInProgress > 0)
-            {
-                return false;
-            }
             var noOfLastBadStatuses = history.Log.OrderByDescending(l => l.ActualStatus.Time)
                 .TakeWhile(l => UnsuccessfulStates.Contains(l.ActualStatus.State)).Count();
             if (noOfLastBadStatuses >= _recoveryConditions.MaxUnsuccessfulRecoveryAttempts)
@@ -56,6 +53,26 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             }
 
             return true;
+        }
+
+        public async Task BlockPreviousRecoveries(string clientId, string ip, string userAgent)
+        {
+            var history = await _stateRepository.FindRecoverySummary(clientId);
+
+            if (history == null)
+            {
+                return;
+            }
+
+            foreach (var recoveryUnit in history.Log.Where(l => InProgressStates.Contains(l.ActualStatus.State)))
+            {
+                var flow = await _factory.FindExisted(recoveryUnit.RecoveryId);
+                flow.Context.Initiator = "RecoveryService";
+                flow.Context.Ip = ip;
+                flow.Context.UserAgent = userAgent;
+
+                await flow.JumpToForbiddenAsync();
+            }
         }
     }
 }

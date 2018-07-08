@@ -56,7 +56,6 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             var service = _container.Resolve<IRecoveryFlowService>(
                 TypedParameter.From(context),
                 TypedParameter.From(recoveryConditions));
-            await service.TryUnfreeze();
             return service;
         }
 
