@@ -23,10 +23,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         SecretPhrasesComplete,
         [EnumMember(Value = "SecretPhrasesSkip")]
         SecretPhrasesSkip,
+        [EnumMember(Value = "SecretPhrasesVerificationFail")]
+        SecretPhrasesVerificationFail,
         [EnumMember(Value = "DeviceVerificationComplete")]
         DeviceVerificationComplete,
         [EnumMember(Value = "DeviceVerificationSkip")]
         DeviceVerificationSkip,
+        [EnumMember(Value = "DeviceVerificationFail")]
+        DeviceVerificationFail,
         [EnumMember(Value = "SmsVerificationComplete")]
         SmsVerificationComplete,
         [EnumMember(Value = "SmsVerificationRestart")]
@@ -87,10 +91,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return "SecretPhrasesComplete";
                 case Trigger.SecretPhrasesSkip:
                     return "SecretPhrasesSkip";
+                case Trigger.SecretPhrasesVerificationFail:
+                    return "SecretPhrasesVerificationFail";
                 case Trigger.DeviceVerificationComplete:
                     return "DeviceVerificationComplete";
                 case Trigger.DeviceVerificationSkip:
                     return "DeviceVerificationSkip";
+                case Trigger.DeviceVerificationFail:
+                    return "DeviceVerificationFail";
                 case Trigger.SmsVerificationComplete:
                     return "SmsVerificationComplete";
                 case Trigger.SmsVerificationRestart:
@@ -147,10 +155,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return Trigger.SecretPhrasesComplete;
                 case "SecretPhrasesSkip":
                     return Trigger.SecretPhrasesSkip;
+                case "SecretPhrasesVerificationFail":
+                    return Trigger.SecretPhrasesVerificationFail;
                 case "DeviceVerificationComplete":
                     return Trigger.DeviceVerificationComplete;
                 case "DeviceVerificationSkip":
                     return Trigger.DeviceVerificationSkip;
+                case "DeviceVerificationFail":
+                    return Trigger.DeviceVerificationFail;
                 case "SmsVerificationComplete":
                     return Trigger.SmsVerificationComplete;
                 case "SmsVerificationRestart":

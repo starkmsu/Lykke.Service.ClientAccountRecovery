@@ -32,7 +32,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// 'PasswordChangeForbidden', 'PasswordUpdated'</param>
         /// <param name="action">Possible values include: 'RecoveryRequest',
         /// 'SecretPhrasesComplete', 'SecretPhrasesSkip',
-        /// 'DeviceVerificationComplete', 'DeviceVerificationSkip',
+        /// 'SecretPhrasesVerificationFail', 'DeviceVerificationComplete',
+        /// 'DeviceVerificationSkip', 'DeviceVerificationFail',
         /// 'SmsVerificationComplete', 'SmsVerificationRestart',
         /// 'SmsVerificationFail', 'SmsVerificationSkip',
         /// 'EmailVerificationComplete', 'EmailVerificationRestart',
@@ -87,7 +88,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Gets possible values include: 'RecoveryRequest',
         /// 'SecretPhrasesComplete', 'SecretPhrasesSkip',
-        /// 'DeviceVerificationComplete', 'DeviceVerificationSkip',
+        /// 'SecretPhrasesVerificationFail', 'DeviceVerificationComplete',
+        /// 'DeviceVerificationSkip', 'DeviceVerificationFail',
         /// 'SmsVerificationComplete', 'SmsVerificationRestart',
         /// 'SmsVerificationFail', 'SmsVerificationSkip',
         /// 'EmailVerificationComplete', 'EmailVerificationRestart',

@@ -27,10 +27,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <param name="overallProgress">Possible values include: 'Ongoing',
         /// 'WaitingForSupport', 'Frozen', 'Suspended', 'Allowed',
         /// 'Undefined'</param>
-        public RecoveryStatusResponse(Challenge challenge, Progress overallProgress)
+        /// <param name="challengeInfo">Addition data to perform the challenge.
+        /// For example a message to be signed by the private key</param>
+        public RecoveryStatusResponse(Challenge challenge, Progress overallProgress, string challengeInfo)
         {
             Challenge = challenge;
             OverallProgress = overallProgress;
+            ChallengeInfo = challengeInfo;
             CustomInit();
         }
 
@@ -52,6 +55,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// </summary>
         [JsonProperty(PropertyName = "overallProgress")]
         public Progress OverallProgress { get; private set; }
+
+        /// <summary>
+        /// Gets addition data to perform the challenge. For example a message
+        /// to be signed by the private key
+        /// </summary>
+        [JsonProperty(PropertyName = "challengeInfo")]
+        public string ChallengeInfo { get; private set; }
 
         /// <summary>
         /// Validate the object.

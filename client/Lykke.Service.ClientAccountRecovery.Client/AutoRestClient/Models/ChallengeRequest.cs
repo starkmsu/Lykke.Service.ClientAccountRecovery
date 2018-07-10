@@ -108,6 +108,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
                 }
             }
+            if (Value != null)
+            {
+                if (Value.Length > 128)
+                {
+                    throw new ValidationException(ValidationRules.MaxLength, "Value", 128);
+                }
+            }
             if (UserAgent != null)
             {
                 if (UserAgent.Length > 128)
