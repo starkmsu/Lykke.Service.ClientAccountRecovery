@@ -17,6 +17,6 @@ namespace Lykke.Service.ClientAccountRecovery.Models
         /// <summary>
         /// Addition data to perform the challenge. For example a message to be signed by the private key
         /// </summary>
-        public string ChallengeInfo { get; set; }
+        public string ChallengeInfo { get; internal set; }
     }
 }
