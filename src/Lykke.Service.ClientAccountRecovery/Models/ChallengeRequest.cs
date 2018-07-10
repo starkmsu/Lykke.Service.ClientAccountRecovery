@@ -10,15 +10,16 @@ namespace Lykke.Service.ClientAccountRecovery.Models
     {
         [Required]
         [MinLength(Consts.MinRecoveryIdLength)]
-        public string RecoveryId { get;  set; }
+        public string RecoveryId { get; set; }
         [Required]
         [JsonConverter(typeof(StringEnumConverter))]
-        public Challenge Challenge { get;  set; }
+        public Challenge Challenge { get; set; }
         [Required]
         [JsonConverter(typeof(StringEnumConverter))]
-        public Action Action { get;  set; }
+        public Action Action { get; set; }
         [Required]
-        public string Value { get;  set; }
+        [MaxLength(128)]
+        public string Value { get; set; }
         [Required]
         public string Ip { get; set; }
 

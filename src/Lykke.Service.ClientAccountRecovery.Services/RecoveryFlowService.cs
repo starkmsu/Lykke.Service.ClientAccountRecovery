@@ -56,6 +56,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 case State.AwaitSmsVerification:
                 case State.AwaitEmailVerification:
                 case State.PasswordChangeFrozen:
+                case State.AwaitSecretPhrases:
+                case State.AwaitDeviceVerification:
                     return Task.CompletedTask;
                 default:
                     return _stateRepository.InsertAsync(_ctx);
@@ -72,13 +74,20 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
             _stateMachine.Configure(State.AwaitSecretPhrases)
                 .PermitSupportStates()
+                .OnEntryAsync(OnEntrySecretPhrases)
+                .OnExit(OnExitSecretPhrases)
                 .Ignore(Trigger.TryUnfreeze)
+                .PermitIf(Trigger.SecretPhrasesVerificationFail, State.PasswordChangeForbidden, () => _ctx.SecretPhrasesRecoveryAttempts > _recoveryConditions.SecretPhrasesMaxAttempts)
+                .PermitReentryIf(Trigger.SecretPhrasesVerificationFail, () => _ctx.SecretPhrasesRecoveryAttempts <= _recoveryConditions.SecretPhrasesMaxAttempts)
                 .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .Permit(Trigger.SecretPhrasesComplete, State.AwaitSmsVerification) // 3 - 6
                 .Permit(Trigger.SecretPhrasesSkip, State.AwaitDeviceVerification); // 8 - 28
                                                                                    //
             _stateMachine.Configure(State.AwaitDeviceVerification)
                 .PermitSupportStates()
+                .OnEntryAsync(OnEntryDeviceVerification)
+                .OnExit(OnExitDeviceVerification)
+                .Permit(Trigger.DeviceVerificationFail, State.PasswordChangeForbidden)
                 .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .Ignore(Trigger.TryUnfreeze)
                 .Permit(Trigger.DeviceVerificationComplete, State.AwaitSmsVerification) //For all cases unconditional go to SMS verification
@@ -232,6 +241,29 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Ignore(Trigger.TryUnfreeze);
         }
 
+        private void OnExitDeviceVerification()
+        {
+            _ctx.SignChallengeMessage = null;
+        }
+
+        private void OnExitSecretPhrases()
+        {
+            _ctx.SignChallengeMessage = null;
+        }
+
+        private Task OnEntrySecretPhrases()
+        {
+            _ctx.SignChallengeMessage = Guid.NewGuid().ToString();
+            return _stateRepository.InsertAsync(_ctx);
+        }
+
+        private Task OnEntryDeviceVerification()
+        {
+            _ctx.SignChallengeMessage = Guid.NewGuid().ToString();
+            return _stateRepository.InsertAsync(_ctx);
+
+        }
+
         private Task Freeze()
         {
             _ctx.FrozenDate = DateTime.UtcNow;
@@ -260,6 +292,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
         public Task StartRecoveryAsync()
         {
+            _ctx.SignChallengeMessage = Guid.NewGuid().ToString();
             return _stateMachine.FireAsync(Trigger.RecoveryRequest);
         }
 
@@ -279,6 +312,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         {
             _ctx.DeviceVerified = true;
             _ctx.DeviceVerificationRequested = true;
+            _ctx.SignChallengeMessage = Guid.NewGuid().ToString();
             return _stateMachine.FireAsync(Trigger.DeviceVerificationComplete);
         }
 
@@ -386,6 +420,17 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         public Task JumpToForbiddenAsync()
         {
             return _stateMachine.FireAsync(Trigger.JumpToForbidden);
+        }
+
+        public Task SecretPhrasesVerificationFailAsync()
+        {
+            _ctx.SecretPhrasesRecoveryAttempts++;
+            return _stateMachine.FireAsync(Trigger.SecretPhrasesVerificationFail);
+        }
+
+        public Task DeviceVerificationFailAsync()
+        {
+            return _stateMachine.FireAsync(Trigger.DeviceVerificationFail);
         }
 
         #region Only for support

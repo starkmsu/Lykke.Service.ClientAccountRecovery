@@ -30,6 +30,9 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
         public string Ip { get; set; }
         public string UserAgent { get; set; }
         public DateTime? FrozenDate { get; set; }
+        public string SignChallengeMessage { get; set; }
+        public int SecretPhrasesRecoveryAttempts { get; set; }
+
 
         public static LogTableEntity CreateNew(RecoveryContext context)
         {
@@ -54,7 +57,9 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 EmailRecoveryAttempts = context.EmailRecoveryAttempts,
                 Ip = context.Ip,
                 UserAgent = context.UserAgent,
-                FrozenDate = context.FrozenDate
+                FrozenDate = context.FrozenDate,
+                SignChallengeMessage = context.SignChallengeMessage,
+                SecretPhrasesRecoveryAttempts = context.SecretPhrasesRecoveryAttempts
             };
         }
 
@@ -81,7 +86,9 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 EmailRecoveryAttempts = EmailRecoveryAttempts,
                 Ip = Ip,
                 UserAgent = UserAgent,
-                FrozenDate = FrozenDate
+                FrozenDate = FrozenDate,
+                SignChallengeMessage = SignChallengeMessage,
+                SecretPhrasesRecoveryAttempts = SecretPhrasesRecoveryAttempts
             };
             return context;
         }

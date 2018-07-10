@@ -286,7 +286,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
         [Test]
-        public async Task ShouldBlockRecoveryAfterMaxSmsAttempts()
+        public async Task Should_BlockRecovery_AfterMaxSmsAttempts()
         {
             var context = new RecoveryContext
             {
@@ -304,7 +304,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
         [Test]
-        public async Task ShouldBlockRecoveryAfterMaxSmsRestarts()
+        public async Task Should_BlockRecovery_AfterMaxSmsRestarts()
         {
             var context = new RecoveryContext
             {
@@ -322,7 +322,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
         [Test]
-        public async Task ShouldBlockRecoveryAfterMaxEmailsAttempts()
+        public async Task Should_BlockRecovery_AfterMaxEmailsAttempts()
         {
             var context = new RecoveryContext
             {
@@ -340,7 +340,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
         [Test]
-        public async Task ShouldBlockRecoveryAfterMaxEmailsRestarts()
+        public async Task Should_BlockRecovery_AfterMaxEmailsRestarts()
         {
             var context = new RecoveryContext
             {
@@ -357,8 +357,45 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
         }
 
+
+        [TestCase(1, false)]
+        [TestCase(2, false)]
+        [TestCase(4, true)]
+        public async Task Should_BlockRecovery_AfterMaxSecretPhrasesAttempts(int attemptsNo, bool block)
+        {
+            var context = new RecoveryContext
+            {
+                State = State.AwaitSecretPhrases
+            };
+
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+
+            for (int i = 0; i < attemptsNo; i++)
+            {
+                await stateMachine.SecretPhrasesVerificationFailAsync();
+            }
+
+            var expected = block ? State.PasswordChangeForbidden : State.AwaitSecretPhrases;
+            Assert.That(stateMachine.Context.State, Is.EqualTo(expected));
+        }
+
         [Test]
-        public void StateMachine_AllowsPasswordRecovery_OnlyInTerminalState([Values] State state)
+        public async Task Should_BlockRecovery_AfterFirstFailedDeviceRecoveryAttempts()
+        {
+            var context = new RecoveryContext
+            {
+                State = State.AwaitDeviceVerification
+            };
+
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+
+            await stateMachine.DeviceVerificationFailAsync();
+
+            Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
+        }
+
+        [Test]
+        public void Allows_PasswordRecovery_OnlyInTerminalState([Values] State state)
         {
             var context = new RecoveryContext
             {

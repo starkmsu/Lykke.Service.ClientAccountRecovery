@@ -33,5 +33,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
         Task TryUnfreezeAsync();
         bool IsPasswordUpdateAllowed { get; }
         Task JumpToForbiddenAsync();
+        Task SecretPhrasesVerificationFailAsync();
+        Task DeviceVerificationFailAsync();
     }
 }

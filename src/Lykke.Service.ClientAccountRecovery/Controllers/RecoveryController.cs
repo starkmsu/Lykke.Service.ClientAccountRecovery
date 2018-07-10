@@ -63,7 +63,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return BadRequest(ModelState);
             }
 
-            await _brutForceDetector.BlockPreviousRecoveries(request.ClientId,request.Ip,request.UserAgent);
+            await _brutForceDetector.BlockPreviousRecoveries(request.ClientId, request.Ip, request.UserAgent);
 
             if (!await _brutForceDetector.IsNewRecoveryAllowedAsync(request.ClientId))
             {
@@ -114,8 +114,10 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             await flow.TryUnfreezeAsync();
             var challenge = flow.Context.State.MapToChallenge();
             var progress = flow.Context.State.MapToProgress();
-            return Ok(new RecoveryStatusResponse { Challenge = challenge, OverallProgress = progress });
+            var message = flow.Context.SignChallengeMessage;
+            return Ok(new RecoveryStatusResponse { Challenge = challenge, OverallProgress = progress, ChallengeInfo = message });
         }
+
 
         /// <summary>
         /// Accepts challenge values

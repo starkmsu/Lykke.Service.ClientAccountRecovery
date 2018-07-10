@@ -26,11 +26,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             switch (switcher)
             {
                 case var a when a.Item1 == Challenge.Words && a.Item2 == Action.Complete:
-                    return flow.SecretPhrasesCompleteAsync();
+                    return ValidateSecretPhrases(flow, code);
                 case var a when a.Item1 == Challenge.Words && a.Item2 == Action.Skip:
                     return flow.SecretPhrasesSkipAsync();
                 case var a when a.Item1 == Challenge.Device && a.Item2 == Action.Complete:
-                    return flow.DeviceVerifiedCompleteAsync();
+                    return ValidateDevice(flow, code);
                 case var a when a.Item1 == Challenge.Device && a.Item2 == Action.Skip:
                     return flow.DeviceVerificationSkipAsync();
                 case var a when a.Item1 == Challenge.Sms && a.Item2 == Action.Complete:
@@ -67,6 +67,16 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private Task ValidateSms(IRecoveryFlowService flow, string code)
         {
             return _validator.ConfirmSmsCode(flow, code);
+        }
+
+        private Task ValidateDevice(IRecoveryFlowService flow, string code)
+        {
+            return _validator.ConfirmDeviceCode(flow, code);
+        }
+
+        private Task ValidateSecretPhrases(IRecoveryFlowService flow, string code)
+        {
+            return _validator.ConfirmSecretPhrasesCode(flow, code);
         }
 
         private Task NotifySelfiePosted(IRecoveryFlowService flow, string code)

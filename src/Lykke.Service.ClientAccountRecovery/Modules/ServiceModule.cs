@@ -80,7 +80,10 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
                 .As<IChallengeManager>();
 
             builder.RegisterType<ChallengesValidator>()
-                .As<IChallengesValidator>();
+                .As<IChallengesValidator>(); 
+            
+            builder.RegisterType<WalletCredentialsRepository>()
+                .As<IWalletCredentialsRepository>();
 
             builder.Register(c => new BrutForceDetector(c.Resolve<IStateRepository>(),
                     c.Resolve<IRecoveryFlowServiceFactory>(),
@@ -111,6 +114,11 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             {
                 return AzureTableStorage<LogTableEntity>.Create(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.ClientAccountRecoveryService.Db.RecoveryActivitiesConnString), "AccountRecoveryEvents", c.Resolve<ILog>());
             }).As<INoSQLTableStorage<LogTableEntity>>()
+                .SingleInstance();
+
+            builder.Register(c => AzureTableStorage<WalletCredentialsEntity>
+                    .Create(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.ClientAccountRecoveryService.Db.ClientPersonalInfoConnString), "WalletCredentials", c.Resolve<ILog>()))
+                .As<INoSQLTableStorage<WalletCredentialsEntity>>()
                 .SingleInstance();
         }
     }
