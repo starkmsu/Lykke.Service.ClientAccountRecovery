@@ -445,10 +445,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             return _stateMachine.FireAsync(Trigger.JumpToCallSupport);
         }
 
-        public Task JumpToFrozenAsync()
-        {
-            return _stateMachine.FireAsync(Trigger.JumpToFrozen);
-        }
+
 
 
         public Task JumpToSuspendAsync()

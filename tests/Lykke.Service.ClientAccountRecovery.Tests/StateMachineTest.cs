@@ -116,7 +116,6 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         [TestCase(State.PasswordChangeAllowed)]
         [TestCase(State.CallSupport)]
         [TestCase(State.PasswordChangeSuspended)]
-        [TestCase(State.PasswordChangeFrozen)]
         public async Task StateMachine_Allows_Switch_Support_States(State supportState)
         {
             var allStates = Enum.GetValues(typeof(State)).Cast<State>().Except(new[] { supportState, State.RecoveryStarted, State.PasswordUpdated });
@@ -137,9 +136,6 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
                         break;
                     case State.PasswordChangeSuspended:
                         await stateMachine.JumpToSuspendAsync();
-                        break;
-                    case State.PasswordChangeFrozen:
-                        await stateMachine.JumpToFrozenAsync();
                         break;
                 }
                 Assert.That(supportState, Is.EqualTo(stateMachine.Context.State));
@@ -174,7 +170,6 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.UpdatePasswordCompleteAsync());
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSuspendAsync());
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToAllowAsync());
-            Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToFrozenAsync());
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.JumpToSupportAsync());
             Assert.ThrowsAsync<InvalidActionException>(() => stateMachine.StartRecoveryAsync());
         }
@@ -226,18 +221,24 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
             await _smsSender.ReceivedWithAnyArgs().SendCodeAsync("1");
         }
-
+        //
         [Test]
         public async Task ShouldUnfreezeAfterPeriod()
         {
             var context = new RecoveryContext
             {
-                State = State.AwaitSecretPhrases
+                HasSecretPhrases = false,
+                DeviceVerified = true,
+                DeviceVerificationRequested = true,
+                SmsVerified = true,
+                EmailVerified = true,
+                SelfieApproved = false,
+                State = State.AwaitPinCode
             };
             _recoveryConditions.FrozenPeriodInDays = TimeSpan.FromSeconds(1).TotalDays;
 
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
-            await stateMachine.JumpToFrozenAsync();
+            await stateMachine.PinCodeVerificationCompleteAsync();
 
 
             await Task.Delay(TimeSpan.FromSeconds(2));
@@ -251,13 +252,18 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         {
             var context = new RecoveryContext
             {
-                State = State.AwaitSecretPhrases
+                HasSecretPhrases = false,
+                DeviceVerified = true,
+                DeviceVerificationRequested = true,
+                SmsVerified = true,
+                EmailVerified = true,
+                SelfieApproved = false,
+                State = State.AwaitPinCode
             };
             _recoveryConditions.FrozenPeriodInDays = TimeSpan.FromSeconds(2).TotalDays;
 
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
-            await stateMachine.JumpToFrozenAsync();
-
+            await stateMachine.PinCodeVerificationCompleteAsync();
 
             await Task.Delay(TimeSpan.FromSeconds(1));
             await stateMachine.TryUnfreezeAsync();

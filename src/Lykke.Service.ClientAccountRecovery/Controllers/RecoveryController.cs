@@ -301,9 +301,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                     case Resolution.Interview:
                         await flow.JumpToSupportAsync();
                         break;
-                    case Resolution.Freeze:
-                        await flow.JumpToFrozenAsync();
-                        break;
                     case Resolution.Allow:
                         await flow.JumpToAllowAsync();
                         break;
