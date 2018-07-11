@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
 using JetBrains.Annotations;
+using Lykke.Common.Log;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 
@@ -15,11 +16,11 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
         private readonly IRecoveryStateRepository _stateRepository;
         private readonly ILog _log;
 
-        public StateRepository(IRecoveryLogRepository logRepository, IRecoveryStateRepository stateRepository, ILog log)
+        public StateRepository(IRecoveryLogRepository logRepository, IRecoveryStateRepository stateRepository, ILogFactory log)
         {
             _logRepository = logRepository;
             _stateRepository = stateRepository;
-            _log = log.CreateComponentScope(nameof(StateRepository));
+            _log = log.CreateLog(this);
         }
 
         public async Task InsertAsync(RecoveryContext context)
@@ -31,7 +32,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
             }
             catch (Exception ex)
             {
-                _log.WriteWarning(nameof(InsertAsync), null, $"Can't save a new state {context.State} for user {context.ClientId} try to rollback action", ex);
+                _log.Warning(nameof(InsertAsync), $"Can't save a new state {context.State} for user {context.ClientId} try to rollback action", ex);
                 try
                 {
                     await _stateRepository.DeleteAsync(context.ClientId, context.RecoveryId);
@@ -39,9 +40,9 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 }
                 catch (Exception innerEx)
                 {
-                    _log.WriteError(nameof(InsertAsync), null, innerEx);
+                    _log.Error(nameof(InsertAsync), innerEx);
                 }
-                _log.WriteWarning(nameof(InsertAsync), null, $"Rollback for {context.State} for {context.ClientId} successful");
+                _log.Warning(nameof(InsertAsync), $"Rollback for {context.State} for {context.ClientId} successful");
             }
         }
 

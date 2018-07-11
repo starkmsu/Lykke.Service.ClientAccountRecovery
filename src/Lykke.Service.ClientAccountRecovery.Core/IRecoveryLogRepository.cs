@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 
 namespace Lykke.Service.ClientAccountRecovery.Core

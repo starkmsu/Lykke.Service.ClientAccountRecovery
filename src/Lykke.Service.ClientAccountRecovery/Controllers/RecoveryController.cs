@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Common.Log;
+using Lykke.Common.Log;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
@@ -34,7 +35,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             IClientAccountClient clientAccountClient,
             IChallengeManager challengeManager,
             IBrutForceDetector brutForceDetector,
-            ILog log)
+            ILogFactory logFactory)
         {
             _stateRepository = stateRepository;
             _logRepository = logRepository;
@@ -42,7 +43,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             _clientAccountClient = clientAccountClient;
             _challengeManager = challengeManager;
             _brutForceDetector = brutForceDetector;
-            _log = log.CreateComponentScope(nameof(RecoveryController));
+            _log = logFactory.CreateLog(this);
         }
 
         /// <summary>
@@ -81,7 +82,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             }
             catch (InvalidActionException ex)
             {
-                _log.WriteWarning("StartNewRecovery", request, "Unable to start new account recovery process", ex);
+                _log.Warning("StartNewRecovery", "Unable to start new account recovery process", ex, request);
                 return Conflict(ex.Message);
             }
 

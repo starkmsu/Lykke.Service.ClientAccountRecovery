@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Common.Log;
 using JetBrains.Annotations;
+using Lykke.Common.Log;
 using Lykke.Cqrs;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 
@@ -17,7 +18,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     {
         private readonly ICqrsEngine _cqrs; // Just create an instance
 
-        public StartupManager(ILog log, ICqrsEngine cqrs)
+        public StartupManager(ICqrsEngine cqrs)
         {
             _cqrs = cqrs;
         }

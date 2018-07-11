@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
 using Common.Log;
+using Lykke.Common.Log;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
@@ -17,9 +18,9 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private readonly ILog _log;
         private readonly IEnumerable<IStopable> _items;
 
-        public ShutdownManager(ILog log, IEnumerable<IStopable> items)
+        public ShutdownManager(ILogFactory log, IEnumerable<IStopable> items)
         {
-            _log = log;
+            _log = log.CreateLog(this);
             _items = items;
         }
 
@@ -34,7 +35,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 }
                 catch (Exception ex)
                 {
-                    _log.WriteWarning(nameof(StopAsync), null, $"Unable to stop {item.GetType().Name}", ex);
+                    _log.Warning(nameof(StopAsync), $"Unable to stop {item.GetType().Name}", ex);
                 }
             }
 
