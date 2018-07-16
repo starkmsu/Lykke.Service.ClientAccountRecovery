@@ -23,10 +23,12 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the PasswordRequest class.
         /// </summary>
-        public PasswordRequest(string recoveryId, string passwordHash, string ip, string userAgent)
+        public PasswordRequest(string recoveryId, string passwordHash, string pin, string hint, string ip, string userAgent)
         {
             RecoveryId = recoveryId;
             PasswordHash = passwordHash;
+            Pin = pin;
+            Hint = hint;
             Ip = ip;
             UserAgent = userAgent;
             CustomInit();
@@ -46,6 +48,16 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// </summary>
         [JsonProperty(PropertyName = "passwordHash")]
         public string PasswordHash { get; set; }
+
+        /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "pin")]
+        public string Pin { get; set; }
+
+        /// <summary>
+        /// </summary>
+        [JsonProperty(PropertyName = "hint")]
+        public string Hint { get; set; }
 
         /// <summary>
         /// </summary>
@@ -73,6 +85,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "PasswordHash");
             }
+            if (Pin == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "Pin");
+            }
+            if (Hint == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "Hint");
+            }
             if (Ip == null)
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "Ip");
@@ -86,6 +106,27 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                 if (RecoveryId.Length < 8)
                 {
                     throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
+                }
+            }
+            if (PasswordHash != null)
+            {
+                if (PasswordHash.Length > 1024)
+                {
+                    throw new ValidationException(ValidationRules.MaxLength, "PasswordHash", 1024);
+                }
+            }
+            if (Pin != null)
+            {
+                if (Pin.Length > 10)
+                {
+                    throw new ValidationException(ValidationRules.MaxLength, "Pin", 10);
+                }
+            }
+            if (Hint != null)
+            {
+                if (Hint.Length > 128)
+                {
+                    throw new ValidationException(ValidationRules.MaxLength, "Hint", 128);
                 }
             }
             if (UserAgent != null)

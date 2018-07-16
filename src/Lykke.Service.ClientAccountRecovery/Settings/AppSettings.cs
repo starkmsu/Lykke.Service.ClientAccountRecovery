@@ -4,6 +4,8 @@ using Lykke.Service.ClientAccountRecovery.Settings.ServiceSettings;
 using Lykke.Service.ClientAccountRecovery.Settings.SlackNotifications;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Kyc.Client;
+using Lykke.Service.PersonalData.Settings;
+using Lykke.ServiceClient;
 using Lykke.SettingsReader.Attributes;
 
 namespace Lykke.Service.ClientAccountRecovery.Settings
@@ -23,5 +25,7 @@ namespace Lykke.Service.ClientAccountRecovery.Settings
         public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { get; set; }
 
         public KycServiceClientSettings KycServiceClient { get; set; }
+
+        public PersonalDataServiceClientSettings PersonalDataServiceClient { get ; set; }
     }
 }

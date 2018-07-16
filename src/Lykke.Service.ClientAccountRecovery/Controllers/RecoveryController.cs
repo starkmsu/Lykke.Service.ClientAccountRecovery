@@ -13,6 +13,8 @@ using Lykke.Service.ClientAccountRecovery.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccountRecovery.Models;
+using Lykke.Service.PersonalData.Client;
+using Lykke.Service.PersonalData.Contract;
 
 namespace Lykke.Service.ClientAccountRecovery.Controllers
 {
@@ -27,6 +29,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         private readonly IClientAccountClient _clientAccountClient;
         private readonly IChallengeManager _challengeManager;
         private readonly IBrutForceDetector _brutForceDetector;
+        private readonly IPersonalDataService _personalDataService;
         private readonly ILog _log;
 
         public RecoveryController(IStateRepository stateRepository,
@@ -35,7 +38,8 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             IClientAccountClient clientAccountClient,
             IChallengeManager challengeManager,
             IBrutForceDetector brutForceDetector,
-            ILogFactory logFactory)
+            ILogFactory logFactory,
+            IPersonalDataService personalDataService)
         {
             _stateRepository = stateRepository;
             _logRepository = logRepository;
@@ -43,6 +47,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             _clientAccountClient = clientAccountClient;
             _challengeManager = challengeManager;
             _brutForceDetector = brutForceDetector;
+            _personalDataService = personalDataService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -201,6 +206,8 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 flow.Context.Ip = request.Ip;
                 flow.Context.UserAgent = request.UserAgent;
                 await _clientAccountClient.ChangeClientPasswordAsync(flow.Context.ClientId, request.PasswordHash);
+                await _clientAccountClient.ChangeClientPinAsync(flow.Context.ClientId, request.Pin);
+                await _personalDataService.ChangePasswordHintAsync(flow.Context.ClientId, request.Hint);
                 await flow.UpdatePasswordCompleteAsync();
             }
             catch (InvalidActionException ex)

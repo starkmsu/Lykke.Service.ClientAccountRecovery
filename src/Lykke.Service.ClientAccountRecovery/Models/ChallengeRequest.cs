@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Newtonsoft.Json;
@@ -17,9 +18,10 @@ namespace Lykke.Service.ClientAccountRecovery.Models
         [Required]
         [JsonConverter(typeof(StringEnumConverter))]
         public Action Action { get; set; }
-        [Required]
+
         [MaxLength(128)]
-        public string Value { get; set; }
+        public string Value { get; set; } = null;
+
         [Required]
         public string Ip { get; set; }
 
