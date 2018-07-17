@@ -46,18 +46,23 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             switch (result.Response.StatusCode)
             {
                 case HttpStatusCode.InternalServerError:
-                    throw new ServerErrorException(result.Response.Content.AsString());
+                    throw new ServerErrorException(GetResponseContent(result));
                 case HttpStatusCode.NotFound:
-                    throw new NotFoundException(result.Response.Content.AsString());
+                    throw new NotFoundException(GetResponseContent(result));
                 case HttpStatusCode.Conflict:
-                    throw new ConflictException(result.Response.Content.AsString());
+                    throw new ConflictException(GetResponseContent(result));
                 case HttpStatusCode.BadRequest:
-                    throw new BadRequestException(result.Response.Content.AsString());
+                    throw new BadRequestException(GetResponseContent(result));
                 case HttpStatusCode.Unauthorized:
-                    throw new UnauthorizedException(result.Response.Content.AsString()); 
+                    throw new UnauthorizedException(GetResponseContent(result));
                 case HttpStatusCode.Forbidden:
-                    throw new ForbiddenException(result.Response.Content.AsString());
+                    throw new ForbiddenException(GetResponseContent(result));
             }
+        }
+
+        private static string GetResponseContent(IHttpOperationResponse response)
+        {
+            return response.Response.Content.AsString()?.Trim('"');
         }
 
         public Task<NewRecoveryResponse> StartNewRecoveryAsync(NewRecoveryRequest request = default(NewRecoveryRequest), CancellationToken cancellationToken = default(CancellationToken))
