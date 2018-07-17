@@ -1,4 +1,5 @@
-﻿using Lykke.Service.ClientAccountRecovery.Core;
+﻿using System.Threading.Tasks;
+using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Lykke.Service.ClientAccountRecovery.Services;
@@ -25,27 +26,36 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
         [Test]
-        public void ShouldSendSmsCode()
+        public async Task ShouldSendSmsCode()
         {
-            _challengeManager.ExecuteAction(Challenge.Sms, Action.Complete, "42", _flowService);
+            await _challengeManager.ExecuteAction(Challenge.Sms, Action.Complete, "42", _flowService);
 
-            _challengesValidator.Received().ConfirmSmsCode(_flowService, "42");
+            await _challengesValidator.Received().ConfirmSmsCode(_flowService, "42");
+        } 
+        
+        
+        [Test]
+        public async Task ShouldValidatePin()
+        {
+            await _challengeManager.ExecuteAction(Challenge.Pin, Action.Complete, "42", _flowService);
+
+            await _challengesValidator.Received().ConfirmPin(_flowService, "42");
         }
 
         [Test]
-        public void ShouldSendEmailCode()
+        public async Task ShouldSendEmailCode()
         {
-            _challengeManager.ExecuteAction(Challenge.Email, Action.Complete, "42", _flowService);
+            await _challengeManager.ExecuteAction(Challenge.Email, Action.Complete, "42", _flowService);
 
-            _challengesValidator.Received().ConfirmEmailCode(_flowService, "42");
+            await _challengesValidator.Received().ConfirmEmailCode(_flowService, "42");
         }
 
         [Test]
-        public void ShouldSendSelfieCode()
+        public async Task ShouldSendSelfieCode()
         {
-            _challengeManager.ExecuteAction(Challenge.Selfie, Action.Complete, "42", _flowService);
+            await _challengeManager.ExecuteAction(Challenge.Selfie, Action.Complete, "42", _flowService);
 
-            _selfieNotificationSender.Send(_flowService, "42");
+            await _selfieNotificationSender.Received().Send(_flowService, "42");
         }
     }
 }

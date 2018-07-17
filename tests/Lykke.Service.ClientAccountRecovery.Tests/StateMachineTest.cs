@@ -364,10 +364,10 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
 
-        [TestCase(1, false)]
-        [TestCase(2, false)]
-        [TestCase(4, true)]
-        public async Task Should_BlockRecovery_AfterMaxSecretPhrasesAttempts(int attemptsNo, bool block)
+        [TestCase(1, State.AwaitSecretPhrases)]
+        [TestCase(2, State.AwaitSecretPhrases)]
+        [TestCase(4, State.PasswordChangeForbidden )]
+        public async Task Should_BlockRecovery_AfterMaxSecretPhrasesAttempts(int attemptsNo, State expectedState)
         {
             var context = new RecoveryContext
             {
@@ -381,8 +381,28 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
                 await stateMachine.SecretPhrasesVerificationFailAsync();
             }
 
-            var expected = block ? State.PasswordChangeForbidden : State.AwaitSecretPhrases;
-            Assert.That(stateMachine.Context.State, Is.EqualTo(expected));
+
+            Assert.That(stateMachine.Context.State, Is.EqualTo(expectedState));
+        }  
+        
+        [TestCase(1, State.AwaitPinCode)]
+        [TestCase(2, State.AwaitPinCode)]
+        [TestCase(4, State.PasswordChangeForbidden)]
+        public async Task Should_BlockRecovery_AfterMaxPinAttempts(int attemptsNo, State expectedState)
+        {
+            var context = new RecoveryContext
+            {
+                State = State.AwaitPinCode
+            };
+
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+
+            for (int i = 0; i < attemptsNo; i++)
+            {
+                await stateMachine.PinCodeVerificationFailAsync();
+            }
+
+            Assert.That(stateMachine.Context.State, Is.EqualTo(expectedState));
         }
 
         [Test]

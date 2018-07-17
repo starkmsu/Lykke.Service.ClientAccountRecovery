@@ -19,6 +19,7 @@
         EmailVerificationSkip,
         PinComplete,
         PinSkip,
+        PinFail,
         SelfieVerificationRequest,
         SelfieVerificationComplete,
         SelfieVerificationSkip,

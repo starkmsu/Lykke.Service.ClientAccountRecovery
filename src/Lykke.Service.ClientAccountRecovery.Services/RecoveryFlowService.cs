@@ -176,6 +176,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _stateMachine.Configure(State.AwaitPinCode)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
+                .PermitIf(Trigger.PinFail, State.PasswordChangeForbidden, () => _ctx.PinRecoveryAttempts > _recoveryConditions.PinCodeMaxAttempts)
+                .PermitReentryIf(Trigger.PinFail, () => _ctx.PinRecoveryAttempts <= _recoveryConditions.PinCodeMaxAttempts)
                 .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .PermitIf(Trigger.PinComplete, State.PasswordChangeFrozen, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 9
                 .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 10
@@ -416,6 +418,12 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             return _stateMachine.FireAsync(Trigger.PinSkip);
         }
 
+        public Task PinCodeVerificationFailAsync()
+        {
+            _ctx.PinRecoveryAttempts++;
+            _ctx.HasPin = false;
+            return _stateMachine.FireAsync(Trigger.PinFail);
+        }
 
         public Task JumpToForbiddenAsync()
         {

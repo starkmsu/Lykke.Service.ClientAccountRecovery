@@ -59,8 +59,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                     await flow.SelfieVerificationSkipAsync();
                     return true;
                 case var a when a.Item1 == Challenge.Pin && a.Item2 == Action.Complete:
-                    await flow.PinCodeVerificationCompleteAsync();
-                    return true;
+                    return await ValidatePin(flow, code);
                 case var a when a.Item1 == Challenge.Pin && a.Item2 == Action.Skip:
                     await flow.PinCodeVerificationSkipAsync();
                     return true;
@@ -88,6 +87,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private Task<bool> ValidateSecretPhrases(IRecoveryFlowService flow, string code)
         {
             return _validator.ConfirmSecretPhrasesCode(flow, code);
+        }
+
+        private Task<bool> ValidatePin(IRecoveryFlowService flow, string code)
+        {
+            return _validator.ConfirmPin(flow, code);
         }
 
         private Task NotifySelfiePosted(IRecoveryFlowService flow, string code)

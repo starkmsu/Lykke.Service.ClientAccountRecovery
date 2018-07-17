@@ -25,6 +25,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
         Task SelfieVerificationCompleteAsync();
         Task PinCodeVerificationCompleteAsync();
         Task PinCodeVerificationSkipAsync();
+        Task PinCodeVerificationFailAsync();
         Task JumpToAllowAsync();
         Task JumpToSupportAsync();
         Task JumpToSuspendAsync();

@@ -51,6 +51,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         PinComplete,
         [EnumMember(Value = "PinSkip")]
         PinSkip,
+        [EnumMember(Value = "PinFail")]
+        PinFail,
         [EnumMember(Value = "SelfieVerificationRequest")]
         SelfieVerificationRequest,
         [EnumMember(Value = "SelfieVerificationComplete")]
@@ -119,6 +121,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return "PinComplete";
                 case Trigger.PinSkip:
                     return "PinSkip";
+                case Trigger.PinFail:
+                    return "PinFail";
                 case Trigger.SelfieVerificationRequest:
                     return "SelfieVerificationRequest";
                 case Trigger.SelfieVerificationComplete:
@@ -183,6 +187,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
                     return Trigger.PinComplete;
                 case "PinSkip":
                     return Trigger.PinSkip;
+                case "PinFail":
+                    return Trigger.PinFail;
                 case "SelfieVerificationRequest":
                     return Trigger.SelfieVerificationRequest;
                 case "SelfieVerificationComplete":

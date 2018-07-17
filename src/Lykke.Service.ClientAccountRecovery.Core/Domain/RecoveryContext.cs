@@ -19,6 +19,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
         public bool HasPin { get; set; }
         public int SmsRecoveryAttempts { get; set; }
         public int EmailRecoveryAttempts { get; set; }
+        public int PinRecoveryAttempts { get; set; }
         public string Initiator { get; set; }
         public string Comment { get; set; }
         public string Ip { get; set; }

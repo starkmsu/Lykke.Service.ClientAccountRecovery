@@ -107,12 +107,46 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             }
         }
 
+
+        [TestCase("Correct code", true)]
+        [TestCase("Invalid code", false)]
+        public async Task Should_CorrectlyValidate_Pin(string code, bool isValid)
+        {
+            const string pinCode = "1234";
+            var clientID = Guid.NewGuid().ToString();
+
+            var flow = Substitute.For<IRecoveryFlowService>();
+            var context = new RecoveryContext
+            {
+                ClientId = clientID,
+                SignChallengeMessage = pinCode
+            };
+            flow.Context.Returns(context);
+            _clientAccountClient.IsPinValidAsync(clientID, pinCode).Returns(Task.FromResult(isValid));
+            
+
+            await _challengesValidator.ConfirmPin(flow, pinCode);
+            
+
+            await _clientAccountClient.Received().IsPinValidAsync(clientID, pinCode);
+            if (isValid)
+            {
+                await flow.Received().PinCodeVerificationCompleteAsync();
+                await flow.DidNotReceive().PinCodeVerificationFailAsync();
+            }
+            else
+            {
+                await flow.DidNotReceive().PinCodeVerificationCompleteAsync();
+                await flow.Received().PinCodeVerificationFailAsync();
+            }
+        }
+
         [Test]
         public void Should_Throw_IfAddress_IsEmpty()
         {
             const string challenge = "Correct code";
             var clientID = Guid.NewGuid().ToString();
-            
+
             var flow = Substitute.For<IRecoveryFlowService>();
             var context = new RecoveryContext
             {

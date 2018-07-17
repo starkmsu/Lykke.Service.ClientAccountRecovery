@@ -32,6 +32,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
         public DateTime? FrozenDate { get; set; }
         public string SignChallengeMessage { get; set; }
         public int SecretPhrasesRecoveryAttempts { get; set; }
+        public int PinRecoveryAttempts { get; set; }
 
 
         public static LogTableEntity CreateNew(RecoveryContext context)
@@ -59,7 +60,8 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 UserAgent = context.UserAgent,
                 FrozenDate = context.FrozenDate,
                 SignChallengeMessage = context.SignChallengeMessage,
-                SecretPhrasesRecoveryAttempts = context.SecretPhrasesRecoveryAttempts
+                SecretPhrasesRecoveryAttempts = context.SecretPhrasesRecoveryAttempts,
+                PinRecoveryAttempts = context.PinRecoveryAttempts
             };
         }
 
@@ -84,6 +86,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
                 HasPin = HasPin,
                 SmsRecoveryAttempts = SmsRecoveryAttempts,
                 EmailRecoveryAttempts = EmailRecoveryAttempts,
+                PinRecoveryAttempts = PinRecoveryAttempts,
                 Ip = Ip,
                 UserAgent = UserAgent,
                 FrozenDate = FrozenDate,

@@ -10,6 +10,9 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
         public int SmsCodeMaxAttempts { get; set; } = 3;
 
         [Optional]
+        public int PinCodeMaxAttempts { get; set; } = 3;
+
+        [Optional]
         public int EmailCodeMaxAttempts { get; set; } = 3;
 
         [Optional]

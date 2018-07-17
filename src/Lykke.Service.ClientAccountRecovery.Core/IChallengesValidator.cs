@@ -9,5 +9,6 @@ namespace Lykke.Service.ClientAccountRecovery.Core
         Task<bool> ConfirmSmsCode(IRecoveryFlowService flowService, string code);
         Task<bool> ConfirmDeviceCode(IRecoveryFlowService flowService, string code);
         Task<bool> ConfirmSecretPhrasesCode(IRecoveryFlowService flowService, string code);
+        Task<bool> ConfirmPin(IRecoveryFlowService flowService, string code);
     }
 }

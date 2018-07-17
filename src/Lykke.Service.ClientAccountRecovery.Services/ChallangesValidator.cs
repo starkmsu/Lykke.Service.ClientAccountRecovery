@@ -85,6 +85,21 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             return false;
         }
 
+
+        public async Task<bool> ConfirmPin(IRecoveryFlowService flowService, string code)
+        {
+            var isValid = await _accountClient.IsPinValidAsync(flowService.Context.ClientId, code);
+
+            if (isValid)
+            {
+                await flowService.PinCodeVerificationCompleteAsync();
+                return true;
+            }
+
+            await flowService.PinCodeVerificationFailAsync();
+            return false;
+        }
+
         public async Task<bool> ConfirmSecretPhrasesCode(IRecoveryFlowService flowService, string code)
         {
             var clientId = flowService.Context.ClientId;
