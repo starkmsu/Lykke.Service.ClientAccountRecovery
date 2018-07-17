@@ -62,7 +62,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task SubmitChallengeAsync(ChallengeRequest request, CancellationToken cancellationToken = default(CancellationToken));
+        Task<OperationStatus> SubmitChallengeAsync(ChallengeRequest request, CancellationToken cancellationToken = default(CancellationToken));
 
 
         /// <summary>

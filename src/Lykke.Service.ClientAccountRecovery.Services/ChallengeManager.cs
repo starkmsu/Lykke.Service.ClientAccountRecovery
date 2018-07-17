@@ -20,61 +20,72 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _selfieNotificationSender = selfieNotificationSender;
         }
 
-        public Task ExecuteAction(Challenge challenge, Action action, string code, IRecoveryFlowService flow)
+        public async Task<bool> ExecuteAction(Challenge challenge, Action action, string code, IRecoveryFlowService flow)
         {
             var switcher = (challenge, action);
             switch (switcher)
             {
                 case var a when a.Item1 == Challenge.Words && a.Item2 == Action.Complete:
-                    return ValidateSecretPhrases(flow, code);
+                    return await ValidateSecretPhrases(flow, code);
                 case var a when a.Item1 == Challenge.Words && a.Item2 == Action.Skip:
-                    return flow.SecretPhrasesSkipAsync();
+                    await flow.SecretPhrasesSkipAsync();
+                    return true;
                 case var a when a.Item1 == Challenge.Device && a.Item2 == Action.Complete:
-                    return ValidateDevice(flow, code);
+                    return await ValidateDevice(flow, code);
                 case var a when a.Item1 == Challenge.Device && a.Item2 == Action.Skip:
-                    return flow.DeviceVerificationSkipAsync();
+                    await flow.DeviceVerificationSkipAsync();
+                    return true;
                 case var a when a.Item1 == Challenge.Sms && a.Item2 == Action.Complete:
-                    return ValidateSms(flow, code);
+                    return await ValidateSms(flow, code);
                 case var a when a.Item1 == Challenge.Sms && a.Item2 == Action.Skip:
-                    return flow.SmsVerificationSkipAsync();
+                    await flow.SmsVerificationSkipAsync();
+                    return true;
                 case var a when a.Item1 == Challenge.Sms && a.Item2 == Action.Restart:
-                    return flow.SmsVerificationRestartAsync();
+                    await flow.SmsVerificationRestartAsync();
+                    return true;
                 case var a when a.Item1 == Challenge.Email && a.Item2 == Action.Complete:
-                    return ValidateEmail(flow, code);
+                    return await ValidateEmail(flow, code);
+
                 case var a when a.Item1 == Challenge.Email && a.Item2 == Action.Skip:
-                    return flow.EmailVerificationSkipAsync();
+                    await flow.EmailVerificationSkipAsync();
+                    return true;
                 case var a when a.Item1 == Challenge.Email && a.Item2 == Action.Restart:
-                    return flow.EmailVerificationRestartAsync();
+                    await flow.EmailVerificationRestartAsync();
+                    return true;
                 case var a when a.Item1 == Challenge.Selfie && a.Item2 == Action.Complete:
-                    return NotifySelfiePosted(flow, code);
+                    await NotifySelfiePosted(flow, code);
+                    return true;
                 case var a when a.Item1 == Challenge.Selfie && a.Item2 == Action.Skip:
-                    return flow.SelfieVerificationSkipAsync();
+                    await flow.SelfieVerificationSkipAsync();
+                    return true;
                 case var a when a.Item1 == Challenge.Pin && a.Item2 == Action.Complete:
-                    return flow.PinCodeVerificationCompleteAsync();
+                    await flow.PinCodeVerificationCompleteAsync();
+                    return true;
                 case var a when a.Item1 == Challenge.Pin && a.Item2 == Action.Skip:
-                    return flow.PinCodeVerificationSkipAsync();
+                    await flow.PinCodeVerificationSkipAsync();
+                    return true;
             }
 
             throw new ArgumentException($"Invalid pair {challenge} {action}");
         }
 
 
-        private Task ValidateEmail(IRecoveryFlowService flow, string code)
+        private Task<bool> ValidateEmail(IRecoveryFlowService flow, string code)
         {
             return _validator.ConfirmEmailCode(flow, code);
         }
 
-        private Task ValidateSms(IRecoveryFlowService flow, string code)
+        private Task<bool> ValidateSms(IRecoveryFlowService flow, string code)
         {
             return _validator.ConfirmSmsCode(flow, code);
         }
 
-        private Task ValidateDevice(IRecoveryFlowService flow, string code)
+        private Task<bool> ValidateDevice(IRecoveryFlowService flow, string code)
         {
             return _validator.ConfirmDeviceCode(flow, code);
         }
 
-        private Task ValidateSecretPhrases(IRecoveryFlowService flow, string code)
+        private Task<bool> ValidateSecretPhrases(IRecoveryFlowService flow, string code)
         {
             return _validator.ConfirmSecretPhrasesCode(flow, code);
         }

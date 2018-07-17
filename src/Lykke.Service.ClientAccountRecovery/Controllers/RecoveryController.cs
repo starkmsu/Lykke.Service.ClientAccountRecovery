@@ -13,7 +13,6 @@ using Lykke.Service.ClientAccountRecovery.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccountRecovery.Models;
-using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 
 namespace Lykke.Service.ClientAccountRecovery.Controllers
@@ -21,6 +20,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
 
     [Route("api/recovery")]
     [Produces("application/json")]
+    [Consumes("application/json")]
     public class RecoveryController : Controller
     {
         private readonly IStateRepository _stateRepository;
@@ -132,16 +132,16 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         /// <returns></returns>
         [HttpPost("challenge")]
         [SwaggerOperation("SubmitChallenge")]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int)HttpStatusCode.Conflict)]
+        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.Conflict)]
         public async Task<IActionResult> PostChallenge([FromBody]ChallengeRequest request)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(new OperationStatus { Error = true, Message = ModelState.ToString() });
             }
 
             var flow = await _factory.FindExisted(request.RecoveryId);
@@ -153,19 +153,21 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             flow.Context.Initiator = Consts.InitiatorUser;
             flow.Context.Ip = request.Ip;
             flow.Context.UserAgent = request.UserAgent;
+            bool challengeSuccessful = false;
             try
             {
-                await _challengeManager.ExecuteAction(request.Challenge, request.Action, request.Value, flow);
+                challengeSuccessful = await _challengeManager.ExecuteAction(request.Challenge, request.Action, request.Value, flow);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new OperationStatus { Error = true, Message = ex.Message });
             }
             catch (InvalidActionException ex)
             {
-                return Conflict(ex.Message);
+                return BadRequest(new OperationStatus { Error = true, Message = ex.Message });
             }
-            return Ok();
+
+            return Ok(challengeSuccessful ? new OperationStatus() : new OperationStatus { Error = true, Message = "The challenge failed" });
         }
 
         /// <summary>

@@ -84,9 +84,12 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task SubmitChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<OperationStatus> SubmitChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
-                (await operations.SubmitChallengeWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
+                using (var _result = await operations.SubmitChallengeWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false))
+                {
+                    return _result.Body;
+                }
             }
 
             /// <summary>

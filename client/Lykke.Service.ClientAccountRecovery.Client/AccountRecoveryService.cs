@@ -70,7 +70,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             return HandleErrorCode(() => _client.GetRecoveryStatusWithHttpMessagesAsync(recoveryId, null, cancellationToken));
         }
 
-        public Task SubmitChallengeAsync(ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
+        public Task<OperationStatus> SubmitChallengeAsync(ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
         {
             return HandleErrorCode(() => _client.SubmitChallengeWithHttpMessagesAsync(request, null, cancellationToken));
         }

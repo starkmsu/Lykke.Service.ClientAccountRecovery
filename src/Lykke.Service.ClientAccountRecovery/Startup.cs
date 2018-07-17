@@ -13,6 +13,7 @@ using Lykke.Service.ClientAccountRecovery.Modules;
 using Lykke.SettingsReader;
 using Lykke.MonitoringServiceApiCaller;
 using Lykke.Service.ClientAccountRecovery.Middleware;
+using Lykke.Service.ClientAccountRecovery.Models;
 using Lykke.Service.Session.Modules;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -106,7 +107,7 @@ namespace Lykke.Service.ClientAccountRecovery
                 }
 
                 app.UseLykkeForwardedHeaders();
-                app.UseLykkeMiddleware(ex => new { Message = "Technical problem" });
+                app.UseLykkeMiddleware(ex => new OperationStatus { Error = true, Message = "Technical problem" });
 
                 app.UseMvc();
                 app.UseSwagger(c =>

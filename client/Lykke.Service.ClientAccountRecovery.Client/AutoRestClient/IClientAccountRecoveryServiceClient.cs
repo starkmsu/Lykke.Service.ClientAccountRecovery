@@ -89,7 +89,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task<HttpOperationResponse> SubmitChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse<OperationStatus>> SubmitChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Updates the user password

@@ -25,7 +25,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _credentialsRepository = credentialsRepository;
         }
 
-        public async Task ConfirmEmailCode(IRecoveryFlowService flowService, string code)
+        public async Task<bool> ConfirmEmailCode(IRecoveryFlowService flowService, string code)
         {
             var clientModel = await _accountClient.GetByIdAsync(flowService.Context.ClientId);
             var result = await _conformationClient.VerifyEmailCodeAsync(new VerifyEmailConfirmationRequest
@@ -38,14 +38,14 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             if (result.IsValid)
             {
                 await flowService.EmailVerificationCompleteAsync();
+                return true;
             }
-            else
-            {
-                await flowService.EmailVerificationFailedAsync();
-            }
+
+            await flowService.EmailVerificationFailedAsync();
+            return false;
         }
 
-        public async Task ConfirmSmsCode(IRecoveryFlowService flowService, string code)
+        public async Task<bool> ConfirmSmsCode(IRecoveryFlowService flowService, string code)
         {
             var clientModel = await _accountClient.GetByIdAsync(flowService.Context.ClientId);
             var result = await _conformationClient.VerifySmsCodeAsync(new VerifySmsConfirmationRequest
@@ -58,14 +58,14 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             if (result.IsValid)
             {
                 await flowService.SmsVerificationCompleteAsync();
+                return true;
             }
-            else
-            {
-                await flowService.SmsVerificationFailedAsync();
-            }
+
+            await flowService.SmsVerificationFailedAsync();
+            return false;
         }
 
-        public async Task ConfirmDeviceCode(IRecoveryFlowService flowService, string code)
+        public async Task<bool> ConfirmDeviceCode(IRecoveryFlowService flowService, string code)
         {
             var clientId = flowService.Context.ClientId;
             var credentials = await _credentialsRepository.GetAsync(clientId);
@@ -78,14 +78,14 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             if (VerifyMessage(publicKeyAddress, flowService.Context.SignChallengeMessage, code))
             {
                 await flowService.DeviceVerifiedCompleteAsync();
+                return true;
             }
-            else
-            {
-                await flowService.DeviceVerificationFailAsync();
-            }
+
+            await flowService.DeviceVerificationFailAsync();
+            return false;
         }
 
-        public async Task ConfirmSecretPhrasesCode(IRecoveryFlowService flowService, string code)
+        public async Task<bool> ConfirmSecretPhrasesCode(IRecoveryFlowService flowService, string code)
         {
             var clientId = flowService.Context.ClientId;
             var credentials = await _credentialsRepository.GetAsync(clientId);
@@ -98,11 +98,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             if (VerifyMessage(publicKeyAddress, flowService.Context.SignChallengeMessage, code))
             {
                 await flowService.SecretPhrasesCompleteAsync();
+                return true;
             }
-            else
-            {
-                await flowService.SecretPhrasesVerificationFailAsync();
-            }
+
+            await flowService.SecretPhrasesVerificationFailAsync();
+            return false;
         }
 
         private static bool VerifyMessage(string pubKeyAddress, string message, string signedMessage)

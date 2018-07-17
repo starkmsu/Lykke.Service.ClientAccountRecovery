@@ -5,9 +5,9 @@ namespace Lykke.Service.ClientAccountRecovery.Core
 {
     public interface IChallengesValidator
     {
-        Task ConfirmEmailCode(IRecoveryFlowService flowService, string code);
-        Task ConfirmSmsCode(IRecoveryFlowService flowService, string code);
-        Task ConfirmDeviceCode(IRecoveryFlowService flowService, string code);
-        Task ConfirmSecretPhrasesCode(IRecoveryFlowService flowService, string code);
+        Task<bool> ConfirmEmailCode(IRecoveryFlowService flowService, string code);
+        Task<bool> ConfirmSmsCode(IRecoveryFlowService flowService, string code);
+        Task<bool> ConfirmDeviceCode(IRecoveryFlowService flowService, string code);
+        Task<bool> ConfirmSecretPhrasesCode(IRecoveryFlowService flowService, string code);
     }
 }

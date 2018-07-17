@@ -5,6 +5,6 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
 {
     public interface IChallengeManager
     {
-        Task ExecuteAction(Challenge challenge, Action action, string code, IRecoveryFlowService flow);
+        Task<bool> ExecuteAction(Challenge challenge, Action action, string code, IRecoveryFlowService flow);
     }
 }
