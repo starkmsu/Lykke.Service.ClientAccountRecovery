@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Autofac;
-using JetBrains.Annotations;
 using Lykke.Common.Log;
 using Lykke.Cqrs;
 using Lykke.Cqrs.Configuration;
@@ -16,7 +14,7 @@ using RabbitMQ.Client;
 
 namespace Lykke.Service.Session.Modules
 {
-    public class CqrsModule : Module
+    internal class CqrsModule : Module
     {
 
         protected override void Load(ContainerBuilder builder)
@@ -54,27 +52,6 @@ namespace Lykke.Service.Session.Modules
                 ))
                 .As<ICqrsEngine>()
                 .SingleInstance();
-        }
-    }
-
-    [UsedImplicitly]
-    internal class AutofacDependencyResolver : IDependencyResolver
-    {
-        private readonly ILifetimeScope _context;
-
-        public AutofacDependencyResolver(ILifetimeScope kernel)
-        {
-            _context = kernel ?? throw new ArgumentNullException(nameof(kernel));
-        }
-
-        public object GetService(Type type)
-        {
-            return _context.Resolve(type);
-        }
-
-        public bool HasService(Type type)
-        {
-            return _context.IsRegistered(type);
         }
     }
 }

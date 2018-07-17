@@ -28,7 +28,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         private readonly IRecoveryFlowServiceFactory _factory;
         private readonly IClientAccountClient _clientAccountClient;
         private readonly IChallengeManager _challengeManager;
-        private readonly IBrutForceDetector _brutForceDetector;
+        private readonly IBruteForceDetector _bruteForceDetector;
         private readonly IPersonalDataService _personalDataService;
         private readonly ILog _log;
 
@@ -37,7 +37,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             IRecoveryFlowServiceFactory factory,
             IClientAccountClient clientAccountClient,
             IChallengeManager challengeManager,
-            IBrutForceDetector brutForceDetector,
+            IBruteForceDetector bruteForceDetector,
             ILogFactory logFactory,
             IPersonalDataService personalDataService)
         {
@@ -46,7 +46,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             _factory = factory;
             _clientAccountClient = clientAccountClient;
             _challengeManager = challengeManager;
-            _brutForceDetector = brutForceDetector;
+            _bruteForceDetector = bruteForceDetector;
             _personalDataService = personalDataService;
             _log = logFactory.CreateLog(this);
         }
@@ -69,9 +69,9 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return BadRequest(ModelState);
             }
 
-            await _brutForceDetector.BlockPreviousRecoveries(request.ClientId, request.Ip, request.UserAgent);
+            await SealPreviousRecoveries(request.ClientId, request.Ip, request.UserAgent);
 
-            if (!await _brutForceDetector.IsNewRecoveryAllowedAsync(request.ClientId))
+            if (!await _bruteForceDetector.IsNewRecoveryAllowedAsync(request.ClientId))
             {
                 return StatusCode((int)HttpStatusCode.Forbidden, "Recovery attempts limits reached");
             }
@@ -153,7 +153,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             flow.Context.Initiator = Consts.InitiatorUser;
             flow.Context.Ip = request.Ip;
             flow.Context.UserAgent = request.UserAgent;
-            bool challengeSuccessful = false;
+            bool challengeSuccessful;
             try
             {
                 challengeSuccessful = await _challengeManager.ExecuteAction(request.Challenge, request.Action, request.Value, flow);
@@ -269,7 +269,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             return Ok();
         }
 
-        //[Authorize]
         /// <summary>
         /// Updates current state of the recovery process. Only for support.
         /// </summary>
@@ -325,7 +324,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             return Ok();
         }
 
-        //[Authorize]
         /// <summary>
         /// Returns brief information about all client's recoveries
         /// </summary>
@@ -391,5 +389,20 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
 
             return Ok(response);
         }
+
+        private async Task SealPreviousRecoveries(string clientId, string ip, string userAgent)
+        {
+            var history = await _bruteForceDetector.GetRecoveriesToSeal(clientId);
+            foreach (var recoveryUnit in history)
+            {
+                var flow = await _factory.FindExisted(recoveryUnit.RecoveryId);
+                flow.Context.Initiator = Consts.InitiatorService;
+                flow.Context.Ip = ip;
+                flow.Context.UserAgent = userAgent;
+
+                await flow.JumpToForbiddenAsync();
+            }
+        }
+
     }
 }

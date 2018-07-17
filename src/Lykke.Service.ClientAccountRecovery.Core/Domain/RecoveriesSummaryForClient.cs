@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace Lykke.Service.ClientAccountRecovery.Core.Domain
 {
-    public class RecoverySummaryForClient
+    public class RecoveriesSummaryForClient
     {
         private readonly Dictionary<string, RecoveryUnit> _recoveryUnits = new Dictionary<string, RecoveryUnit>();
         public string ClientId { get; private set; }
 
-        public RecoverySummaryForClient(string clientId)
+        public RecoveriesSummaryForClient(string clientId)
         {
             ClientId = clientId;
         }
@@ -28,23 +28,8 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
 
         public void AddItem(RecoveryUnit unit)
         {
-
-
             _recoveryUnits[unit.RecoveryId] = unit;
         }
 
-    }
-
-    public class RecoveryUnit
-    {
-        public readonly IReadOnlyCollection<RecoveryContext> Log;
-        public bool Empty => Log.Count == 0;
-        public string RecoveryId => Log.First().RecoveryId;
-        public string ClientId => Log.First().ClientId;
-        public RecoveryContext ActualStatus => Log.Last();
-        public RecoveryUnit(IReadOnlyCollection<RecoveryContext> log)
-        {
-            Log = log;
-        }
     }
 }

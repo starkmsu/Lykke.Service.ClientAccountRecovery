@@ -8,7 +8,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
     public class LogTableEntity : AzureTableEntity
     {
 
-        private const string KeyLength = "00000000000";
+        private const string KeyFormat = "00000000000"; // Never change! The sorting of key depends on this
         public string RecoveryId => PartitionKey;
         public int SeqNo => int.Parse(RowKey);
         public string ClientId { get; set; }
@@ -103,7 +103,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
 
         public static string GetRowKey(int seqNo)
         {
-            return seqNo.ToString(KeyLength);
+            return seqNo.ToString(KeyFormat);
         }
     }
 }

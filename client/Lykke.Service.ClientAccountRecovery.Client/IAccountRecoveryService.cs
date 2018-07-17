@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models;
-using Microsoft.Rest;
 
 namespace Lykke.Service.ClientAccountRecovery.Client
 {
@@ -136,66 +135,5 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// </param>
         Task<IList<RecoveryTraceResponse>> GetRecoveryTraceAsync(string recoveryId, CancellationToken cancellationToken = default(CancellationToken));
 
-    }
-
-    /// <summary>
-    /// An exception for 500 code
-    /// </summary>
-    public class ServerErrorException : RestException
-    {
-        public ServerErrorException(string message) : base(message)
-        {
-        }
-    }
-
-    /// <summary>
-    /// An exception for 404 code
-    /// </summary>
-    public class NotFoundException : RestException
-    {
-        public NotFoundException(string message) : base(message)
-        {
-        }
-    }
-
-    /// <summary>
-    /// An exception for 409 code
-    /// </summary>
-    public class ConflictException : RestException
-    {
-        public ConflictException(string message) : base(message)
-        {
-        }
-    }
-
-    /// <summary>
-    /// An exception for 409 code
-    /// </summary>
-    public class BadRequestException : RestException
-    {
-        public BadRequestException(string message) : base(message)
-        {
-        }
-    }
-
-
-    /// <summary>
-    /// An exception for 403 code
-    /// </summary>
-    public class ForbiddenException : RestException
-    {
-        public ForbiddenException(string message) : base(message)
-        {
-        }
-    }
-
-    /// <summary>
-    /// An exception for 401 code
-    /// </summary>
-    public class UnauthorizedException : RestException
-    {
-        public UnauthorizedException(string message) : base(message)
-        {
-        }
     }
 }

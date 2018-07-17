@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Log;
+using JetBrains.Annotations;
 using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Common.Log;
@@ -25,7 +26,8 @@ using Swashbuckle.AspNetCore.Swagger;
 
 namespace Lykke.Service.ClientAccountRecovery
 {
-    public class Startup
+    [UsedImplicitly]
+    internal class Startup
     {
         private string _monitoringServiceUrl;
 

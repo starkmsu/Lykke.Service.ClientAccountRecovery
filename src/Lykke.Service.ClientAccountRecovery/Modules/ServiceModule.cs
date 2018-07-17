@@ -19,7 +19,7 @@ using Lykke.SettingsReader;
 
 namespace Lykke.Service.ClientAccountRecovery.Modules
 {
-    public class ServiceModule : Module
+    internal class ServiceModule : Module
     {
         private readonly IReloadingManager<AppSettings> _settings;
 
@@ -86,10 +86,10 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             builder.RegisterType<WalletCredentialsRepository>()
                 .As<IWalletCredentialsRepository>();
 
-            builder.Register(c => new BrutForceDetector(c.Resolve<IStateRepository>(),
+            builder.Register(c => new BruteForceDetector(c.Resolve<IStateRepository>(),
                     c.Resolve<IRecoveryFlowServiceFactory>(),
                     c.Resolve<IReloadingManager<AppSettings>>().Nested(n => n.ClientAccountRecoveryService.RecoveryConditions).CurrentValue))
-                .As<IBrutForceDetector>();
+                .As<IBruteForceDetector>();
 
             RegisterStorage(builder);
             RegisterClients(builder);

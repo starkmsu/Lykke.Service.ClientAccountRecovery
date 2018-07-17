@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
@@ -10,9 +11,9 @@ using NUnit.Framework;
 namespace Lykke.Service.ClientAccountRecovery.Tests
 {
     [TestFixture]
-    public class BrutForceDetectorTest
+    public class BruteForceDetectorTest
     {
-        private BrutForceDetector _detector;
+        private BruteForceDetector _detector;
         private IStateRepository _stateRepository;
         private IRecoveryFlowServiceFactory _serviceFactory;
         private const string clientID = "1";
@@ -23,11 +24,11 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             _stateRepository = Substitute.For<IStateRepository>();
             _serviceFactory = Substitute.For<IRecoveryFlowServiceFactory>();
             var rc = new RecoveryConditions();
-            _detector = new BrutForceDetector(_stateRepository, _serviceFactory, rc);
+            _detector = new BruteForceDetector(_stateRepository, _serviceFactory, rc);
         }
 
         [Test]
-        public async Task ShouldBlockBrutForce([Values] State forthState)
+        public async Task IsNewRecoveryAllowedAsync_WhenThreeForbiddenAttemptsMade_ShouldBlockNext([Values] State forthState)
         {
             AddRecovery(State.PasswordChangeForbidden, State.PasswordChangeForbidden, State.PasswordChangeForbidden, forthState); // By default 3 unsuccessful attempts allowed
             var result = await _detector.IsNewRecoveryAllowedAsync(clientID);
@@ -35,7 +36,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
         [Test]
-        public async Task ShouldNotBlockLosers()
+        public async Task IsNewRecoveryAllowedAsync_WhenTwoForbiddenAttemptsDone_ShouldAllowNext()
         {
             AddRecovery(State.PasswordChangeForbidden, State.PasswordChangeForbidden); // By default 3 unsuccessful attempts allowed
             var result = await _detector.IsNewRecoveryAllowedAsync(clientID);
@@ -43,47 +44,36 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
         [Test]
-        public async Task Should_Block_PreviousRecoveries()
+        public async Task GetRecoveriesToSeal_WhenOngoingRecoveriesArePresent_ShouldReturnThem()
         {
             var flow1 = Substitute.For<IRecoveryFlowService>();
             flow1.Context.Returns(new RecoveryContext());
             var flow2 = Substitute.For<IRecoveryFlowService>();
             flow2.Context.Returns(new RecoveryContext());
+            var flow3 = Substitute.For<IRecoveryFlowService>();
+            flow3.Context.Returns(new RecoveryContext());
 
-            var recovery = AddRecovery(State.AwaitDeviceVerification, State.AwaitPinCode);
+            var recovery = AddRecovery(State.AwaitDeviceVerification, State.AwaitPinCode, State.PasswordChangeForbidden);
 
             _serviceFactory.FindExisted(recovery.Log[0].RecoveryId).Returns(Task.FromResult(flow1));
             _serviceFactory.FindExisted(recovery.Log[1].RecoveryId).Returns(Task.FromResult(flow2));
+            _serviceFactory.FindExisted(recovery.Log[2].RecoveryId).Returns(Task.FromResult(flow3));
 
-            await _detector.BlockPreviousRecoveries(clientID, "", "");
+            var actual = await _detector.GetRecoveriesToSeal(clientID);
 
-            await flow1.Received().JumpToForbiddenAsync();
-            await flow2.Received().JumpToForbiddenAsync();
+            Assert.That(actual.Count, Is.EqualTo(2));
+
+            Assert.That(actual.Select(a => a.RecoveryId), Has.One.EqualTo(recovery.Log[0].RecoveryId));
+            Assert.That(actual.Select(a => a.RecoveryId), Has.One.EqualTo(recovery.Log[1].RecoveryId));
+
         }
 
-        [Test]
-        public async Task Should_Preserve_IpAndClientAgent()
-        {
-            const string agent = "MyAgent";
-            const string ip = "MyIp";
-
-            var context = new RecoveryContext();
-            var flow1 = Substitute.For<IRecoveryFlowService>();
-            flow1.Context.Returns(context);
-            var recovery = AddRecovery(State.AwaitDeviceVerification);
-            _serviceFactory.FindExisted(recovery.Log[0].RecoveryId).Returns(Task.FromResult(flow1));
-
-            await _detector.BlockPreviousRecoveries(clientID, ip, agent);
-
-            Assert.That(context.UserAgent, Is.EqualTo(agent));
-            Assert.That(context.Ip, Is.EqualTo(ip));
-        }
 
         [Test]
-        public async Task Should_CorrectlyHandle_EmptyHistory()
+        public async Task DoNotSearchRecoveries_WhenItIsFirstRecovery()
         {
 
-            await _detector.BlockPreviousRecoveries(clientID, "", "");
+            await _detector.GetRecoveriesToSeal(clientID);
             await _serviceFactory.DidNotReceiveWithAnyArgs().FindExisted("");
         }
 
@@ -94,9 +84,9 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             Assert.That(result, Is.EqualTo(true));
         }
 
-        private RecoverySummaryForClient AddRecovery(params State[] lastState)
+        private RecoveriesSummaryForClient AddRecovery(params State[] lastState)
         {
-            var summary = new RecoverySummaryForClient(clientID);
+            var summary = new RecoveriesSummaryForClient(clientID);
 
             for (var i = 0; i < lastState.Length; i++)
             {

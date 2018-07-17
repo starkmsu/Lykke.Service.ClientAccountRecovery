@@ -6,6 +6,7 @@
         public const int MaxUserAgentLength = 128;
         public const int MinRecoveryIdLength = 8;
         public const string InitiatorUser = "User";
+        public const string InitiatorService = "RecoveryService";
         public const string BoundedContext = "client-account-recovery";
     }
 }

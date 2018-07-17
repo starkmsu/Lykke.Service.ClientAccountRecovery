@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Service.ClientAccountRecovery.Core;
@@ -7,7 +8,7 @@ using Lykke.Service.ClientAccountRecovery.Core.Services;
 
 namespace Lykke.Service.ClientAccountRecovery.Services
 {
-    public class BrutForceDetector : IBrutForceDetector
+    public class BruteForceDetector : IBruteForceDetector
     {
         private readonly IStateRepository _stateRepository;
         private readonly IRecoveryFlowServiceFactory _factory;
@@ -15,7 +16,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private static readonly State[] UnsuccessfulStates;
         private static readonly State[] InProgressStates;
 
-        static BrutForceDetector()
+        static BruteForceDetector()
         {
             UnsuccessfulStates = new[] { State.PasswordChangeForbidden };
             InProgressStates = Enum.GetValues(typeof(State)).Cast<State>().Except
@@ -30,7 +31,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             ).ToArray();
         }
 
-        public BrutForceDetector(IStateRepository stateRepository, IRecoveryFlowServiceFactory factory, RecoveryConditions recoveryConditions)
+        public BruteForceDetector(IStateRepository stateRepository, IRecoveryFlowServiceFactory factory, RecoveryConditions recoveryConditions)
         {
             _stateRepository = stateRepository;
             _factory = factory;
@@ -45,9 +46,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 return true;
             }
 
-            var noOfLastBadStatuses = history.Log.OrderByDescending(l => l.ActualStatus.Time)
-                .TakeWhile(l => UnsuccessfulStates.Contains(l.ActualStatus.State)).Count();
-            if (noOfLastBadStatuses >= _recoveryConditions.MaxUnsuccessfulRecoveryAttempts)
+            if (NoOfLastUnsuccessfulStatuses(history) >= _recoveryConditions.MaxUnsuccessfulRecoveryAttempts)
             {
                 return false;
             }
@@ -55,24 +54,24 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             return true;
         }
 
-        public async Task BlockPreviousRecoveries(string clientId, string ip, string userAgent)
+        private static int NoOfLastUnsuccessfulStatuses(RecoveriesSummaryForClient history)
+        {
+            var noOfLastBadStatuses = history.Log.OrderByDescending(l => l.ActualStatus.Time)
+                .TakeWhile(l => UnsuccessfulStates.Contains(l.ActualStatus.State)).Count();
+            return noOfLastBadStatuses;
+        }
+
+        public async Task<IReadOnlyCollection<RecoveryUnit>> GetRecoveriesToSeal(string clientId)
         {
             var history = await _stateRepository.FindRecoverySummary(clientId);
 
             if (history == null)
             {
-                return;
+                return Array.Empty<RecoveryUnit>();
             }
 
-            foreach (var recoveryUnit in history.Log.Where(l => InProgressStates.Contains(l.ActualStatus.State)))
-            {
-                var flow = await _factory.FindExisted(recoveryUnit.RecoveryId);
-                flow.Context.Initiator = "RecoveryService";
-                flow.Context.Ip = ip;
-                flow.Context.UserAgent = userAgent;
+            return history.Log.Where(l => InProgressStates.Contains(l.ActualStatus.State)).ToArray();
 
-                await flow.JumpToForbiddenAsync();
-            }
         }
     }
 }

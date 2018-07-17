@@ -10,20 +10,20 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     [UsedImplicitly]
     public class SmsSender : ISmsSender
     {
-        private readonly IConfirmationCodesClient _conformationClient;
+        private readonly IConfirmationCodesClient _confirmationCodesClient;
         private readonly IClientAccountClient _accountClient;
 
-        public SmsSender(IClientAccountClient accountClient, IConfirmationCodesClient conformationClient)
+        public SmsSender(IClientAccountClient accountClient, IConfirmationCodesClient confirmationCodesClient)
         {
             _accountClient = accountClient;
-            _conformationClient = conformationClient;
+            _confirmationCodesClient = confirmationCodesClient;
         }
 
 
         public async Task SendCodeAsync(string clientId)
         {
             var clientModel = await _accountClient.GetByIdAsync(clientId);
-            await _conformationClient.SendSmsConfirmationAsync(new SendSmsConfirmationRequest
+            await _confirmationCodesClient.SendSmsConfirmationAsync(new SendSmsConfirmationRequest
             {
                 Phone = clientModel.Phone,
                 PartnerId = clientModel.PartnerId,
