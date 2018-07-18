@@ -26,6 +26,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
         public string UserAgent { get; set; }
         public DateTime? FrozenDate { get; set; }
         public bool KycPassed { get; set; } // A transient state
+        public bool HasPhoneNumber { get; set; } // A transient state
         public string SignChallengeMessage { get; set; }
         public int SecretPhrasesRecoveryAttempts { get; set; }
     }

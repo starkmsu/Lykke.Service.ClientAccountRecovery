@@ -10,19 +10,19 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     [UsedImplicitly]
     public class EmailSender : IEmailSender
     {
-        private readonly IConfirmationCodesClient _conformationClient;
+        private readonly IConfirmationCodesClient _confirmationClient;
         private readonly IClientAccountClient _accountClient;
 
-        public EmailSender(IClientAccountClient accountClient, IConfirmationCodesClient conformationClient)
+        public EmailSender(IClientAccountClient accountClient, IConfirmationCodesClient confirmationClient)
         {
             _accountClient = accountClient;
-            _conformationClient = conformationClient;
+            _confirmationClient = confirmationClient;
         }
 
         public async Task SendCodeAsync(string clientId)
         {
             var clientModel = await _accountClient.GetByIdAsync(clientId);
-            await _conformationClient.SendEmailConfirmationAsync(new SendEmailConfirmationRequest
+            await _confirmationClient.SendEmailConfirmationAsync(new SendEmailConfirmationRequest
             {
                 Email = clientModel.Email,
                 PartnerId = clientModel.PartnerId,

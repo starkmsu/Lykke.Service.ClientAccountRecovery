@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Autofac;
 using JetBrains.Annotations;
+using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
@@ -17,14 +18,17 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private readonly ILifetimeScope _container;
         private readonly IRecoveryLogRepository _repository;
         private readonly IKycStatusService _kycStatusService;
+        private readonly IClientAccountClient _accountClient;
 
         public RecoveryFlowServiceFactory(ILifetimeScope container,
             IRecoveryLogRepository repository,
-            IKycStatusService kycStatusService)
+            IKycStatusService kycStatusService,
+            IClientAccountClient accountClient)
         {
             _container = container;
             _repository = repository;
             _kycStatusService = kycStatusService;
+            _accountClient = accountClient;
         }
 
         public async Task<IRecoveryFlowService> InitiateNew(string clientId)
@@ -33,7 +37,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             {
                 RecoveryId = Guid.NewGuid().ToString(),
                 ClientId = clientId,
-                KycPassed = await IsKycPassed(clientId)
+                KycPassed = await IsKycPassed(clientId),
+                HasPhoneNumber = await ClientHasPhoneNumber(clientId)
             };
             var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
             var service = _container.Resolve<IRecoveryFlowService>(
@@ -51,6 +56,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             }
             var context = log.ActualStatus;
             context.KycPassed = await IsKycPassed(context.ClientId);
+            context.HasPhoneNumber = await ClientHasPhoneNumber(context.ClientId);
+
             var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
 
             var service = _container.Resolve<IRecoveryFlowService>(
@@ -64,6 +71,12 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         {
             var status = await _kycStatusService.GetKycStatusAsync(clientId);
             return status == KycStatus.Ok;
+        }
+
+        private async Task<bool> ClientHasPhoneNumber(string clientId)
+        {
+            var clientModel = await _accountClient.GetByIdAsync(clientId);
+            return !string.IsNullOrWhiteSpace(clientModel.Phone);
         }
     }
 }

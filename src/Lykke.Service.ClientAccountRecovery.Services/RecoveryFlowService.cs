@@ -80,7 +80,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .PermitIf(Trigger.SecretPhrasesVerificationFail, State.PasswordChangeForbidden, () => _ctx.SecretPhrasesRecoveryAttempts > _recoveryConditions.SecretPhrasesMaxAttempts)
                 .PermitReentryIf(Trigger.SecretPhrasesVerificationFail, () => _ctx.SecretPhrasesRecoveryAttempts <= _recoveryConditions.SecretPhrasesMaxAttempts)
                 .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
-                .Permit(Trigger.SecretPhrasesComplete, State.AwaitSmsVerification) // 3 - 6
+                .PermitIf(Trigger.SecretPhrasesComplete, State.AwaitSmsVerification, () => _ctx.HasPhoneNumber) // 3 - 6
+                .PermitIf(Trigger.SecretPhrasesComplete, State.AwaitEmailVerification, () => !_ctx.HasPhoneNumber) // 3 - 6
                 .Permit(Trigger.SecretPhrasesSkip, State.AwaitDeviceVerification); // 8 - 28
                                                                                    //
             _stateMachine.Configure(State.AwaitDeviceVerification)
@@ -90,8 +91,10 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Permit(Trigger.DeviceVerificationFail, State.PasswordChangeForbidden)
                 .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .Ignore(Trigger.TryUnfreeze)
-                .Permit(Trigger.DeviceVerificationComplete, State.AwaitSmsVerification) //For all cases unconditional go to SMS verification
-                .Permit(Trigger.DeviceVerificationSkip, State.AwaitSmsVerification);
+                .PermitIf(Trigger.DeviceVerificationComplete, State.AwaitSmsVerification, () => _ctx.HasPhoneNumber) //For all cases unconditional go to SMS verification
+                .PermitIf(Trigger.DeviceVerificationComplete, State.AwaitEmailVerification, () => !_ctx.HasPhoneNumber) //For all cases unconditional go to SMS verification
+                .PermitIf(Trigger.DeviceVerificationSkip, State.AwaitSmsVerification, () => _ctx.HasPhoneNumber)
+                .PermitIf(Trigger.DeviceVerificationSkip, State.AwaitEmailVerification, () => !_ctx.HasPhoneNumber);
 
             _stateMachine.Configure(State.AwaitSmsVerification)
                 .OnEntryAsync(SendSmsAsync)

@@ -38,65 +38,89 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
 
-        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.PasswordChangeAllowed, 3)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.PasswordChangeAllowed, 3.5)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 4.1)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 4.15)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 4.2)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, State.PasswordChangeAllowed, 5.1)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 5.15)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, State.PasswordChangeAllowed, 5.2)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 5.25)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 5.3)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 5.3)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, State.CallSupport, 6.1)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 6.15)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 6.2)]
-        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 6.3)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, State.PasswordChangeAllowed, 8.1)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 8.2)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ok, State.PasswordChangeFrozen, 9.1)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ok, State.PasswordChangeFrozen, 9.15)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Skip, State.CallSupport, 10)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Skip, State.CallSupport, 10.5)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ok, State.PasswordChangeFrozen, 11.1)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 11.2)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ok, State.CallSupport, 12)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ok, State.CallSupport, 12.5)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Skip, State.CallSupport, 13)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Skip, State.CallSupport, 13.5)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, State.CallSupport, 14.1)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 14.2)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 15)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 15.5)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, State.CallSupport, 16.1)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 16.2)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, State.PasswordChangeForbidden, 17)]
-        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.PasswordChangeForbidden, 17.5)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, State.Transfer, 19.1)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 19.2)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ok, State.Transfer, 20)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ok, State.Transfer, 20.5)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Skip, State.CallSupport, 21)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Skip, State.CallSupport, 21.5)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ok, State.Transfer, 22.1)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Skip, State.CallSupport, 22.2)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 22.3)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ok, State.CallSupport, 23)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ok, State.CallSupport, 23.5)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Skip, State.CallSupport, 24)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Skip, State.CallSupport, 24.5)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, State.CallSupport, 25.1)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 25.2)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 26)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.CallSupport, 26.5)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, State.CallSupport, 27.1)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, State.CallSupport, 27.2)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, State.PasswordChangeForbidden, 28)]
-        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, State.PasswordChangeForbidden, 28.5)]
-        public async Task StateMachine_WhenCaseApplied_FinalStateIsCorrect(Ss secretPhrases, Ss deviceVerified, Ss sms, Ss email, Ss kycPassed, Ss selfieReceived, Ss selfiePass, Ss pin, State resolution, double line)
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.PasswordChangeAllowed, 3)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.PasswordChangeAllowed, 3.5)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 4.1)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 4.15)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 4.2)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.Yes, State.PasswordChangeAllowed, 5.1)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 5.15)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ignore, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.CallSupport, 4.2)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ignore, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.No, State.PasswordChangeAllowed, 5.1)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ignore, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.CallSupport, 5.15)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.Yes, State.PasswordChangeAllowed, 5.2)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 5.25)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 5.3)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 5.3)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.Yes, State.CallSupport, 6.1)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 6.15)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 6.2)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 6.3)]  
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ignore, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.No, State.CallSupport, 6.1)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ignore, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.CallSupport, 6.15)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ignore, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.CallSupport, 6.2)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ignore, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.No, State.CallSupport, 6.3)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.Yes, State.PasswordChangeAllowed, 8.1)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 8.2)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ok, Phone.Yes, State.PasswordChangeFrozen, 9.1)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ok, Phone.Yes, State.PasswordChangeFrozen, 9.15)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Skip, Phone.Yes, State.CallSupport, 10)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Skip, Phone.Yes, State.CallSupport, 10.5)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ok, Phone.Yes, State.PasswordChangeFrozen, 11.1)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 11.2)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ok, Phone.Yes, State.CallSupport, 12)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ok, Phone.Yes, State.CallSupport, 12.5)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Skip, Phone.Yes, State.CallSupport, 13)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Skip, Phone.Yes, State.CallSupport, 13.5)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.Yes, State.CallSupport, 14.1)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 14.2)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 15)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 15.5)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.Yes, State.CallSupport, 16.1)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 16.2)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.PasswordChangeForbidden, 17)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Skip, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.PasswordChangeForbidden, 17.5)] 
+        [TestCase(Words.Skip, Device.Ok, Sms.Ignore, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.No, State.CallSupport, 14.1)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ignore, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.No, State.CallSupport, 14.2)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ignore, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.CallSupport, 15)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ignore, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.CallSupport, 15.5)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ignore, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.No, State.CallSupport, 16.1)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ignore, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.No, State.CallSupport, 16.2)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ignore, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.PasswordChangeForbidden, 17)]
+        [TestCase(Words.Skip, Device.Ok, Sms.Ignore, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.PasswordChangeForbidden, 17.5)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.Yes, State.Transfer, 19.1)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 19.2)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ok, Phone.Yes, State.Transfer, 20)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ok, Phone.Yes, State.Transfer, 20.5)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Skip, Phone.Yes, State.CallSupport, 21)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Skip, Phone.Yes, State.CallSupport, 21.5)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ok, Phone.Yes, State.Transfer, 22.1)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Skip, Phone.Yes, State.CallSupport, 22.2)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 22.3)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ok, Phone.Yes, State.CallSupport, 23)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ok, Phone.Yes, State.CallSupport, 23.5)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Skip, Phone.Yes, State.CallSupport, 24)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ok, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Skip, Phone.Yes, State.CallSupport, 24.5)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.Yes, State.CallSupport, 25.1)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 25.2)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 26)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.CallSupport, 26.5)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.Yes, State.CallSupport, 27.1)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.Yes, State.CallSupport, 27.2)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.PasswordChangeForbidden, 28)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Skip, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.Yes, State.PasswordChangeForbidden, 28.5)]    
+        [TestCase(Words.Skip, Device.Skip, Sms.Ignore, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.No, State.CallSupport, 25.1)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ignore, Email.Ok, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.No, State.CallSupport, 25.2)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ignore, Email.Ok, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.CallSupport, 26)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ignore, Email.Ok, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.CallSupport, 26.5)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ignore, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Ok, Pin.Ignore, Phone.No, State.CallSupport, 27.1)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ignore, Email.Skip, KycPassed.Ok, Selfie.Ok, SelfieCheck.Fail, Pin.Ignore, Phone.No, State.CallSupport, 27.2)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ignore, Email.Skip, KycPassed.Ok, Selfie.Skip, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.PasswordChangeForbidden, 28)]
+        [TestCase(Words.Skip, Device.Skip, Sms.Ignore, Email.Skip, KycPassed.Fail, Selfie.Ignore, SelfieCheck.Ignore, Pin.Ignore, Phone.No, State.PasswordChangeForbidden, 28.5)]
+        public async Task StateMachine_WhenCaseApplied_FinalStateIsCorrect(Ss secretPhrases, Ss deviceVerified, Ss sms, Ss email, Ss kycPassed, Ss selfieReceived, Ss selfiePass, Ss pin, Phone phone, State resolution, double line)
         {
             _flowService.Context.KycPassed = kycPassed == Ss.Ok;
+            _flowService.Context.HasPhoneNumber = phone == Phone.Yes;
             await _flowService.StartRecoveryAsync();
             await Fire(secretPhrases, _flowService.SecretPhrasesCompleteAsync, _flowService.SecretPhrasesSkipAsync);
             await Fire(deviceVerified, _flowService.DeviceVerifiedCompleteAsync, _flowService.DeviceVerificationSkipAsync);
@@ -214,7 +238,8 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         {
             var context = new RecoveryContext
             {
-                State = State.AwaitDeviceVerification
+                State = State.AwaitDeviceVerification,
+                HasPhoneNumber = true
             };
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
             await stateMachine.DeviceVerifiedCompleteAsync();
@@ -366,7 +391,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
         [TestCase(1, State.AwaitSecretPhrases)]
         [TestCase(2, State.AwaitSecretPhrases)]
-        [TestCase(4, State.PasswordChangeForbidden )]
+        [TestCase(4, State.PasswordChangeForbidden)]
         public async Task Should_BlockRecovery_AfterMaxSecretPhrasesAttempts(int attemptsNo, State expectedState)
         {
             var context = new RecoveryContext
@@ -383,8 +408,8 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(expectedState));
-        }  
-        
+        }
+
         [TestCase(1, State.AwaitPinCode)]
         [TestCase(2, State.AwaitPinCode)]
         [TestCase(4, State.PasswordChangeForbidden)]
@@ -488,11 +513,11 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         public enum Ss // Step state for short
         {
 
-            Ignore,
-            Ok,
-            Skip,
-            Fail,
-            Restart
+            Ignore = 0,
+            Ok = 1,
+            Skip = 2,
+            Fail = 3,
+            Restart = 4
         }
 
         private enum Words // Step state for short
@@ -565,6 +590,12 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             Skip,
             Fail,
             Restart
+        }
+
+        public enum Phone // Step state for short
+        {
+            Yes = 1,
+            No = 3
         }
     }
 
