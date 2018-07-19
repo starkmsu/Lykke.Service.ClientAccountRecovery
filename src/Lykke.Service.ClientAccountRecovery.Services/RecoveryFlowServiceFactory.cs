@@ -20,6 +20,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private readonly IKycStatusService _kycStatusService;
         private readonly IClientAccountClient _accountClient;
 
+
         public RecoveryFlowServiceFactory(ILifetimeScope container,
             IRecoveryLogRepository repository,
             IKycStatusService kycStatusService,
@@ -38,7 +39,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 RecoveryId = Guid.NewGuid().ToString(),
                 ClientId = clientId,
                 KycPassed = await IsKycPassed(clientId),
-                HasPhoneNumber = await ClientHasPhoneNumber(clientId)
+                HasPhoneNumber = await ClientHasPhoneNumber(clientId),
+                PinKnown = await IsPinEntered(clientId)
             };
             var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
             var service = _container.Resolve<IRecoveryFlowService>(
@@ -57,6 +59,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             var context = log.ActualStatus;
             context.KycPassed = await IsKycPassed(context.ClientId);
             context.HasPhoneNumber = await ClientHasPhoneNumber(context.ClientId);
+            context.PinKnown = await IsPinEntered(context.ClientId);
 
             var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
 
@@ -77,6 +80,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         {
             var clientModel = await _accountClient.GetByIdAsync(clientId);
             return !string.IsNullOrWhiteSpace(clientModel.Phone);
+        }
+
+        private Task<bool> IsPinEntered(string clientId)
+        {
+            return _accountClient.IsPinEnteredAsync(clientId);
         }
     }
 }
