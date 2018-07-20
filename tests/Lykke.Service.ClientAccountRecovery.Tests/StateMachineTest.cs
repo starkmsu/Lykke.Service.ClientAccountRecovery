@@ -376,7 +376,6 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             await stateMachine.SmsVerificationFailedAsync();
             await stateMachine.SmsVerificationFailedAsync();
             await stateMachine.SmsVerificationFailedAsync();
-            await stateMachine.SmsVerificationFailedAsync();
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
         }
@@ -391,7 +390,6 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
 
-            await stateMachine.SmsVerificationRestartAsync();
             await stateMachine.SmsVerificationRestartAsync();
             await stateMachine.SmsVerificationRestartAsync();
             await stateMachine.SmsVerificationRestartAsync();
@@ -412,7 +410,6 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             await stateMachine.EmailVerificationFailedAsync();
             await stateMachine.EmailVerificationFailedAsync();
             await stateMachine.EmailVerificationFailedAsync();
-            await stateMachine.EmailVerificationFailedAsync();
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
         }
@@ -430,7 +427,6 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             await stateMachine.EmailVerificationRestartAsync();
             await stateMachine.EmailVerificationRestartAsync();
             await stateMachine.EmailVerificationRestartAsync();
-            await stateMachine.EmailVerificationRestartAsync();
 
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
         }
@@ -438,7 +434,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
         [TestCase(1, State.AwaitSecretPhrases)]
         [TestCase(2, State.AwaitSecretPhrases)]
-        [TestCase(4, State.PasswordChangeForbidden)]
+        [TestCase(3, State.PasswordChangeForbidden)]
         public async Task Should_BlockRecovery_AfterMaxSecretPhrasesAttempts(int attemptsNo, State expectedState)
         {
             var context = new RecoveryContext
@@ -459,7 +455,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
         [TestCase(1, State.AwaitPinCode)]
         [TestCase(2, State.AwaitPinCode)]
-        [TestCase(4, State.PasswordChangeForbidden)]
+        [TestCase(3, State.PasswordChangeForbidden)]
         public async Task Should_BlockRecovery_AfterMaxPinAttempts(int attemptsNo, State expectedState)
         {
             var context = new RecoveryContext

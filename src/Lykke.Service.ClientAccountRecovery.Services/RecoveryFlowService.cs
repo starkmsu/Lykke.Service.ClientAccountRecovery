@@ -79,8 +79,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .OnEntryAsync(OnEntrySecretPhrases)
                 .OnExit(OnExitSecretPhrases)
                 .Ignore(Trigger.TryUnfreeze)
-                .PermitIf(Trigger.SecretPhrasesVerificationFail, State.PasswordChangeForbidden, () => _ctx.SecretPhrasesRecoveryAttempts > _recoveryConditions.SecretPhrasesMaxAttempts)
-                .PermitReentryIf(Trigger.SecretPhrasesVerificationFail, () => _ctx.SecretPhrasesRecoveryAttempts <= _recoveryConditions.SecretPhrasesMaxAttempts)
+                .PermitIf(Trigger.SecretPhrasesVerificationFail, State.PasswordChangeForbidden, () => _ctx.SecretPhrasesRecoveryAttempts >= _recoveryConditions.SecretPhrasesMaxAttempts)
+                .PermitReentryIf(Trigger.SecretPhrasesVerificationFail, () => _ctx.SecretPhrasesRecoveryAttempts < _recoveryConditions.SecretPhrasesMaxAttempts)
                 .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .PermitIf(Trigger.SecretPhrasesComplete, State.AwaitSmsVerification, () => _ctx.HasPhoneNumber) // 3 - 6
                 .PermitIf(Trigger.SecretPhrasesComplete, State.AwaitEmailVerification, () => !_ctx.HasPhoneNumber) // 3 - 6
@@ -105,10 +105,10 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Ignore(Trigger.TryUnfreeze)
                 .Permit(Trigger.SmsVerificationComplete, State.AwaitEmailVerification) // For all cases unconditional go to email verification
                 .Permit(Trigger.SmsVerificationSkip, State.AwaitEmailVerification) // For all cases unconditional go to email verification
-                .PermitIf(Trigger.SmsVerificationFail, State.PasswordChangeForbidden, () => _ctx.SmsRecoveryAttempts > _recoveryConditions.SmsCodeMaxAttempts)
-                .PermitReentryIf(Trigger.SmsVerificationFail, () => _ctx.SmsRecoveryAttempts <= _recoveryConditions.SmsCodeMaxAttempts)
-                .PermitIf(Trigger.SmsVerificationRestart, State.PasswordChangeForbidden, () => _ctx.SmsRecoveryAttempts > _recoveryConditions.SmsCodeMaxAttempts)
-                .PermitReentryIf(Trigger.SmsVerificationRestart, () => _ctx.SmsRecoveryAttempts <= _recoveryConditions.SmsCodeMaxAttempts);
+                .PermitIf(Trigger.SmsVerificationFail, State.PasswordChangeForbidden, () => _ctx.SmsRecoveryAttempts >= _recoveryConditions.SmsCodeMaxAttempts)
+                .PermitReentryIf(Trigger.SmsVerificationFail, () => _ctx.SmsRecoveryAttempts < _recoveryConditions.SmsCodeMaxAttempts)
+                .PermitIf(Trigger.SmsVerificationRestart, State.PasswordChangeForbidden, () => _ctx.SmsRecoveryAttempts >= _recoveryConditions.SmsCodeMaxAttempts)
+                .PermitReentryIf(Trigger.SmsVerificationRestart, () => _ctx.SmsRecoveryAttempts < _recoveryConditions.SmsCodeMaxAttempts);
 
             _stateMachine.Configure(State.AwaitEmailVerification)
                 .Ignore(Trigger.TryUnfreeze)
@@ -133,10 +133,10 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .PermitIf(Trigger.EmailVerificationSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.KycPassed && !_ctx.PinKnown)
                 .PermitIf(Trigger.EmailVerificationSkip, State.PasswordChangeForbidden, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.KycPassed)
                 .PermitIf(Trigger.EmailVerificationSkip, State.AwaitSelfieVerification, () => _ctx.KycPassed) // All cases
-                .PermitIf(Trigger.EmailVerificationFail, State.PasswordChangeForbidden, () => _ctx.EmailRecoveryAttempts > _recoveryConditions.EmailCodeMaxAttempts)
-                .PermitReentryIf(Trigger.EmailVerificationFail, () => _ctx.EmailRecoveryAttempts <= _recoveryConditions.EmailCodeMaxAttempts)
-                .PermitIf(Trigger.EmailVerificationRestart, State.PasswordChangeForbidden, () => _ctx.EmailRecoveryAttempts > _recoveryConditions.EmailCodeMaxAttempts)
-                .PermitReentryIf(Trigger.EmailVerificationRestart, () => _ctx.EmailRecoveryAttempts <= _recoveryConditions.EmailCodeMaxAttempts);
+                .PermitIf(Trigger.EmailVerificationFail, State.PasswordChangeForbidden, () => _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitReentryIf(Trigger.EmailVerificationFail, () => _ctx.EmailRecoveryAttempts < _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIf(Trigger.EmailVerificationRestart, State.PasswordChangeForbidden, () => _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitReentryIf(Trigger.EmailVerificationRestart, () => _ctx.EmailRecoveryAttempts < _recoveryConditions.EmailCodeMaxAttempts);
 
             _stateMachine.Configure(State.AwaitSelfieVerification)
                 .Ignore(Trigger.TryUnfreeze)
@@ -189,8 +189,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             _stateMachine.Configure(State.AwaitPinCode)
                 .Ignore(Trigger.TryUnfreeze)
                 .PermitSupportStates()
-                .PermitIf(Trigger.PinFail, State.PasswordChangeForbidden, () => _ctx.PinRecoveryAttempts > _recoveryConditions.PinCodeMaxAttempts)
-                .PermitReentryIf(Trigger.PinFail, () => _ctx.PinRecoveryAttempts <= _recoveryConditions.PinCodeMaxAttempts)
+                .PermitIf(Trigger.PinFail, State.PasswordChangeForbidden, () => _ctx.PinRecoveryAttempts >= _recoveryConditions.PinCodeMaxAttempts)
+                .PermitReentryIf(Trigger.PinFail, () => _ctx.PinRecoveryAttempts < _recoveryConditions.PinCodeMaxAttempts)
                 .Permit(Trigger.JumpToForbidden, State.PasswordChangeForbidden)
                 .PermitIf(Trigger.PinComplete, State.PasswordChangeFrozen, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 9
                 .PermitIf(Trigger.PinSkip, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && _ctx.EmailVerified && !_ctx.SelfieApproved) // 10
