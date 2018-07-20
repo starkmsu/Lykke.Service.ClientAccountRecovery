@@ -522,6 +522,12 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             await _emailSender.ReceivedWithAnyArgs().SendCodeAsync("1");
         }
 
+        [Test, Explicit("Only for manual graph generating")]
+        public void GetStateMachineGraph()
+        {
+            var grpaph = _flowService.GetGraph();
+        }
+
         private Task Fire(Ss state, Func<Task> ok, Func<Task> skip, Func<Task> fail = null, Func<Task> restart = null)
         {
             Debug.Assert(ok != skip);
