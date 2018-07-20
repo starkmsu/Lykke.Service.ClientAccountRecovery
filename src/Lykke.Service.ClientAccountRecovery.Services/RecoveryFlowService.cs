@@ -70,7 +70,9 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private void Configure()
         {
             _stateMachine.Configure(State.RecoveryStarted)
-                    .Permit(Trigger.RecoveryRequest, State.AwaitSecretPhrases);
+                    .PermitIf(Trigger.RecoveryRequest, State.AwaitSecretPhrases, () => _ctx.PublicKeyKnown)
+                    .PermitIf(Trigger.RecoveryRequest, State.AwaitSmsVerification, () => !_ctx.PublicKeyKnown && _ctx.HasPhoneNumber)
+                    .PermitIf(Trigger.RecoveryRequest, State.AwaitEmailVerification, () => !_ctx.PublicKeyKnown && !_ctx.HasPhoneNumber);
 
             _stateMachine.Configure(State.AwaitSecretPhrases)
                 .PermitSupportStates()

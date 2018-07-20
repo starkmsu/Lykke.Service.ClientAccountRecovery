@@ -68,8 +68,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         public async Task<bool> ConfirmDeviceCode(IRecoveryFlowService flowService, string code)
         {
             var clientId = flowService.Context.ClientId;
-            var credentials = await _credentialsRepository.GetAsync(clientId);
-            var publicKeyAddress = credentials.Address;
+            var publicKeyAddress = await PublicKeyAddress(clientId);
             if (string.IsNullOrWhiteSpace(publicKeyAddress))
             {
                 throw new InvalidOperationException($"Unable to validate signature because the client with Id {clientId} has no address in the credentials");
@@ -103,8 +102,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         public async Task<bool> ConfirmSecretPhrasesCode(IRecoveryFlowService flowService, string code)
         {
             var clientId = flowService.Context.ClientId;
-            var credentials = await _credentialsRepository.GetAsync(clientId);
-            var publicKeyAddress = credentials.Address;
+            var publicKeyAddress = await PublicKeyAddress(clientId);
             if (publicKeyAddress == null)
             {
                 throw new InvalidOperationException($"Unable to validate signature because the client with Id {clientId} has no address in the credentials");
@@ -118,6 +116,17 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
             await flowService.SecretPhrasesVerificationFailAsync();
             return false;
+        }
+
+        private async Task<string> PublicKeyAddress(string clientId)
+        {
+            var credentials = await _credentialsRepository.GetAsync(clientId);
+            if (credentials == null) // We should never be here, because the state machine must bypass this step
+            {
+                throw new InvalidOperationException($"Unable to find a credentials for client {clientId}");
+            }
+            var publicKeyAddress = credentials.Address;
+            return publicKeyAddress;
         }
 
         private static bool VerifyMessage(string pubKeyAddress, string message, string signedMessage)

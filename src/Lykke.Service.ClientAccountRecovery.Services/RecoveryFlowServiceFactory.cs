@@ -19,17 +19,20 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private readonly IRecoveryLogRepository _repository;
         private readonly IKycStatusService _kycStatusService;
         private readonly IClientAccountClient _accountClient;
+        private readonly IWalletCredentialsRepository _credentialsRepository;
 
 
         public RecoveryFlowServiceFactory(ILifetimeScope container,
             IRecoveryLogRepository repository,
             IKycStatusService kycStatusService,
-            IClientAccountClient accountClient)
+            IClientAccountClient accountClient,
+            IWalletCredentialsRepository credentialsRepository)
         {
             _container = container;
             _repository = repository;
             _kycStatusService = kycStatusService;
             _accountClient = accountClient;
+            _credentialsRepository = credentialsRepository;
         }
 
         public async Task<IRecoveryFlowService> InitiateNew(string clientId)
@@ -40,7 +43,8 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 ClientId = clientId,
                 KycPassed = await IsKycPassed(clientId),
                 HasPhoneNumber = await ClientHasPhoneNumber(clientId),
-                PinKnown = await IsPinEntered(clientId)
+                PinKnown = await IsPinEntered(clientId),
+                PublicKeyKnown = await PublicKeyKnown(clientId)
             };
             var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
             var service = _container.Resolve<IRecoveryFlowService>(
@@ -60,6 +64,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             context.KycPassed = await IsKycPassed(context.ClientId);
             context.HasPhoneNumber = await ClientHasPhoneNumber(context.ClientId);
             context.PinKnown = await IsPinEntered(context.ClientId);
+            context.PublicKeyKnown = await PublicKeyKnown(context.ClientId);
 
             var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
 
@@ -85,6 +90,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private Task<bool> IsPinEntered(string clientId)
         {
             return _accountClient.IsPinEnteredAsync(clientId);
+        }
+
+        private async Task<bool> PublicKeyKnown(string clientId)
+        {
+            return (await _credentialsRepository.GetAsync(clientId))?.Address != null;
         }
     }
 }

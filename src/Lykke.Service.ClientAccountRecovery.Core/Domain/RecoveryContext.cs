@@ -28,6 +28,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
         public bool KycPassed { get; set; } // A transient state
         public bool HasPhoneNumber { get; set; } // A transient state
         public bool PinKnown { get; set; } // A transient state
+        public bool PublicKeyKnown { get; set; } // A transient state
         public string SignChallengeMessage { get; set; }
         public int SecretPhrasesRecoveryAttempts { get; set; }
     }
