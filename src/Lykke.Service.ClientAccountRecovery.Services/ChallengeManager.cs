@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Action = Lykke.Service.ClientAccountRecovery.Core.Domain.Action;
@@ -11,12 +10,12 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     [UsedImplicitly]
     public class ChallengeManager : IChallengeManager
     {
-        private readonly IChallengesValidator _validator;
+        private readonly IChallengeValidatorFactory _challengeValidatorFactory;
         private readonly ISelfieNotificationSender _selfieNotificationSender;
 
-        public ChallengeManager(IChallengesValidator validator, ISelfieNotificationSender selfieNotificationSender)
+        public ChallengeManager(IChallengeValidatorFactory challengeValidatorFactory, ISelfieNotificationSender selfieNotificationSender)
         {
-            _validator = validator;
+            _challengeValidatorFactory = challengeValidatorFactory;
             _selfieNotificationSender = selfieNotificationSender;
         }
 
@@ -71,27 +70,27 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
         private Task<bool> ValidateEmail(IRecoveryFlowService flow, string code)
         {
-            return _validator.ConfirmEmailCode(flow, code);
+            return _challengeValidatorFactory.GetValidator(Challenge.Email).Confirm(flow, code);
         }
 
         private Task<bool> ValidateSms(IRecoveryFlowService flow, string code)
         {
-            return _validator.ConfirmSmsCode(flow, code);
+            return _challengeValidatorFactory.GetValidator(Challenge.Sms).Confirm(flow, code);
         }
 
         private Task<bool> ValidateDevice(IRecoveryFlowService flow, string code)
         {
-            return _validator.ConfirmDeviceCode(flow, code);
+            return _challengeValidatorFactory.GetValidator(Challenge.Device).Confirm(flow, code);
         }
 
         private Task<bool> ValidateSecretPhrases(IRecoveryFlowService flow, string code)
         {
-            return _validator.ConfirmSecretPhrasesCode(flow, code);
+            return _challengeValidatorFactory.GetValidator(Challenge.Words).Confirm(flow, code);
         }
 
         private Task<bool> ValidatePin(IRecoveryFlowService flow, string code)
         {
-            return _validator.ConfirmPin(flow, code);
+            return _challengeValidatorFactory.GetValidator(Challenge.Pin).Confirm(flow, code);
         }
 
         private Task NotifySelfiePosted(IRecoveryFlowService flow, string code)

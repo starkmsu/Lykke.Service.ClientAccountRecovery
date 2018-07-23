@@ -12,42 +12,66 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
     public class ChallengeManagerTest
     {
         private ChallengeManager _challengeManager;
-        private IChallengesValidator _challengesValidator;
+        private IChallengeValidatorFactory _challengeValidatorFactory;
         private ISelfieNotificationSender _selfieNotificationSender;
         private IRecoveryFlowService _flowService;
+        private IChallengesValidator _validator;
 
         [SetUp]
         public void SetUp()
         {
-            _challengesValidator = Substitute.For<IChallengesValidator>();
+            _challengeValidatorFactory = Substitute.For<IChallengeValidatorFactory>();
             _selfieNotificationSender = Substitute.For<ISelfieNotificationSender>();
             _flowService = Substitute.For<IRecoveryFlowService>();
-            _challengeManager = new ChallengeManager(_challengesValidator, _selfieNotificationSender);
+            _challengeManager = new ChallengeManager(_challengeValidatorFactory, _selfieNotificationSender);
+            _validator = Substitute.For<IChallengesValidator>();
+            _challengeValidatorFactory.GetValidator(Arg.Any<Challenge>()).Returns(_validator);
         }
 
         [Test]
-        public async Task ShouldSendSmsCode()
+        public async Task Should_Validate_Sms()
         {
             await _challengeManager.ExecuteAction(Challenge.Sms, Action.Complete, "42", _flowService);
 
-            await _challengesValidator.Received().ConfirmSmsCode(_flowService, "42");
+            _challengeValidatorFactory.Received().GetValidator(Challenge.Sms);
+            await _validator.Received().Confirm(_flowService, "42");
         } 
         
+        [Test]
+        public async Task Should_Validate_Phrases()
+        {
+            await _challengeManager.ExecuteAction(Challenge.Words, Action.Complete, "42", _flowService);
+
+            _challengeValidatorFactory.Received().GetValidator(Challenge.Words);
+            await _validator.Received().Confirm(_flowService, "42");
+        }   
         
         [Test]
-        public async Task ShouldValidatePin()
+        public async Task Should_Validate_Device()
+        {
+            await _challengeManager.ExecuteAction(Challenge.Device, Action.Complete, "42", _flowService);
+
+            _challengeValidatorFactory.Received().GetValidator(Challenge.Device);
+            await _validator.Received().Confirm(_flowService, "42");
+        }
+
+
+        [Test]
+        public async Task Should_Validate_Pin()
         {
             await _challengeManager.ExecuteAction(Challenge.Pin, Action.Complete, "42", _flowService);
 
-            await _challengesValidator.Received().ConfirmPin(_flowService, "42");
+            _challengeValidatorFactory.Received().GetValidator(Challenge.Pin);
+            await _validator.Received().Confirm(_flowService, "42");
         }
 
         [Test]
-        public async Task ShouldSendEmailCode()
+        public async Task Should_Validate_Email()
         {
             await _challengeManager.ExecuteAction(Challenge.Email, Action.Complete, "42", _flowService);
 
-            await _challengesValidator.Received().ConfirmEmailCode(_flowService, "42");
+            _challengeValidatorFactory.Received().GetValidator(Challenge.Email);
+            await _validator.Received().Confirm(_flowService, "42");
         }
 
         [Test]

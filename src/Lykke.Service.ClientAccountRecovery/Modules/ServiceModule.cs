@@ -80,8 +80,14 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             builder.RegisterType<ChallengeManager>()
                 .As<IChallengeManager>();
 
-            builder.RegisterType<ChallengesValidator>()
-                .As<IChallengesValidator>();
+            builder.RegisterType<SmsValidator>();
+            builder.RegisterType<EmailValidator>();
+            builder.RegisterType<PinValidator>();
+            builder.RegisterType<SecretPhrasesValidator>();
+            builder.RegisterType<DeviceValidator>();
+
+            builder.RegisterType<ChallengeValidatorFactory>()
+                .As<IChallengeValidatorFactory>();
 
             builder.RegisterType<WalletCredentialsRepository>()
                 .As<IWalletCredentialsRepository>();

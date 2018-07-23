@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Lykke.Service.ClientAccountRecovery.Services;
 using Lykke.Service.ConfirmationCodes.Client;
+using Lykke.Service.ConfirmationCodes.Client.Models.Response;
 using NBitcoin;
 using NSubstitute;
 using NUnit.Framework;
@@ -17,10 +19,14 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
     {
         private const string PublicAddress = "mhsp2ukHTfXfu4ixrQEwULNcduFkK5qnPW";
         private const string PrivateKey = "KwDiBf89QgGbjEhKnhXJuH7Ro98XrkJMQ5PFYQ4reorxqRmVKhvL";
-        private ChallengesValidator _challengesValidator;
         private IConfirmationCodesClient _confirmationCodesClient;
         private IClientAccountClient _clientAccountClient;
         private IWalletCredentialsRepository _credentialsRepository;
+        private SecretPhrasesValidator _phrasesValidator;
+        private DeviceValidator _deviceValidator;
+        private PinValidator _pinValidator;
+        private SmsValidator _smsValidator;
+        private EmailValidator _emailValidator;
 
 
         [SetUp]
@@ -29,7 +35,11 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             _confirmationCodesClient = Substitute.For<IConfirmationCodesClient>();
             _clientAccountClient = Substitute.For<IClientAccountClient>();
             _credentialsRepository = Substitute.For<IWalletCredentialsRepository>();
-            _challengesValidator = new ChallengesValidator(_confirmationCodesClient, _clientAccountClient, _credentialsRepository);
+            _phrasesValidator = new SecretPhrasesValidator(_credentialsRepository);
+            _deviceValidator = new DeviceValidator(_credentialsRepository);
+            _pinValidator = new PinValidator(_clientAccountClient);
+            _smsValidator = new SmsValidator(_confirmationCodesClient, _clientAccountClient);
+            _emailValidator = new EmailValidator(_confirmationCodesClient, _clientAccountClient);
         }
 
         [TestCase("Correct code", true)]
@@ -55,7 +65,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             credentials.Address.Returns(PublicAddress);
             _credentialsRepository.GetAsync(clientID).Returns(Task.FromResult(credentials));
 
-            await _challengesValidator.ConfirmSecretPhrasesCode(flow, signature);
+            await _phrasesValidator.Confirm(flow, signature);
 
             if (isValid)
             {
@@ -68,6 +78,71 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
                 await flow.Received().SecretPhrasesVerificationFailAsync();
             }
 
+        }
+
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_CorrectlyValidate_Sms(bool isValid)
+        {
+            var clientID = Guid.NewGuid().ToString();
+
+
+            var flow = Substitute.For<IRecoveryFlowService>();
+            var context = new RecoveryContext
+            {
+                ClientId = clientID
+            };
+
+            flow.Context.Returns(context);
+            _clientAccountClient.GetByIdAsync("").ReturnsForAnyArgs(new ClientModel());
+
+            _confirmationCodesClient.VerifySmsCodeAsync(null).ReturnsForAnyArgs(new VerificationResult { IsValid = isValid });
+
+            await _smsValidator.Confirm(flow, "SomeCode");
+
+            if (isValid)
+            {
+                await flow.Received().SmsVerificationCompleteAsync();
+                await flow.DidNotReceive().SmsVerificationFailedAsync();
+            }
+            else
+            {
+                await flow.DidNotReceive().SmsVerificationCompleteAsync();
+                await flow.Received().SmsVerificationFailedAsync();
+            }
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public async Task Should_CorrectlyValidate_Email(bool isValid)
+        {
+            var clientID = Guid.NewGuid().ToString();
+
+
+            var flow = Substitute.For<IRecoveryFlowService>();
+            var context = new RecoveryContext
+            {
+                ClientId = clientID
+            };
+
+            flow.Context.Returns(context);
+            _clientAccountClient.GetByIdAsync("").ReturnsForAnyArgs(new ClientModel());
+
+            _confirmationCodesClient.VerifyEmailCodeAsync(null).ReturnsForAnyArgs(new VerificationResult { IsValid = isValid });
+
+            await _emailValidator.Confirm(flow, "SomeCode");
+
+            if (isValid)
+            {
+                await flow.Received().EmailVerificationCompleteAsync();
+                await flow.DidNotReceive().EmailVerificationFailedAsync();
+            }
+            else
+            {
+                await flow.DidNotReceive().EmailVerificationCompleteAsync();
+                await flow.Received().EmailVerificationFailedAsync();
+            }
         }
 
         [TestCase("Correct code", true)]
@@ -93,7 +168,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             credentials.Address.Returns(PublicAddress);
             _credentialsRepository.GetAsync(clientID).Returns(Task.FromResult(credentials));
 
-            await _challengesValidator.ConfirmDeviceCode(flow, signature);
+            await _deviceValidator.Confirm(flow, signature);
 
             if (isValid)
             {
@@ -123,10 +198,10 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             };
             flow.Context.Returns(context);
             _clientAccountClient.IsPinValidAsync(clientID, pinCode).Returns(Task.FromResult(isValid));
-            
 
-            await _challengesValidator.ConfirmPin(flow, pinCode);
-            
+
+            await _pinValidator.Confirm(flow, pinCode);
+
 
             await _clientAccountClient.Received().IsPinValidAsync(clientID, pinCode);
             if (isValid)
@@ -160,7 +235,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
 
             _credentialsRepository.GetAsync(clientID).Returns(Task.FromResult(credentials));
 
-            Assert.ThrowsAsync<InvalidOperationException>(() => _challengesValidator.ConfirmDeviceCode(flow, "signed message"));
+            Assert.ThrowsAsync<InvalidOperationException>(() => _deviceValidator.Confirm(flow, "signed message"));
 
         }
     }
