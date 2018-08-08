@@ -17,8 +17,7 @@ namespace Lykke.Service.ClientAccountRecovery.AzureRepositories
         {
             return _storage.GetDataAsync(clientId); // Expected only a few records per User
         }
-
-
+        
         public Task InsertOrReplaceAsync(string clientId, string recoveryId)
         {
             var entity = StateTableEntity.CreateNew(clientId, recoveryId);

@@ -23,10 +23,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the ApproveChallengeRequest class.
         /// </summary>
-        /// <param name="challenge">Possible values include: 'Unknown', 'Sms',
-        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
-        /// <param name="checkResult">Possible values include: 'Unknown',
-        /// 'Approved', 'Rejected'</param>
+        /// <param name="recoveryId">An id of the recovery</param>
+        /// <param name="challenge">A challenge to approve. Possible values
+        /// include: 'Unknown', 'Sms', 'Email', 'Selfie', 'Words', 'Device',
+        /// 'Pin', 'Undefined'</param>
+        /// <param name="agentId">An agent id</param>
+        /// <param name="checkResult">Resolution. Possible values include:
+        /// 'Unknown', 'Approved', 'Rejected'</param>
         public ApproveChallengeRequest(string recoveryId, Challenge challenge, string agentId, CheckResult checkResult)
         {
             RecoveryId = recoveryId;
@@ -42,25 +45,28 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
+        /// Gets or sets an id of the recovery
         /// </summary>
         [JsonProperty(PropertyName = "recoveryId")]
         public string RecoveryId { get; set; }
 
         /// <summary>
-        /// Gets or sets possible values include: 'Unknown', 'Sms', 'Email',
-        /// 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'
+        /// Gets or sets a challenge to approve. Possible values include:
+        /// 'Unknown', 'Sms', 'Email', 'Selfie', 'Words', 'Device', 'Pin',
+        /// 'Undefined'
         /// </summary>
         [JsonProperty(PropertyName = "challenge")]
         public Challenge Challenge { get; set; }
 
         /// <summary>
+        /// Gets or sets an agent id
         /// </summary>
         [JsonProperty(PropertyName = "agentId")]
         public string AgentId { get; set; }
 
         /// <summary>
-        /// Gets or sets possible values include: 'Unknown', 'Approved',
-        /// 'Rejected'
+        /// Gets or sets resolution. Possible values include: 'Unknown',
+        /// 'Approved', 'Rejected'
         /// </summary>
         [JsonProperty(PropertyName = "checkResult")]
         public CheckResult CheckResult { get; set; }

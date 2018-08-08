@@ -24,13 +24,16 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// Initializes a new instance of the ClientRecoveryHistoryResponse
         /// class.
         /// </summary>
-        /// <param name="state">Possible values include: 'RecoveryStarted',
-        /// 'AwaitSecretPhrases', 'AwaitDeviceVerification',
+        /// <param name="recoveryId">An id of the recovery</param>
+        /// <param name="time">An event date time</param>
+        /// <param name="state">An event state. Possible values include:
+        /// 'RecoveryStarted', 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
         /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
         /// 'AwaitPinCode', 'PasswordChangeFrozen', 'PasswordChangeSuspended',
         /// 'CallSupport', 'Transfer', 'PasswordChangeAllowed',
         /// 'PasswordChangeForbidden', 'PasswordUpdated'</param>
+        /// <param name="initiator">The initiator of the event</param>
         public ClientRecoveryHistoryResponse(string recoveryId, System.DateTime time, State state, string initiator)
         {
             RecoveryId = recoveryId;
@@ -46,17 +49,19 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
+        /// Gets an id of the recovery
         /// </summary>
         [JsonProperty(PropertyName = "recoveryId")]
         public string RecoveryId { get; private set; }
 
         /// <summary>
+        /// Gets an event date time
         /// </summary>
         [JsonProperty(PropertyName = "time")]
         public System.DateTime Time { get; private set; }
 
         /// <summary>
-        /// Gets possible values include: 'RecoveryStarted',
+        /// Gets an event state. Possible values include: 'RecoveryStarted',
         /// 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
         /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
@@ -68,6 +73,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         public State State { get; private set; }
 
         /// <summary>
+        /// Gets the initiator of the event
         /// </summary>
         [JsonProperty(PropertyName = "initiator")]
         public string Initiator { get; private set; }

@@ -22,6 +22,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the OperationStatus class.
         /// </summary>
+        /// <param name="error">True if there was an error</param>
+        /// <param name="message">A description of the error or null</param>
         public OperationStatus(bool error, string message)
         {
             Error = error;
@@ -35,11 +37,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
+        /// Gets true if there was an error
         /// </summary>
         [JsonProperty(PropertyName = "error")]
         public bool Error { get; private set; }
 
         /// <summary>
+        /// Gets a description of the error or null
         /// </summary>
         [JsonProperty(PropertyName = "message")]
         public string Message { get; private set; }

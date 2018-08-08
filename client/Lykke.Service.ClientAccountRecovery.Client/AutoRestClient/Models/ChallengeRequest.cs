@@ -23,10 +23,15 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the ChallengeRequest class.
         /// </summary>
-        /// <param name="challenge">Possible values include: 'Unknown', 'Sms',
-        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
-        /// <param name="action">Possible values include: 'Undefined',
-        /// 'Complete', 'Restart', 'Skip'</param>
+        /// <param name="recoveryId">An id of the recovery</param>
+        /// <param name="challenge">A challenge to contest. Possible values
+        /// include: 'Unknown', 'Sms', 'Email', 'Selfie', 'Words', 'Device',
+        /// 'Pin', 'Undefined'</param>
+        /// <param name="action">Resolution. Possible values include:
+        /// 'Undefined', 'Complete', 'Restart', 'Skip'</param>
+        /// <param name="value">A challenge value</param>
+        /// <param name="ip">Client's ip</param>
+        /// <param name="userAgent">Client's user agent</param>
         public ChallengeRequest(string recoveryId, Challenge challenge, Action action, string value, string ip, string userAgent)
         {
             RecoveryId = recoveryId;
@@ -44,35 +49,40 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
+        /// Gets or sets an id of the recovery
         /// </summary>
         [JsonProperty(PropertyName = "recoveryId")]
         public string RecoveryId { get; set; }
 
         /// <summary>
-        /// Gets or sets possible values include: 'Unknown', 'Sms', 'Email',
-        /// 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'
+        /// Gets or sets a challenge to contest. Possible values include:
+        /// 'Unknown', 'Sms', 'Email', 'Selfie', 'Words', 'Device', 'Pin',
+        /// 'Undefined'
         /// </summary>
         [JsonProperty(PropertyName = "challenge")]
         public Challenge Challenge { get; set; }
 
         /// <summary>
-        /// Gets or sets possible values include: 'Undefined', 'Complete',
-        /// 'Restart', 'Skip'
+        /// Gets or sets resolution. Possible values include: 'Undefined',
+        /// 'Complete', 'Restart', 'Skip'
         /// </summary>
         [JsonProperty(PropertyName = "action")]
         public Action Action { get; set; }
 
         /// <summary>
+        /// Gets or sets a challenge value
         /// </summary>
         [JsonProperty(PropertyName = "value")]
         public string Value { get; set; }
 
         /// <summary>
+        /// Gets or sets client's ip
         /// </summary>
         [JsonProperty(PropertyName = "ip")]
         public string Ip { get; set; }
 
         /// <summary>
+        /// Gets or sets client's user agent
         /// </summary>
         [JsonProperty(PropertyName = "userAgent")]
         public string UserAgent { get; set; }

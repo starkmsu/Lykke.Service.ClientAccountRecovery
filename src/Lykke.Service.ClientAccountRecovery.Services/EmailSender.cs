@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
@@ -22,6 +23,10 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         public async Task SendCodeAsync(string clientId)
         {
             var clientModel = await _accountClient.GetByIdAsync(clientId);
+            if (clientModel == null)
+            {
+                throw new InvalidOperationException($"The inconsistent state. Unable to find a client with id {clientId}");
+            }
             await _confirmationClient.SendEmailConfirmationAsync(new SendEmailConfirmationRequest
             {
                 Email = clientModel.Email,

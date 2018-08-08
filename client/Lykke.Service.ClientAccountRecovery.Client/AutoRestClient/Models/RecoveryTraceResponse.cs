@@ -23,33 +23,40 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the RecoveryTraceResponse class.
         /// </summary>
-        /// <param name="previousState">Possible values include:
+        /// <param name="time">A date time of the event</param>
+        /// <param name="previousState">A previous state. Possible values
+        /// include: 'RecoveryStarted', 'AwaitSecretPhrases',
+        /// 'AwaitDeviceVerification', 'AwaitSmsVerification',
+        /// 'AwaitEmailVerification', 'AwaitSelfieVerification',
+        /// 'SelfieVerificationInProgress', 'AwaitPinCode',
+        /// 'PasswordChangeFrozen', 'PasswordChangeSuspended', 'CallSupport',
+        /// 'Transfer', 'PasswordChangeAllowed', 'PasswordChangeForbidden',
+        /// 'PasswordUpdated'</param>
+        /// <param name="action">An action that leaded state changing. Possible
+        /// values include: 'RecoveryRequest', 'SecretPhrasesComplete',
+        /// 'SecretPhrasesSkip', 'SecretPhrasesVerificationFail',
+        /// 'DeviceVerificationComplete', 'DeviceVerificationSkip',
+        /// 'DeviceVerificationFail', 'SmsVerificationComplete',
+        /// 'SmsVerificationRestart', 'SmsVerificationFail',
+        /// 'SmsVerificationSkip', 'EmailVerificationComplete',
+        /// 'EmailVerificationRestart', 'EmailVerificationFail',
+        /// 'EmailVerificationSkip', 'PinComplete', 'PinSkip', 'PinFail',
+        /// 'SelfieVerificationRequest', 'SelfieVerificationComplete',
+        /// 'SelfieVerificationSkip', 'SelfieVerificationFail',
+        /// 'JumpToSuspended', 'JumpToCallSupport', 'JumpToFrozen',
+        /// 'JumpToAllowed', 'JumpToForbidden', 'UpdatePassword',
+        /// 'TryUnfreeze'</param>
+        /// <param name="newState">A current state. Possible values include:
         /// 'RecoveryStarted', 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
         /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
         /// 'AwaitPinCode', 'PasswordChangeFrozen', 'PasswordChangeSuspended',
         /// 'CallSupport', 'Transfer', 'PasswordChangeAllowed',
         /// 'PasswordChangeForbidden', 'PasswordUpdated'</param>
-        /// <param name="action">Possible values include: 'RecoveryRequest',
-        /// 'SecretPhrasesComplete', 'SecretPhrasesSkip',
-        /// 'SecretPhrasesVerificationFail', 'DeviceVerificationComplete',
-        /// 'DeviceVerificationSkip', 'DeviceVerificationFail',
-        /// 'SmsVerificationComplete', 'SmsVerificationRestart',
-        /// 'SmsVerificationFail', 'SmsVerificationSkip',
-        /// 'EmailVerificationComplete', 'EmailVerificationRestart',
-        /// 'EmailVerificationFail', 'EmailVerificationSkip', 'PinComplete',
-        /// 'PinSkip', 'PinFail', 'SelfieVerificationRequest',
-        /// 'SelfieVerificationComplete', 'SelfieVerificationSkip',
-        /// 'SelfieVerificationFail', 'JumpToSuspended', 'JumpToCallSupport',
-        /// 'JumpToFrozen', 'JumpToAllowed', 'JumpToForbidden',
-        /// 'UpdatePassword', 'TryUnfreeze'</param>
-        /// <param name="newState">Possible values include: 'RecoveryStarted',
-        /// 'AwaitSecretPhrases', 'AwaitDeviceVerification',
-        /// 'AwaitSmsVerification', 'AwaitEmailVerification',
-        /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
-        /// 'AwaitPinCode', 'PasswordChangeFrozen', 'PasswordChangeSuspended',
-        /// 'CallSupport', 'Transfer', 'PasswordChangeAllowed',
-        /// 'PasswordChangeForbidden', 'PasswordUpdated'</param>
+        /// <param name="initiator">An initiator of the event</param>
+        /// <param name="comment">Comment from the support</param>
+        /// <param name="ip">Client's ip</param>
+        /// <param name="userAgent">Client's user agent</param>
         public RecoveryTraceResponse(System.DateTime time, State previousState, Trigger action, State newState, string initiator, string comment, string ip, string userAgent)
         {
             Time = time;
@@ -69,12 +76,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
+        /// Gets a date time of the event
         /// </summary>
         [JsonProperty(PropertyName = "time")]
         public System.DateTime Time { get; private set; }
 
         /// <summary>
-        /// Gets possible values include: 'RecoveryStarted',
+        /// Gets a previous state. Possible values include: 'RecoveryStarted',
         /// 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
         /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
@@ -86,8 +94,8 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         public State PreviousState { get; private set; }
 
         /// <summary>
-        /// Gets possible values include: 'RecoveryRequest',
-        /// 'SecretPhrasesComplete', 'SecretPhrasesSkip',
+        /// Gets an action that leaded state changing. Possible values include:
+        /// 'RecoveryRequest', 'SecretPhrasesComplete', 'SecretPhrasesSkip',
         /// 'SecretPhrasesVerificationFail', 'DeviceVerificationComplete',
         /// 'DeviceVerificationSkip', 'DeviceVerificationFail',
         /// 'SmsVerificationComplete', 'SmsVerificationRestart',
@@ -104,7 +112,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         public Trigger Action { get; private set; }
 
         /// <summary>
-        /// Gets possible values include: 'RecoveryStarted',
+        /// Gets a current state. Possible values include: 'RecoveryStarted',
         /// 'AwaitSecretPhrases', 'AwaitDeviceVerification',
         /// 'AwaitSmsVerification', 'AwaitEmailVerification',
         /// 'AwaitSelfieVerification', 'SelfieVerificationInProgress',
@@ -116,21 +124,25 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         public State NewState { get; private set; }
 
         /// <summary>
+        /// Gets an initiator of the event
         /// </summary>
         [JsonProperty(PropertyName = "initiator")]
         public string Initiator { get; private set; }
 
         /// <summary>
+        /// Gets comment from the support
         /// </summary>
         [JsonProperty(PropertyName = "comment")]
         public string Comment { get; private set; }
 
         /// <summary>
+        /// Gets client's ip
         /// </summary>
         [JsonProperty(PropertyName = "ip")]
         public string Ip { get; private set; }
 
         /// <summary>
+        /// Gets client's user agent
         /// </summary>
         [JsonProperty(PropertyName = "userAgent")]
         public string UserAgent { get; private set; }

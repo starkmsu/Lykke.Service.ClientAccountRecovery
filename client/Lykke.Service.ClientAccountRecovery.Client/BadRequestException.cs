@@ -3,7 +3,7 @@
 namespace Lykke.Service.ClientAccountRecovery.Client
 {
     /// <summary>
-    /// An exception for 409 code
+    /// An exception for 400 code
     /// </summary>
     public class BadRequestException : RestException
     {

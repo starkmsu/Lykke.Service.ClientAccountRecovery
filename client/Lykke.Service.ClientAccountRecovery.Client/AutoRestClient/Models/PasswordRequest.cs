@@ -23,6 +23,12 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the PasswordRequest class.
         /// </summary>
+        /// <param name="recoveryId">An id of the recovery</param>
+        /// <param name="passwordHash">A hash of the new password</param>
+        /// <param name="pin">A new PIN</param>
+        /// <param name="hint">A password hint</param>
+        /// <param name="ip">Client's IP</param>
+        /// <param name="userAgent">Client's user agent</param>
         public PasswordRequest(string recoveryId, string passwordHash, string pin, string hint, string ip, string userAgent)
         {
             RecoveryId = recoveryId;
@@ -40,31 +46,37 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
+        /// Gets or sets an id of the recovery
         /// </summary>
         [JsonProperty(PropertyName = "recoveryId")]
         public string RecoveryId { get; set; }
 
         /// <summary>
+        /// Gets or sets a hash of the new password
         /// </summary>
         [JsonProperty(PropertyName = "passwordHash")]
         public string PasswordHash { get; set; }
 
         /// <summary>
+        /// Gets or sets a new PIN
         /// </summary>
         [JsonProperty(PropertyName = "pin")]
         public string Pin { get; set; }
 
         /// <summary>
+        /// Gets or sets a password hint
         /// </summary>
         [JsonProperty(PropertyName = "hint")]
         public string Hint { get; set; }
 
         /// <summary>
+        /// Gets or sets client's IP
         /// </summary>
         [JsonProperty(PropertyName = "ip")]
         public string Ip { get; set; }
 
         /// <summary>
+        /// Gets or sets client's user agent
         /// </summary>
         [JsonProperty(PropertyName = "userAgent")]
         public string UserAgent { get; set; }

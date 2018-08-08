@@ -2,6 +2,9 @@
 
 namespace Lykke.Service.ClientAccountRecovery.Core.Domain
 {
+    /// <summary>
+    /// An action that can be performed on a challenge
+    /// </summary>
     [PublicAPI]
     public enum Action
     {

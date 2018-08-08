@@ -12,6 +12,11 @@ namespace Lykke.Service.ClientAccountRecovery
     {
         public void Apply(Operation operation, OperationFilterContext context)
         {
+            if (operation == null || context == null)
+            {
+                return;
+            }
+
             var hasHeader = context.ApiDescription.ActionAttributes()
                 .OfType<ApiKeyAuthAttribute>()
                 .Any();

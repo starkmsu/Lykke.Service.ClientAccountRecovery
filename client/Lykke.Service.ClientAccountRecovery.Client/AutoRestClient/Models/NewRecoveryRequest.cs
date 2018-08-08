@@ -23,6 +23,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the NewRecoveryRequest class.
         /// </summary>
+        /// <param name="clientId">An id of Client</param>
+        /// <param name="ip">Client's ip</param>
+        /// <param name="userAgent">Client's user agent</param>
         public NewRecoveryRequest(string clientId, string ip, string userAgent)
         {
             ClientId = clientId;
@@ -37,16 +40,19 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
+        /// Gets or sets an id of Client
         /// </summary>
         [JsonProperty(PropertyName = "clientId")]
         public string ClientId { get; set; }
 
         /// <summary>
+        /// Gets or sets client's ip
         /// </summary>
         [JsonProperty(PropertyName = "ip")]
         public string Ip { get; set; }
 
         /// <summary>
+        /// Gets or sets client's user agent
         /// </summary>
         [JsonProperty(PropertyName = "userAgent")]
         public string UserAgent { get; set; }

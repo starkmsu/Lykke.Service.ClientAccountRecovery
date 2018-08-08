@@ -84,6 +84,10 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private async Task<bool> ClientHasPhoneNumber(string clientId)
         {
             var clientModel = await _accountClient.GetByIdAsync(clientId);
+            if (clientModel == null)
+            {
+                throw new InvalidOperationException($"The inconsistent state. Unable to find a client with id {clientId}");
+            }
             return !string.IsNullOrWhiteSpace(clientModel.Phone);
         }
 

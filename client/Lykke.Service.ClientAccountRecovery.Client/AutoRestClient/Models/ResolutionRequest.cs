@@ -23,8 +23,12 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the ResolutionRequest class.
         /// </summary>
-        /// <param name="resolution">Possible values include: 'Unknown',
-        /// 'Suspend', 'Interview', 'Freeze', 'Allow'</param>
+        /// <param name="recoveryId">An id of the recovery</param>
+        /// <param name="resolution">A resolution from support. Possible values
+        /// include: 'Unknown', 'Suspend', 'Interview', 'Freeze',
+        /// 'Allow'</param>
+        /// <param name="agentId">Client's ip</param>
+        /// <param name="comment">Client's user agent</param>
         public ResolutionRequest(string recoveryId, Resolution resolution, string agentId, string comment)
         {
             RecoveryId = recoveryId;
@@ -40,23 +44,26 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
+        /// Gets or sets an id of the recovery
         /// </summary>
         [JsonProperty(PropertyName = "recoveryId")]
         public string RecoveryId { get; set; }
 
         /// <summary>
-        /// Gets or sets possible values include: 'Unknown', 'Suspend',
-        /// 'Interview', 'Freeze', 'Allow'
+        /// Gets or sets a resolution from support. Possible values include:
+        /// 'Unknown', 'Suspend', 'Interview', 'Freeze', 'Allow'
         /// </summary>
         [JsonProperty(PropertyName = "resolution")]
         public Resolution Resolution { get; set; }
 
         /// <summary>
+        /// Gets or sets client's ip
         /// </summary>
         [JsonProperty(PropertyName = "agentId")]
         public string AgentId { get; set; }
 
         /// <summary>
+        /// Gets or sets client's user agent
         /// </summary>
         [JsonProperty(PropertyName = "comment")]
         public string Comment { get; set; }

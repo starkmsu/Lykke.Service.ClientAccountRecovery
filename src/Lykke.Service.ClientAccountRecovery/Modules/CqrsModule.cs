@@ -43,7 +43,7 @@ namespace Lykke.Service.Session.Modules
                     true,
                     Register.DefaultEndpointResolver(new RabbitMqConventionEndpointResolver(
                         "RabbitMq",
-                        "messagepack",
+                        SerializationFormat.MessagePack,
                         environment: "lykke",
                         exclusiveQueuePostfix: "k8s")),
 

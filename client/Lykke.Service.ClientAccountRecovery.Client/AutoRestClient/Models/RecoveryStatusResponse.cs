@@ -22,9 +22,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the RecoveryStatusResponse class.
         /// </summary>
-        /// <param name="challenge">Possible values include: 'Unknown', 'Sms',
-        /// 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'</param>
-        /// <param name="overallProgress">Possible values include: 'Ongoing',
+        /// <param name="challenge">An challenge to perform. Possible values
+        /// include: 'Unknown', 'Sms', 'Email', 'Selfie', 'Words', 'Device',
+        /// 'Pin', 'Undefined'</param>
+        /// <param name="overallProgress">A current state of the password
+        /// recovery process. Possible values include: 'Ongoing',
         /// 'WaitingForSupport', 'Frozen', 'Suspended', 'Allowed',
         /// 'Undefined'</param>
         /// <param name="challengeInfo">Addition data to perform the challenge.
@@ -43,15 +45,16 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
-        /// Gets possible values include: 'Unknown', 'Sms', 'Email', 'Selfie',
-        /// 'Words', 'Device', 'Pin', 'Undefined'
+        /// Gets an challenge to perform. Possible values include: 'Unknown',
+        /// 'Sms', 'Email', 'Selfie', 'Words', 'Device', 'Pin', 'Undefined'
         /// </summary>
         [JsonProperty(PropertyName = "challenge")]
         public Challenge Challenge { get; private set; }
 
         /// <summary>
-        /// Gets possible values include: 'Ongoing', 'WaitingForSupport',
-        /// 'Frozen', 'Suspended', 'Allowed', 'Undefined'
+        /// Gets a current state of the password recovery process. Possible
+        /// values include: 'Ongoing', 'WaitingForSupport', 'Frozen',
+        /// 'Suspended', 'Allowed', 'Undefined'
         /// </summary>
         [JsonProperty(PropertyName = "overallProgress")]
         public Progress OverallProgress { get; private set; }

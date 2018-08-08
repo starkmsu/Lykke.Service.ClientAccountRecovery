@@ -1,5 +1,8 @@
 ﻿namespace Lykke.Service.ClientAccountRecovery.Core.Domain
 {
+    /// <summary>
+    /// A current state of the state machine
+    /// </summary>
     public enum State
     {
         RecoveryStarted,

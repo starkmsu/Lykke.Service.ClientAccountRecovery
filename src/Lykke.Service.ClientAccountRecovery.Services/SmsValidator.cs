@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core;
@@ -23,6 +24,12 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         public async Task<bool> Confirm(IRecoveryFlowService flowService, string code)
         {
             var clientModel = await _accountClient.GetByIdAsync(flowService.Context.ClientId);
+
+            if (clientModel == null)
+            {
+                throw new InvalidOperationException($"The inconsistent state. Unable to find a client with id {flowService.Context.ClientId}");
+            }
+
             var result = await _conformationClient.VerifySmsCodeAsync(new VerifySmsConfirmationRequest
             {
                 Phone = clientModel.Phone,

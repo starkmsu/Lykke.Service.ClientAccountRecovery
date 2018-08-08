@@ -17,7 +17,9 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         protected async Task<string> PublicKeyAddress(string clientId)
         {
             var credentials = await _credentialsRepository.GetAsync(clientId);
-            if (credentials == null) // We should never be here, because the state machine must bypass this step
+
+            // We should never be here, because the state machine must bypass this step
+            if (credentials == null) 
             {
                 throw new InvalidOperationException($"Unable to find a credentials for client {clientId}");
             }

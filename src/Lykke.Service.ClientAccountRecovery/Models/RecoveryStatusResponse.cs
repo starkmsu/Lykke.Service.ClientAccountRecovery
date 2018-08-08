@@ -8,9 +8,15 @@ namespace Lykke.Service.ClientAccountRecovery.Models
     [PublicAPI]
     public class RecoveryStatusResponse
     {
+        /// <summary>
+        /// An challenge to perform
+        /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public Challenge Challenge { get; internal set; }
 
+        /// <summary>
+        /// A current state of the password recovery process
+        /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public Progress OverallProgress { get; internal set; }
 

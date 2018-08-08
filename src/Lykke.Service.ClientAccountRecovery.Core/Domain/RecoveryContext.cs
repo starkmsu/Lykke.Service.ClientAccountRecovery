@@ -25,10 +25,14 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Domain
         public string Ip { get; set; }
         public string UserAgent { get; set; }
         public DateTime? FrozenDate { get; set; }
-        public bool KycPassed { get; set; } // A transient state
-        public bool HasPhoneNumber { get; set; } // A transient state
-        public bool PinKnown { get; set; } // A transient state
-        public bool PublicKeyKnown { get; set; } // A transient state
+
+        #region Transient states
+        public bool KycPassed { get; set; }
+        public bool HasPhoneNumber { get; set; }
+        public bool PinKnown { get; set; }
+        public bool PublicKeyKnown { get; set; }
+        #endregion
+
         public string SignChallengeMessage { get; set; }
         public int SecretPhrasesRecoveryAttempts { get; set; }
     }

@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 namespace Lykke.Service.ClientAccountRecovery.Client
 {
     /// <summary>
-    /// 
+    /// A helper class for the client registration
     /// </summary>
     [PublicAPI]
     public static class AutofacExtension

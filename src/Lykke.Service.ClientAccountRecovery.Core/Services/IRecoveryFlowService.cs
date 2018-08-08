@@ -6,6 +6,8 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
     public interface IRecoveryFlowService
     {
         RecoveryContext Context { get; }
+        bool IsPasswordUpdateAllowed { get; }
+
         Task StartRecoveryAsync();
         Task SecretPhrasesCompleteAsync();
         Task SecretPhrasesSkipAsync();
@@ -31,7 +33,6 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
         Task JumpToSuspendAsync();
         Task UpdatePasswordCompleteAsync();
         Task TryUnfreezeAsync();
-        bool IsPasswordUpdateAllowed { get; }
         Task JumpToForbiddenAsync();
         Task SecretPhrasesVerificationFailAsync();
         Task DeviceVerificationFailAsync();

@@ -9,8 +9,6 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     [UsedImplicitly]
     public class SecretPhrasesValidator : PrivateKeValidatorBase, IChallengesValidator
     {
-
-
         public SecretPhrasesValidator(IWalletCredentialsRepository credentialsRepository) : base(credentialsRepository)
         {
 
