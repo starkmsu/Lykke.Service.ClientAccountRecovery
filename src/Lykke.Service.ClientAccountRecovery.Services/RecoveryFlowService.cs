@@ -110,7 +110,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .Permit(Trigger.SmsVerificationSkip, State.AwaitEmailVerification) // For all cases unconditional go to email verification
                 .PermitIfEx(Trigger.SmsVerificationFail, State.PasswordChangeForbidden, () => _ctx.SmsRecoveryAttempts >= _recoveryConditions.SmsCodeMaxAttempts)
                 .PermitReentryIfEx(Trigger.SmsVerificationFail, () => _ctx.SmsRecoveryAttempts < _recoveryConditions.SmsCodeMaxAttempts)
-                .PermitIfEx(Trigger.SmsVerificationRestart, State.PasswordChangeForbidden, () => _ctx.SmsRecoveryAttempts >= _recoveryConditions.SmsCodeMaxAttempts)
+                .PermitIfEx(Trigger.SmsVerificationRestart, State.AwaitEmailVerification, () => _ctx.SmsRecoveryAttempts >= _recoveryConditions.SmsCodeMaxAttempts)
                 .PermitReentryIfEx(Trigger.SmsVerificationRestart, () => _ctx.SmsRecoveryAttempts < _recoveryConditions.SmsCodeMaxAttempts);
 
             _stateMachine.Configure(State.AwaitEmailVerification)
@@ -138,7 +138,15 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 .PermitIfEx(Trigger.EmailVerificationSkip, State.AwaitSelfieVerification, () => _ctx.KycPassed) // All cases
                 .PermitIfEx(Trigger.EmailVerificationFail, State.PasswordChangeForbidden, () => _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
                 .PermitReentryIfEx(Trigger.EmailVerificationFail, () => _ctx.EmailRecoveryAttempts < _recoveryConditions.EmailCodeMaxAttempts)
-                .PermitIfEx(Trigger.EmailVerificationRestart, State.PasswordChangeForbidden, () => _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIfEx(Trigger.EmailVerificationRestart, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && _ctx.SmsVerified ^ false && !_ctx.KycPassed && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIfEx(Trigger.EmailVerificationRestart, State.CallSupport, () => _ctx.HasSecretPhrases && !_ctx.DeviceVerificationRequested && !_ctx.SmsVerified && !_ctx.KycPassed && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIfEx(Trigger.EmailVerificationRestart, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.KycPassed && _ctx.PinKnown && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIfEx(Trigger.EmailVerificationRestart, State.CallSupport, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.KycPassed && !_ctx.PinKnown && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIfEx(Trigger.EmailVerificationRestart, State.PasswordChangeForbidden, () => !_ctx.HasSecretPhrases && _ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.KycPassed && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIfEx(Trigger.EmailVerificationRestart, State.AwaitPinCode, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.KycPassed && _ctx.PinKnown && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIfEx(Trigger.EmailVerificationRestart, State.CallSupport, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && _ctx.SmsVerified && !_ctx.KycPassed && !_ctx.PinKnown && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIfEx(Trigger.EmailVerificationRestart, State.PasswordChangeForbidden, () => !_ctx.HasSecretPhrases && !_ctx.DeviceVerified && !_ctx.SmsVerified && !_ctx.KycPassed && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts)
+                .PermitIfEx(Trigger.EmailVerificationRestart, State.AwaitSelfieVerification, () => _ctx.KycPassed && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts && _ctx.EmailRecoveryAttempts >= _recoveryConditions.EmailCodeMaxAttempts) // All cases
                 .PermitReentryIfEx(Trigger.EmailVerificationRestart, () => _ctx.EmailRecoveryAttempts < _recoveryConditions.EmailCodeMaxAttempts);
 
             _stateMachine.Configure(State.AwaitSelfieVerification)

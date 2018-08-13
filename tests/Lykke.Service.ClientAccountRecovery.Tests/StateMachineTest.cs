@@ -394,7 +394,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             await stateMachine.SmsVerificationRestartAsync();
             await stateMachine.SmsVerificationRestartAsync();
 
-            Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
+            Assert.That(stateMachine.Context.State, Is.EqualTo(State.AwaitEmailVerification));
         }
 
         [Test]
@@ -414,12 +414,26 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
         }
 
-        [Test]
-        public async Task Should_BlockRecovery_AfterMaxEmailsRestarts()
+        [TestCase(Words.Ok, Device.Ignore, Sms.Ok, KycPassed.Fail, PinKnown.No, ExpectedResult = State.CallSupport)]
+        [TestCase(Words.Ok, Device.Ignore, Sms.Fail, KycPassed.Fail, PinKnown.No, ExpectedResult = State.CallSupport)]
+        [TestCase(Words.Fail, Device.Ok, Sms.Ok, KycPassed.Fail, PinKnown.Yes, ExpectedResult = State.AwaitPinCode)]
+        [TestCase(Words.Fail, Device.Ok, Sms.Ok, KycPassed.Fail, PinKnown.No, ExpectedResult = State.CallSupport)]
+        [TestCase(Words.Fail, Device.Ok, Sms.Fail, KycPassed.Fail, PinKnown.No, ExpectedResult = State.PasswordChangeForbidden)]
+        [TestCase(Words.Fail, Device.Fail, Sms.Ok, KycPassed.Fail, PinKnown.Yes, ExpectedResult = State.AwaitPinCode)]
+        [TestCase(Words.Fail, Device.Fail, Sms.Ok, KycPassed.Fail, PinKnown.No, ExpectedResult = State.CallSupport)]
+        [TestCase(Words.Fail, Device.Fail, Sms.Fail, KycPassed.Fail, PinKnown.No, ExpectedResult = State.PasswordChangeForbidden)]
+        [TestCase(Words.Fail, Device.Fail, Sms.Fail, KycPassed.Ok, PinKnown.No, ExpectedResult = State.AwaitSelfieVerification)]
+        public async Task<State> Should_BlockRecovery_AfterMaxEmailsRestarts(Ss words, Ss device, Ss sms, Ss kyc, PinKnown pin)
         {
             var context = new RecoveryContext
             {
-                State = State.AwaitEmailVerification
+                HasSecretPhrases = words == Ss.Ok,
+                DeviceVerificationRequested = device != Ss.Ignore,
+                DeviceVerified = device == Ss.Ok,
+                SmsVerified = sms == Ss.Ok,
+                State = State.AwaitEmailVerification,
+                PinKnown = pin == PinKnown.Yes,
+                KycPassed = kyc == Ss.Ok
             };
 
             var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
@@ -428,7 +442,7 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             await stateMachine.EmailVerificationRestartAsync();
             await stateMachine.EmailVerificationRestartAsync();
 
-            Assert.That(stateMachine.Context.State, Is.EqualTo(State.PasswordChangeForbidden));
+            return stateMachine.Context.State;
         }
 
 
