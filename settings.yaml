@@ -25,12 +25,12 @@ ClientAccountClient:
   ServiceUrl:
     settings-key: ClientAccountServiceUrl
 KycServiceClient:
-  ServiceUrl:
+  ServiceUri:
     settings-key: KycServiceUrl
   ApiKey:
     settings-key: KycApiKey
 PersonalDataServiceClient:
-  ServiceUrl:
+  ServiceUri:
     settings-key: PersonalDataServiceUrl
   ApiKey:
     settings-key: PersonalDataApiKey
