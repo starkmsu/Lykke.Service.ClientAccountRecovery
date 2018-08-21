@@ -9,7 +9,7 @@ ClientAccountRecoveryService:
         settings-key: ClientAccountRecoveryService-RecoveryActivitiesConnString
         types: [ AzureTableStorage ]        
     ClientPersonalInfoConnString:
-        settings-key: ClientAccountRecoveryService-ClientPersonalInfoConnString
+        settings-key: PersonalInfoConnString
         types: [ AzureTableStorage ]
   RabbitMq:
     ConnectionString:
