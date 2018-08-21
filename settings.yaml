@@ -19,18 +19,18 @@ ClientAccountRecoveryService:
     FrozenPeriodInDays:
         settings-key: ClientAccountRecoveryService-FrozenPeriodInDays
 ConfirmationCodesClient:
-   ServiceUri:
+   ServiceUrl:
     settings-key: ConfirmationCodesServiceUrl
 ClientAccountClient:
-  ServiceUri:
+  ServiceUrl:
     settings-key: ClientAccountServiceUrl
 KycServiceClient:
-  ServiceUri:
+  ServiceUrl:
     settings-key: KycServiceUrl
   ApiKey:
     settings-key: KycApiKey
 PersonalDataServiceClient:
-  ServiceUri:
+  ServiceUrl:
     settings-key: PersonalDataServiceUrl
   ApiKey:
     settings-key: PersonalDataApiKey
