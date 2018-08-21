@@ -13,7 +13,7 @@ ClientAccountRecoveryService:
         types: [ AzureTableStorage ]
   RabbitMq:
     ConnectionString:
-        settings-key: ClientAccountRecoveryService-RabbitMqConnectionString
+        settings-key: CqrsRabbitConnString
         types:
             - RabbitMq 
   RecoveryConditions:
