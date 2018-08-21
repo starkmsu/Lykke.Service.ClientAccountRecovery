@@ -86,6 +86,7 @@ namespace Lykke.Service.ClientAccountRecovery
                 builder.RegisterInstance(appSettings).As<IReloadingManagerWithConfiguration<AppSettings>>();
                 builder.RegisterModule(new ServiceModule(appSettings));
                 builder.RegisterModule<CqrsModule>();
+                builder.RegisterModule<AutoMapperModule>();
                 builder.Populate(services);
                 ApplicationContainer = builder.Build();
                 Log = ApplicationContainer.Resolve<ILogFactory>().CreateLog(this);
