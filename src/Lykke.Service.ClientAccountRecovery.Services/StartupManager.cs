@@ -1,7 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Common.Log;
 using JetBrains.Annotations;
-using Lykke.Common.Log;
 using Lykke.Cqrs;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="7.0.1" />
     <PackageReference Include="Lykke.Common" Version="7.0.3" />
     <PackageReference Include="Lykke.Logs" Version="5.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
@@ -19,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\client\Lykke.Service.ClientAccountRecovery.Client\Lykke.Service.ClientAccountRecovery.Client.csproj" />
+    <ProjectReference Include="..\..\src\Lykke.Service.ClientAccountRecovery.AzureRepositories\Lykke.Service.ClientAccountRecovery.AzureRepositories.csproj" />
     <ProjectReference Include="..\..\src\Lykke.Service.ClientAccountRecovery.Services\Lykke.Service.ClientAccountRecovery.Services.csproj" />
   </ItemGroup>
 

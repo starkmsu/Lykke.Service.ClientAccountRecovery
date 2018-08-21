@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Autofac.Builder;
 using AzureStorage;
 using AzureStorage.Tables;
 using Lykke.Common.Log;
@@ -12,7 +11,6 @@ using Lykke.Service.ClientAccountRecovery.Settings;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
-using Lykke.Service.PersonalData;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.SettingsReader;
