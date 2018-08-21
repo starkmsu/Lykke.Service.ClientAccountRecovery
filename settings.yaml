@@ -1,0 +1,43 @@
+ClientAccountRecoveryService:
+  ApiKey:
+    settings-key: ClientAccountRecoveryService-ApiKey
+  Db:
+    LogsConnString:
+        settings-key: LogsConnString
+        types: [ AzureTableStorage ]
+    RecoveryActivitiesConnString:
+        settings-key: ClientAccountRecoveryService-RecoveryActivitiesConnString
+        types: [ AzureTableStorage ]        
+    ClientPersonalInfoConnString:
+        settings-key: ClientAccountRecoveryService-ClientPersonalInfoConnString
+        types: [ AzureTableStorage ]
+  RabbitMq:
+    ConnectionString:
+        settings-key: ClientAccountRecoveryService-RabbitMqConnectionString
+        types:
+            - RabbitMq 
+  RecoveryConditions:
+    settings-key: ClientAccountRecoveryService-FrozenPeriodInDays
+ConfirmationCodesClient:
+   ServiceUri:
+    settings-key: ConfirmationCodesServiceUrl
+ClientAccountClient:
+  ServiceUri:
+    settings-key: ClientAccountServiceUrl
+KycServiceClient:
+  ServiceUri:
+    settings-key: KycServiceUrl
+  ApiKey:
+    settings-key:KycApiKey
+PersonalDataServiceClient:
+  ServiceUri:
+    settings-key:PersonalDataServiceUrl
+  ApiKey:
+    settings-key: PersonalDataApiKey
+SlackNotifications:
+  AzureQueue:
+    ConnectionString:
+      settings-key: SlackNotificationsConnString
+      types: [ AzureTableStorage ]
+    QueueName:
+      settings-key: SlackQueueName
