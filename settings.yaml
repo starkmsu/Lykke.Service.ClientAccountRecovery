@@ -14,10 +14,10 @@ ClientAccountRecoveryService:
   RabbitMq:
     ConnectionString:
         settings-key: CqrsRabbitConnString
-        types:
-            - RabbitMq 
+        types: [ RabbitMq ]
   RecoveryConditions:
-    settings-key: ClientAccountRecoveryService-FrozenPeriodInDays
+    FrozenPeriodInDays:
+        settings-key: ClientAccountRecoveryService-FrozenPeriodInDays
 ConfirmationCodesClient:
    ServiceUri:
     settings-key: ConfirmationCodesServiceUrl
@@ -28,10 +28,10 @@ KycServiceClient:
   ServiceUri:
     settings-key: KycServiceUrl
   ApiKey:
-    settings-key:KycApiKey
+    settings-key: KycApiKey
 PersonalDataServiceClient:
   ServiceUri:
-    settings-key:PersonalDataServiceUrl
+    settings-key: PersonalDataServiceUrl
   ApiKey:
     settings-key: PersonalDataApiKey
 SlackNotifications:
