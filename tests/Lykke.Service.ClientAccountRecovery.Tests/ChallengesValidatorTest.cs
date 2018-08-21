@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Lykke.Logs;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.ClientAccountRecovery.Core;
@@ -35,8 +36,8 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             _confirmationCodesClient = Substitute.For<IConfirmationCodesClient>();
             _clientAccountClient = Substitute.For<IClientAccountClient>();
             _credentialsRepository = Substitute.For<IWalletCredentialsRepository>();
-            _phrasesValidator = new SecretPhrasesValidator(_credentialsRepository);
-            _deviceValidator = new DeviceValidator(_credentialsRepository);
+            _phrasesValidator = new SecretPhrasesValidator(_credentialsRepository, LogFactory.Create());
+            _deviceValidator = new DeviceValidator(_credentialsRepository, LogFactory.Create());
             _pinValidator = new PinValidator(_clientAccountClient);
             _smsValidator = new SmsValidator(_confirmationCodesClient, _clientAccountClient);
             _emailValidator = new EmailValidator(_confirmationCodesClient, _clientAccountClient);

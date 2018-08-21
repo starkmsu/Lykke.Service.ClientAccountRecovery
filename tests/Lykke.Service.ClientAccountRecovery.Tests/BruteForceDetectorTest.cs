@@ -28,9 +28,9 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
         [Test]
-        public async Task IsNewRecoveryAllowedAsync_WhenThreeForbiddenAttemptsMade_ShouldBlockNext([Values] State forthState)
+        public async Task IsNewRecoveryAllowedAsync_WhenThreeForbiddenAttemptsMade_ShouldBlockNext([Values] State fourthState)
         {
-            AddRecovery(State.PasswordChangeForbidden, State.PasswordChangeForbidden, State.PasswordChangeForbidden, forthState); // By default 3 unsuccessful attempts allowed
+            AddRecovery(State.PasswordChangeForbidden, State.PasswordChangeForbidden, State.PasswordChangeForbidden, fourthState); // By default 3 unsuccessful attempts allowed
             var result = await _detector.IsNewRecoveryAllowedAsync(clientID);
             Assert.That(result, Is.EqualTo(false));
         }
@@ -84,13 +84,13 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
             Assert.That(result, Is.EqualTo(true));
         }
 
-        private RecoveriesSummaryForClient AddRecovery(params State[] lastState)
+        private RecoveriesSummaryForClient AddRecovery(params State[] states)
         {
             var summary = new RecoveriesSummaryForClient(clientID);
 
-            for (var i = 0; i < lastState.Length; i++)
+            for (var i = 0; i < states.Length; i++)
             {
-                var state = lastState[i];
+                var state = states[i];
                 summary.AddItem(new RecoveryUnit(new[]
                 {
                     new RecoveryContext

@@ -25,17 +25,17 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             switch (switcher)
             {
                 case var a when a.Item1 == Challenge.Words && a.Item2 == Action.Complete:
-                    return await ValidateSecretPhrases(flow, code);
+                    return await Validate(Challenge.Words, flow, code);
                 case var a when a.Item1 == Challenge.Words && a.Item2 == Action.Skip:
                     await flow.SecretPhrasesSkipAsync();
                     return true;
                 case var a when a.Item1 == Challenge.Device && a.Item2 == Action.Complete:
-                    return await ValidateDevice(flow, code);
+                    return await Validate(Challenge.Device, flow, code);
                 case var a when a.Item1 == Challenge.Device && a.Item2 == Action.Skip:
                     await flow.DeviceVerificationSkipAsync();
                     return true;
                 case var a when a.Item1 == Challenge.Sms && a.Item2 == Action.Complete:
-                    return await ValidateSms(flow, code);
+                    return await Validate(Challenge.Sms, flow, code);
                 case var a when a.Item1 == Challenge.Sms && a.Item2 == Action.Skip:
                     await flow.SmsVerificationSkipAsync();
                     return true;
@@ -43,8 +43,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                     await flow.SmsVerificationRestartAsync();
                     return true;
                 case var a when a.Item1 == Challenge.Email && a.Item2 == Action.Complete:
-                    return await ValidateEmail(flow, code);
-
+                    return await Validate(Challenge.Email, flow, code);
                 case var a when a.Item1 == Challenge.Email && a.Item2 == Action.Skip:
                     await flow.EmailVerificationSkipAsync();
                     return true;
@@ -58,7 +57,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                     await flow.SelfieVerificationSkipAsync();
                     return true;
                 case var a when a.Item1 == Challenge.Pin && a.Item2 == Action.Complete:
-                    return await ValidatePin(flow, code);
+                    return await Validate(Challenge.Pin, flow, code);
                 case var a when a.Item1 == Challenge.Pin && a.Item2 == Action.Skip:
                     await flow.PinCodeVerificationSkipAsync();
                     return true;
@@ -67,30 +66,9 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             throw new ArgumentException($"Invalid pair {challenge} {action}");
         }
 
-
-        private Task<bool> ValidateEmail(IRecoveryFlowService flow, string code)
+        private Task<bool> Validate(Challenge challenge, IRecoveryFlowService flow, string code)
         {
-            return _challengeValidatorFactory.GetValidator(Challenge.Email).Confirm(flow, code);
-        }
-
-        private Task<bool> ValidateSms(IRecoveryFlowService flow, string code)
-        {
-            return _challengeValidatorFactory.GetValidator(Challenge.Sms).Confirm(flow, code);
-        }
-
-        private Task<bool> ValidateDevice(IRecoveryFlowService flow, string code)
-        {
-            return _challengeValidatorFactory.GetValidator(Challenge.Device).Confirm(flow, code);
-        }
-
-        private Task<bool> ValidateSecretPhrases(IRecoveryFlowService flow, string code)
-        {
-            return _challengeValidatorFactory.GetValidator(Challenge.Words).Confirm(flow, code);
-        }
-
-        private Task<bool> ValidatePin(IRecoveryFlowService flow, string code)
-        {
-            return _challengeValidatorFactory.GetValidator(Challenge.Pin).Confirm(flow, code);
+            return _challengeValidatorFactory.GetValidator(challenge).Confirm(flow, code);
         }
 
         private Task NotifySelfiePosted(IRecoveryFlowService flow, string code)

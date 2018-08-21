@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Lykke.Common.Log;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 
@@ -9,7 +10,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     [UsedImplicitly]
     public class SecretPhrasesValidator : PrivateKeValidatorBase, IChallengesValidator
     {
-        public SecretPhrasesValidator(IWalletCredentialsRepository credentialsRepository) : base(credentialsRepository)
+        public SecretPhrasesValidator(IWalletCredentialsRepository credentialsRepository, ILogFactory logFactory) : base(credentialsRepository, logFactory)
         {
 
         }
@@ -23,7 +24,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 throw new InvalidOperationException($"Unable to validate signature because the client with Id {clientId} has no address in the credentials");
             }
 
-            if (VerifyMessage(publicKeyAddress, flowService.Context.SignChallengeMessage, code))
+            if (VerifyMessage(publicKeyAddress, flowService.Context.SignChallengeMessage, clientId, code))
             {
                 await flowService.SecretPhrasesCompleteAsync();
                 return true;

@@ -200,16 +200,16 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return Conflict($"Unable to update the password from this state: {flow.Context.State}");
             }
 
+            flow.Context.Initiator = Consts.InitiatorUser;
+            flow.Context.Comment = null;
+            flow.Context.Ip = request.Ip;
+            flow.Context.UserAgent = request.UserAgent;
+            await _clientAccountClient.ChangeClientPasswordAsync(flow.Context.ClientId, request.PasswordHash);
+            await _clientAccountClient.ChangeClientPinAsync(flow.Context.ClientId, request.Pin);
+            await _personalDataService.ChangePasswordHintAsync(flow.Context.ClientId, request.Hint);
+
             try
             {
-
-                flow.Context.Initiator = Consts.InitiatorUser;
-                flow.Context.Comment = null;
-                flow.Context.Ip = request.Ip;
-                flow.Context.UserAgent = request.UserAgent;
-                await _clientAccountClient.ChangeClientPasswordAsync(flow.Context.ClientId, request.PasswordHash);
-                await _clientAccountClient.ChangeClientPinAsync(flow.Context.ClientId, request.Pin);
-                await _personalDataService.ChangePasswordHintAsync(flow.Context.ClientId, request.Hint);
                 await flow.UpdatePasswordCompleteAsync();
             }
             catch (InvalidActionException ex)
@@ -247,11 +247,11 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return NotFound();
             }
 
+            flow.Context.Initiator = request.AgentId;
+            flow.Context.Ip = null;
+            flow.Context.UserAgent = null;
             try
             {
-                flow.Context.Initiator = request.AgentId;
-                flow.Context.Ip = null;
-                flow.Context.UserAgent = null;
                 if (request.CheckResult == CheckResult.Approved)
                 {
                     await flow.SelfieVerificationCompleteAsync(); // In a moment supporting only selfie
@@ -296,12 +296,12 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return NotFound();
             }
 
+            flow.Context.Initiator = request.AgentId;
+            flow.Context.Comment = request.Comment;
+            flow.Context.Ip = null;
+            flow.Context.UserAgent = null;
             try
             {
-                flow.Context.Initiator = request.AgentId;
-                flow.Context.Comment = request.Comment;
-                flow.Context.Ip = null;
-                flow.Context.UserAgent = null;
                 switch (request.Resolution)
                 {
                     case Resolution.Suspend:

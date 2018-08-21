@@ -12,12 +12,12 @@ namespace Lykke.Service.ClientAccountRecovery.Services
     [UsedImplicitly]
     public class EmailValidator : IChallengesValidator
     {
-        private readonly IConfirmationCodesClient _conformationClient;
+        private readonly IConfirmationCodesClient _confirmationClient;
         private readonly IClientAccountClient _accountClient;
 
-        public EmailValidator(IConfirmationCodesClient conformationClient, IClientAccountClient accountClient)
+        public EmailValidator(IConfirmationCodesClient confirmationClient, IClientAccountClient accountClient)
         {
-            _conformationClient = conformationClient;
+            _confirmationClient = confirmationClient;
             _accountClient = accountClient;
         }
 
@@ -28,7 +28,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             {
                 throw new InvalidOperationException($"The inconsistent state. Unable to find a client with id {flowService.Context.ClientId}");
             }
-            var result = await _conformationClient.VerifyEmailCodeAsync(new VerifyEmailConfirmationRequest
+            var result = await _confirmationClient.VerifyEmailCodeAsync(new VerifyEmailConfirmationRequest
             {
                 Email = clientModel.Email,
                 PartnerId = clientModel.PartnerId,

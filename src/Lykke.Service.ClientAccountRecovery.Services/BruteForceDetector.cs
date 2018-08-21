@@ -46,7 +46,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 return true;
             }
 
-            if (NoOfLastUnsuccessfulStatuses(history) >= _recoveryConditions.MaxUnsuccessfulRecoveryAttempts)
+            if (NoOfLastUnsuccessfulStates(history) >= _recoveryConditions.MaxUnsuccessfulRecoveryAttempts)
             {
                 return false;
             }
@@ -54,11 +54,11 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             return true;
         }
 
-        private static int NoOfLastUnsuccessfulStatuses(RecoveriesSummaryForClient history)
+        private static int NoOfLastUnsuccessfulStates(RecoveriesSummaryForClient history)
         {
-            var noOfLastBadStatuses = history.Log.OrderByDescending(l => l.ActualStatus.Time)
+            var noOfLastBadStates = history.Log.OrderByDescending(l => l.ActualStatus.Time)
                 .TakeWhile(l => UnsuccessfulStates.Contains(l.ActualStatus.State)).Count();
-            return noOfLastBadStatuses;
+            return noOfLastBadStates;
         }
 
         public async Task<IReadOnlyCollection<RecoveryUnit>> GetRecoveriesToSeal(string clientId)
