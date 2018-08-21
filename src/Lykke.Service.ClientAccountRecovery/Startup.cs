@@ -69,7 +69,14 @@ namespace Lykke.Service.ClientAccountRecovery
 
 
                 var builder = new ContainerBuilder();
-                var appSettings = Configuration.LoadSettings<AppSettings>();
+                var appSettings = Configuration.LoadSettings<AppSettings>(options =>
+                {
+                    options.SetConnString(x => x.SlackNotifications.AzureQueue.ConnectionString);
+                    options.SetQueueName(x => x.SlackNotifications.AzureQueue.QueueName);
+                    options.SenderName = "ClientAccountRecovery";
+                });
+
+
                 builder.RegisterInstance(appSettings).As<IReloadingManager<AppSettings>>();
                 services.AddLykkeLogging(appSettings.Nested(x => x.ClientAccountRecoveryService.Db.LogsConnString),
                     "ClientAccountRecoveryLog",
