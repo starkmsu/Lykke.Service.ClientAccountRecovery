@@ -59,15 +59,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
-            /// <param name='recoveryId'>
-            /// Recovery Id
+            /// <param name='model'>
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<RecoveryStatusResponse> GetRecoveryStatusAsync(this IClientAccountRecoveryServiceClient operations, string recoveryId, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<RecoveryStatusResponse> GetRecoveryStatusAsync(this IClientAccountRecoveryServiceClient operations, RecoveryStatusRequest model = default(RecoveryStatusRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.GetRecoveryStatusWithHttpMessagesAsync(recoveryId, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.GetRecoveryStatusWithHttpMessagesAsync(model, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
@@ -84,7 +83,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<OperationStatus> SubmitChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<SubmitChallengeResponse> SubmitChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
                 using (var _result = await operations.SubmitChallengeWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false))
                 {

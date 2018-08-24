@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
+using Lykke.Service.ClientAccountRecovery.Validation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -9,18 +10,10 @@ namespace Lykke.Service.ClientAccountRecovery.Models
     public class ChallengeRequest
     {
         /// <summary>
-        /// An id of the recovery
+        ///     JWE token containing current state of recovery process.
         /// </summary>
-        [Required]
-        [MinLength(Consts.MinRecoveryIdLength)]
-        public string RecoveryId { get; set; }
-
-        /// <summary>
-        /// A challenge to contest
-        /// </summary>
-        [Required]
-        [JsonConverter(typeof(StringEnumConverter))]
-        public Challenge Challenge { get; set; }
+        [JweToken]
+        public string StateToken { get; set; }
 
         /// <summary>
         /// Resolution

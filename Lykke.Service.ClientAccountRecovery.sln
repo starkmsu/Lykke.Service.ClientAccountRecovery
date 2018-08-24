@@ -31,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. Tests", "4. Tests", "{8F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{0EB556B2-324C-4D1F-8AD6-1C588E916A10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigningUtil", "src\SigningUtil\SigningUtil.csproj", "{98DC2375-9E98-48FA-B032-0A8BBF64B2FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SigningUtil", "src\SigningUtil\SigningUtil.csproj", "{98DC2375-9E98-48FA-B032-0A8BBF64B2FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +80,7 @@ Global
 		{98DC2375-9E98-48FA-B032-0A8BBF64B2FA} = {0EB556B2-324C-4D1F-8AD6-1C588E916A10}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		RESX_SortFileContentOnSave = True
 		SolutionGuid = {4601DA1F-D164-42CE-9173-26B22581364C}
 	EndGlobalSection
 EndGlobal

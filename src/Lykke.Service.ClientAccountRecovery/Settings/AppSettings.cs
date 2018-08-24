@@ -26,5 +26,7 @@ namespace Lykke.Service.ClientAccountRecovery.Settings
         public KycServiceClientSettings KycServiceClient { get; set; }
 
         public PersonalDataServiceClientSettings PersonalDataServiceClient { get ; set; }
+
+        public SessionServiceClientSettings SessionServiceClient { get ; set; }
     }
 }

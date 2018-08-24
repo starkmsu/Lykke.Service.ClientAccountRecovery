@@ -42,6 +42,19 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         /// <summary>
         /// Initializes a new instance of the ClientAccountRecoveryServiceClient class.
         /// </summary>
+        /// <param name='httpClient'>
+        /// HttpClient to be used
+        /// </param>
+        /// <param name='disposeHttpClient'>
+        /// True: will dispose the provided httpClient on calling ClientAccountRecoveryServiceClient.Dispose(). False: will not dispose provided httpClient</param>
+        protected ClientAccountRecoveryServiceClient(HttpClient httpClient, bool disposeHttpClient) : base(httpClient, disposeHttpClient)
+        {
+            Initialize();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ClientAccountRecoveryServiceClient class.
+        /// </summary>
         /// <param name='handlers'>
         /// Optional. The delegating handlers to add to the http client pipeline.
         /// </param>
@@ -122,6 +135,33 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         /// Thrown when a required parameter is null
         /// </exception>
         internal ClientAccountRecoveryServiceClient(ServiceClientCredentials credentials, params DelegatingHandler[] handlers) : this(handlers)
+        {
+            if (credentials == null)
+            {
+                throw new System.ArgumentNullException("credentials");
+            }
+            Credentials = credentials;
+            if (Credentials != null)
+            {
+                Credentials.InitializeServiceClient(this);
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ClientAccountRecoveryServiceClient class.
+        /// </summary>
+        /// <param name='credentials'>
+        /// Required. Subscription credentials which uniquely identify client subscription.
+        /// </param>
+        /// <param name='httpClient'>
+        /// HttpClient to be used
+        /// </param>
+        /// <param name='disposeHttpClient'>
+        /// True: will dispose the provided httpClient on calling ClientAccountRecoveryServiceClient.Dispose(). False: will not dispose provided httpClient</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when a required parameter is null
+        /// </exception>
+        internal ClientAccountRecoveryServiceClient(ServiceClientCredentials credentials, HttpClient httpClient, bool disposeHttpClient) : this(httpClient, disposeHttpClient)
         {
             if (credentials == null)
             {
@@ -451,7 +491,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             }
             // Construct URL
             var _baseUrl = BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery").ToString();
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery/token/start").ToString();
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;
@@ -500,7 +540,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             HttpStatusCode _statusCode = _httpResponse.StatusCode;
             cancellationToken.ThrowIfCancellationRequested();
             string _responseContent = null;
-            if ((int)_statusCode != 200 && (int)_statusCode != 400 && (int)_statusCode != 403 && (int)_statusCode != 409 && (int)_statusCode != 500)
+            if ((int)_statusCode != 200 && (int)_statusCode != 400 && (int)_statusCode != 403 && (int)_statusCode != 404 && (int)_statusCode != 409 && (int)_statusCode != 500)
             {
                 var ex = new HttpOperationException(string.Format("Operation returned an invalid status code '{0}'", _statusCode));
                 if (_httpResponse.Content != null) {
@@ -554,8 +594,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         /// <summary>
         /// Returns the current recovery state
         /// </summary>
-        /// <param name='recoveryId'>
-        /// Recovery Id
+        /// <param name='model'>
         /// </param>
         /// <param name='customHeaders'>
         /// Headers that will be added to request.
@@ -569,20 +608,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         /// <exception cref="SerializationException">
         /// Thrown when unable to deserialize the response
         /// </exception>
-        /// <exception cref="ValidationException">
-        /// Thrown when a required parameter is null
-        /// </exception>
-        /// <exception cref="System.ArgumentNullException">
-        /// Thrown when a required parameter is null
-        /// </exception>
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<HttpOperationResponse<RecoveryStatusResponse>> GetRecoveryStatusWithHttpMessagesAsync(string recoveryId, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<HttpOperationResponse<RecoveryStatusResponse>> GetRecoveryStatusWithHttpMessagesAsync(RecoveryStatusRequest model = default(RecoveryStatusRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (recoveryId == null)
+            if (model != null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "recoveryId");
+                model.Validate();
             }
             // Tracing
             bool _shouldTrace = ServiceClientTracing.IsEnabled;
@@ -591,18 +624,17 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             {
                 _invocationId = ServiceClientTracing.NextInvocationId.ToString();
                 Dictionary<string, object> tracingParameters = new Dictionary<string, object>();
-                tracingParameters.Add("recoveryId", recoveryId);
+                tracingParameters.Add("model", model);
                 tracingParameters.Add("cancellationToken", cancellationToken);
                 ServiceClientTracing.Enter(_invocationId, this, "GetRecoveryStatus", tracingParameters);
             }
             // Construct URL
             var _baseUrl = BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery/{recoveryId}").ToString();
-            _url = _url.Replace("{recoveryId}", System.Uri.EscapeDataString(recoveryId));
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery/token/status").ToString();
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;
-            _httpRequest.Method = new HttpMethod("GET");
+            _httpRequest.Method = new HttpMethod("POST");
             _httpRequest.RequestUri = new System.Uri(_url);
             // Set Headers
 
@@ -621,6 +653,12 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
 
             // Serialize Request
             string _requestContent = null;
+            if(model != null)
+            {
+                _requestContent = SafeJsonConvert.SerializeObject(model, SerializationSettings);
+                _httpRequest.Content = new StringContent(_requestContent, System.Text.Encoding.UTF8);
+                _httpRequest.Content.Headers.ContentType =System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json; charset=utf-8");
+            }
             // Set Credentials
             if (Credentials != null)
             {
@@ -712,7 +750,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         /// <return>
         /// A response object containing the response body and response headers.
         /// </return>
-        public async Task<HttpOperationResponse<OperationStatus>> SubmitChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<HttpOperationResponse<SubmitChallengeResponse>> SubmitChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (request != null)
             {
@@ -731,7 +769,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             }
             // Construct URL
             var _baseUrl = BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery/challenge").ToString();
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery/token/challenge").ToString();
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;
@@ -803,7 +841,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
                 throw ex;
             }
             // Create Result
-            var _result = new HttpOperationResponse<OperationStatus>();
+            var _result = new HttpOperationResponse<SubmitChallengeResponse>();
             _result.Request = _httpRequest;
             _result.Response = _httpResponse;
             // Deserialize Response
@@ -812,7 +850,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
                 _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
                 try
                 {
-                    _result.Body = SafeJsonConvert.DeserializeObject<OperationStatus>(_responseContent, DeserializationSettings);
+                    _result.Body = SafeJsonConvert.DeserializeObject<SubmitChallengeResponse>(_responseContent, DeserializationSettings);
                 }
                 catch (JsonException ex)
                 {
@@ -830,61 +868,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
                 _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
                 try
                 {
-                    _result.Body = SafeJsonConvert.DeserializeObject<OperationStatus>(_responseContent, DeserializationSettings);
-                }
-                catch (JsonException ex)
-                {
-                    _httpRequest.Dispose();
-                    if (_httpResponse != null)
-                    {
-                        _httpResponse.Dispose();
-                    }
-                    throw new SerializationException("Unable to deserialize the response.", _responseContent, ex);
-                }
-            }
-            // Deserialize Response
-            if ((int)_statusCode == 404)
-            {
-                _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-                try
-                {
-                    _result.Body = SafeJsonConvert.DeserializeObject<OperationStatus>(_responseContent, DeserializationSettings);
-                }
-                catch (JsonException ex)
-                {
-                    _httpRequest.Dispose();
-                    if (_httpResponse != null)
-                    {
-                        _httpResponse.Dispose();
-                    }
-                    throw new SerializationException("Unable to deserialize the response.", _responseContent, ex);
-                }
-            }
-            // Deserialize Response
-            if ((int)_statusCode == 409)
-            {
-                _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-                try
-                {
-                    _result.Body = SafeJsonConvert.DeserializeObject<OperationStatus>(_responseContent, DeserializationSettings);
-                }
-                catch (JsonException ex)
-                {
-                    _httpRequest.Dispose();
-                    if (_httpResponse != null)
-                    {
-                        _httpResponse.Dispose();
-                    }
-                    throw new SerializationException("Unable to deserialize the response.", _responseContent, ex);
-                }
-            }
-            // Deserialize Response
-            if ((int)_statusCode == 500)
-            {
-                _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-                try
-                {
-                    _result.Body = SafeJsonConvert.DeserializeObject<OperationStatus>(_responseContent, DeserializationSettings);
+                    _result.Body = SafeJsonConvert.DeserializeObject<SubmitChallengeResponse>(_responseContent, DeserializationSettings);
                 }
                 catch (JsonException ex)
                 {
@@ -939,7 +923,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             }
             // Construct URL
             var _baseUrl = BaseUri.AbsoluteUri;
-            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery/password").ToString();
+            var _url = new System.Uri(new System.Uri(_baseUrl + (_baseUrl.EndsWith("/") ? "" : "/")), "api/recovery/token/password").ToString();
             // Create HTTP transport objects
             var _httpRequest = new HttpRequestMessage();
             HttpResponseMessage _httpResponse = null;

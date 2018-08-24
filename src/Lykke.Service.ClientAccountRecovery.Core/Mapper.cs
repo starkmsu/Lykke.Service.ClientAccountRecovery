@@ -1,6 +1,6 @@
 ﻿using Lykke.Service.ClientAccountRecovery.Core.Domain;
 
-namespace Lykke.Service.ClientAccountRecovery.Models
+namespace Lykke.Service.ClientAccountRecovery.Core
 {
     public static class ChallengeEx
     {

@@ -67,8 +67,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         /// <summary>
         /// Returns the current recovery state
         /// </summary>
-        /// <param name='recoveryId'>
-        /// Recovery Id
+        /// <param name='model'>
         /// </param>
         /// <param name='customHeaders'>
         /// The headers that will be added to request.
@@ -76,7 +75,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task<HttpOperationResponse<RecoveryStatusResponse>> GetRecoveryStatusWithHttpMessagesAsync(string recoveryId, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse<RecoveryStatusResponse>> GetRecoveryStatusWithHttpMessagesAsync(RecoveryStatusRequest model = default(RecoveryStatusRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Accepts challenge values
@@ -89,7 +88,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task<HttpOperationResponse<OperationStatus>> SubmitChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse<SubmitChallengeResponse>> SubmitChallengeWithHttpMessagesAsync(ChallengeRequest request = default(ChallengeRequest), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Updates the user password

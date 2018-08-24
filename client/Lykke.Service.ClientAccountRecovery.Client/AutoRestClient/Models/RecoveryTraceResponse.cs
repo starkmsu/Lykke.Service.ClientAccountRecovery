@@ -157,9 +157,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         {
             if (UserAgent != null)
             {
-                if (UserAgent.Length > 128)
+                if (UserAgent.Length > 1024)
                 {
-                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 128);
+                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 1024);
                 }
             }
         }

@@ -8,16 +8,16 @@ using Lykke.Common.Log;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core;
 using Lykke.Service.ClientAccountRecovery.Core.Domain;
+using Lykke.Service.ClientAccountRecovery.Core.Exceptions;
 using Lykke.Service.ClientAccountRecovery.Core.Services;
 using Lykke.Service.ClientAccountRecovery.Middleware;
-using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccountRecovery.Models;
 using Lykke.Service.PersonalData.Contract;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Lykke.Service.ClientAccountRecovery.Controllers
 {
-
     [Route("api/recovery")]
     [Produces("application/json")]
     [Consumes("application/json")]
@@ -31,6 +31,8 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         private readonly IBruteForceDetector _bruteForceDetector;
         private readonly IPersonalDataService _personalDataService;
         private readonly ILog _log;
+        private readonly IRecoveryTokenService _recoveryTokenService;
+
 
         public RecoveryController(IStateRepository stateRepository,
             IRecoveryLogRepository logRepository,
@@ -39,7 +41,8 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             IChallengeManager challengeManager,
             IBruteForceDetector bruteForceDetector,
             ILogFactory logFactory,
-            IPersonalDataService personalDataService)
+            IPersonalDataService personalDataService,
+            IRecoveryTokenService recoveryTokenService)
         {
             _stateRepository = stateRepository;
             _logRepository = logRepository;
@@ -48,35 +51,33 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             _challengeManager = challengeManager;
             _bruteForceDetector = bruteForceDetector;
             _personalDataService = personalDataService;
+            _recoveryTokenService = recoveryTokenService;
             _log = logFactory.CreateLog(this);
         }
 
         /// <summary>
-        /// Starts password recovering process
+        ///     Starts password recovering process
         /// </summary>
-        /// <returns></returns>
-        [HttpPost]
+        [HttpPost("token/start")]
         [SwaggerOperation("StartNewRecovery")]
-        [ProducesResponseType(typeof(NewRecoveryResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.Conflict)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int)HttpStatusCode.Forbidden)]
-        public async Task<IActionResult> Index([FromBody]NewRecoveryRequest request)
+        [ProducesResponseType(typeof(NewRecoveryResponse), (int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.Conflict)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int) HttpStatusCode.Forbidden)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        public async Task<IActionResult> StartNewRecovery([FromBody] NewRecoveryRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            await SealPreviousRecoveries(request.ClientId, request.Ip, request.UserAgent);
+            var clientId = request.ClientId;
 
-            if (!await _bruteForceDetector.IsNewRecoveryAllowedAsync(request.ClientId))
-            {
-                return StatusCode((int)HttpStatusCode.Forbidden, "Recovery attempts limits reached");
-            }
+            await SealPreviousRecoveries(clientId, request.Ip, request.UserAgent);
 
-            var flow = await _factory.InitiateNew(request.ClientId);
+            if (!await _bruteForceDetector.IsNewRecoveryAllowedAsync(clientId))
+                return StatusCode((int) HttpStatusCode.Forbidden, "Recovery attempts limits reached");
+
+            var flow = await _factory.InitiateNew(clientId);
             flow.Context.Initiator = Consts.InitiatorUser;
             flow.Context.Ip = request.Ip;
             flow.Context.UserAgent = request.UserAgent;
@@ -91,161 +92,179 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 return Conflict(ex.Message);
             }
 
-            return Ok(new NewRecoveryResponse { RecoveryId = flow.Context.RecoveryId });
+            var stateToken = await _recoveryTokenService.GenerateTokenAsync(flow.Context);
+
+            return Ok(new NewRecoveryResponse
+            {
+                StateToken = stateToken
+            });
         }
 
         /// <summary>
-        /// Returns the current recovery state
+        ///     Returns the current recovery state
         /// </summary>
-        /// <param name="recoveryId">Recovery Id</param>
-        /// <returns></returns>
-        [HttpGet("{recoveryId}")]
+        [HttpPost("token/status")]
         [SwaggerOperation("GetRecoveryStatus")]
-        [ProducesResponseType(typeof(RecoveryStatusResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetRecoveryStatus([FromRoute]string recoveryId)
+        [ProducesResponseType(typeof(RecoveryStatusResponse), (int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetRecoveryStatus([FromBody] RecoveryStatusRequest model)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
             {
+                var recoveryId = await _recoveryTokenService.GetRecoveryIdAsync(model.StateToken);
+                var flow = await _factory.FindExisted(recoveryId);
+                if (flow == null) return NotFound();
+
+                await flow.TryUnfreezeAsync();
+                var challenge = flow.Context.State.MapToChallenge();
+                var progress = flow.Context.State.MapToProgress();
+                var message = flow.Context.SignChallengeMessage;
+                return Ok(new RecoveryStatusResponse
+                {
+                    Challenge = challenge,
+                    OverallProgress = progress,
+                    ChallengeInfo = message
+                });
+            }
+            catch (InvalidRecoveryTokenException e)
+            {
+                _log.Warning(nameof(GetRecoveryStatus), "Unable to get recovery status", e);
+
+                ModelState.AddModelError(nameof(RecoveryStatusRequest.StateToken), e.Message);
                 return BadRequest(ModelState);
             }
-
-            var flow = await _factory.FindExisted(recoveryId);
-            if (flow == null)
-            {
-                return NotFound();
-            }
-            await flow.TryUnfreezeAsync();
-            var challenge = flow.Context.State.MapToChallenge();
-            var progress = flow.Context.State.MapToProgress();
-            var message = flow.Context.SignChallengeMessage;
-            return Ok(new RecoveryStatusResponse { Challenge = challenge, OverallProgress = progress, ChallengeInfo = message });
         }
 
-
         /// <summary>
-        /// Accepts challenge values
+        ///     Accepts challenge values
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("challenge")]
+        [HttpPost("token/challenge")]
         [SwaggerOperation("SubmitChallenge")]
-        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(OperationStatus), (int)HttpStatusCode.Conflict)]
-        public async Task<IActionResult> PostChallenge([FromBody]ChallengeRequest request)
+        [ProducesResponseType(typeof(SubmitChallengeResponse), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(SubmitChallengeResponse), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int) HttpStatusCode.Conflict)]
+        public async Task<IActionResult> SubmitChallenge([FromBody] ChallengeRequest request)
         {
             if (!ModelState.IsValid)
-            {
-                return BadRequest(new OperationStatus { Error = true, Message = ModelState.ToString() });
-            }
+                return BadRequest(CreateSubmitChallengeError(ModelState.ToString()));
 
-            var flow = await _factory.FindExisted(request.RecoveryId);
-            if (flow == null)
-            {
-                return NotFound();
-            }
-
-            flow.Context.Initiator = Consts.InitiatorUser;
-            flow.Context.Ip = request.Ip;
-            flow.Context.UserAgent = request.UserAgent;
-            bool challengeSuccessful;
             try
             {
-                challengeSuccessful = await _challengeManager.ExecuteAction(request.Challenge, request.Action, request.Value, flow);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new OperationStatus { Error = true, Message = ex.Message });
-            }
-            catch (InvalidActionException ex)
-            {
-                return BadRequest(new OperationStatus { Error = true, Message = ex.Message });
-            }
+                var oldState = await _recoveryTokenService.GetTokenPayloadAsync<RecoveryTokenPayload>(request.StateToken);
 
-            return Ok(challengeSuccessful ? new OperationStatus() : new OperationStatus { Error = true, Message = "The challenge failed" });
+                var recoveryId = oldState.RecoveryId;
+                var challenge = oldState.Challenge;
+
+                var flow = await _factory.FindExisted(recoveryId);
+                if (flow == null) return NotFound();
+
+                flow.Context.Initiator = Consts.InitiatorUser;
+                flow.Context.Ip = request.Ip;
+                flow.Context.UserAgent = request.UserAgent;
+
+                var challengeSuccessful = await _challengeManager.ExecuteAction(challenge, request.Action, request.Value, flow);
+                
+                if (!challengeSuccessful)
+                    return BadRequest(CreateSubmitChallengeError("The challenge failed"));
+
+                var newStateToken = await _recoveryTokenService.GenerateTokenAsync(flow.Context);
+
+                return Ok(new SubmitChallengeResponse
+                {
+                    OperationStatus = new OperationStatus {Error = false},
+                    StateToken = newStateToken
+                });
+            }
+            catch (Exception e) when (e is InvalidRecoveryTokenException ||
+                                      e is ArgumentException ||
+                                      e is InvalidActionException)
+            {
+                _log.Warning(nameof(SubmitChallenge), "Unable to submit challenge", e);
+
+                return BadRequest(CreateSubmitChallengeError(e.Message));
+            }
         }
 
         /// <summary>
-        /// Updates the user password
+        ///     Updates the user password
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("password")]
+        [HttpPost("token/password")]
         [SwaggerOperation("UpdatePassword")]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int)HttpStatusCode.Conflict)]
-        public async Task<IActionResult> PostPassword([FromBody]PasswordRequest request)
+        [ProducesResponseType((int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int) HttpStatusCode.Conflict)]
+        public async Task<IActionResult> UpdatePassword([FromBody] PasswordRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var flow = await _factory.FindExisted(request.RecoveryId);
-            if (flow == null)
-            {
-                return NotFound();
-            }
-
-            if (!flow.IsPasswordUpdateAllowed)
-            {
-                return Conflict($"Unable to update the password from this state: {flow.Context.State}");
-            }
-
-            flow.Context.Initiator = Consts.InitiatorUser;
-            flow.Context.Comment = null;
-            flow.Context.Ip = request.Ip;
-            flow.Context.UserAgent = request.UserAgent;
-            await _clientAccountClient.ChangeClientPasswordAsync(flow.Context.ClientId, request.PasswordHash);
-            await _clientAccountClient.ChangeClientPinAsync(flow.Context.ClientId, request.Pin);
-            await _personalDataService.ChangePasswordHintAsync(flow.Context.ClientId, request.Hint);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                await flow.UpdatePasswordCompleteAsync();
-            }
-            catch (InvalidActionException ex)
-            {
-                return Conflict(ex.Message);
-            }
+                var recoveryId = await _recoveryTokenService.GetRecoveryIdAsync(request.StateToken);
 
-            return Ok();
+                var flow = await _factory.FindExisted(recoveryId);
+                if (flow == null) return NotFound();
+
+                if (!flow.IsPasswordUpdateAllowed)
+                    return Conflict($"Unable to update the password from this state: {flow.Context.State}");
+
+                flow.Context.Initiator = Consts.InitiatorUser;
+                flow.Context.Comment = null;
+                flow.Context.Ip = request.Ip;
+                flow.Context.UserAgent = request.UserAgent;
+                await _clientAccountClient.ChangeClientPasswordAsync(flow.Context.ClientId, request.PasswordHash);
+                await _clientAccountClient.ChangeClientPinAsync(flow.Context.ClientId, request.Pin);
+                await _personalDataService.ChangePasswordHintAsync(flow.Context.ClientId, request.Hint);
+
+                await flow.UpdatePasswordCompleteAsync();
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                const string logMessage = "Unable to update password";
+
+                switch (e)
+                {
+                    case InvalidActionException _:
+                        _log.Warning(nameof(UpdatePassword), logMessage, e);
+                        return Conflict(e.Message);
+                    case InvalidRecoveryTokenException _:
+                        _log.Warning(nameof(UpdatePassword), logMessage, e);
+                        ModelState.AddModelError(nameof(PasswordRequest.StateToken), e.Message);
+                        return BadRequest(ModelState);
+                    default:
+                        throw;
+                }
+            }
         }
 
         /// <summary>
-        /// Approves user challenges. Only for support.
+        ///     Approves user challenges. Only for support.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         [HttpPut("challenge/challenge/checkResult")]
         [SwaggerOperation("ApproveChallenge")]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.OK)]
         [ApiKeyAuth]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int)HttpStatusCode.Conflict)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> ApproveChallenge([FromBody]ApproveChallengeRequest request)
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int) HttpStatusCode.Conflict)]
+        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> ApproveChallenge([FromBody] ApproveChallengeRequest request)
         {
-            if (!ModelState.IsValid || request.CheckResult == CheckResult.Unknown || request.Challenge != Core.Domain.Challenge.Selfie)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid || request.CheckResult == CheckResult.Unknown ||
+                request.Challenge != Core.Domain.Challenge.Selfie) return BadRequest(ModelState);
 
             var flow = await _factory.FindExisted(request.RecoveryId);
-            if (flow == null)
-            {
-                return NotFound();
-            }
+            if (flow == null) return NotFound();
 
             flow.Context.Initiator = request.AgentId;
             flow.Context.Ip = null;
@@ -253,13 +272,9 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             try
             {
                 if (request.CheckResult == CheckResult.Approved)
-                {
                     await flow.SelfieVerificationCompleteAsync(); // In a moment supporting only selfie
-                }
                 else
-                {
                     await flow.SelfieVerificationFailAsync();
-                }
             }
             catch (InvalidActionException ex)
             {
@@ -270,31 +285,23 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         }
 
         /// <summary>
-        /// Updates current state of the recovery process. Only for support.
+        ///     Updates current state of the recovery process. Only for support.
         /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
         [HttpPost("challenge/resolution")]
         [SwaggerOperation("SubmitResolution")]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.OK)]
         [ApiKeyAuth]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType((int)HttpStatusCode.Conflict)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public async Task<IActionResult> SubmitResolution([FromBody]ResolutionRequest request)
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int) HttpStatusCode.Conflict)]
+        [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
+        public async Task<IActionResult> SubmitResolution([FromBody] ResolutionRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var flow = await _factory.FindExisted(request.RecoveryId);
-            if (flow == null)
-            {
-                return NotFound();
-            }
+            if (flow == null) return NotFound();
 
             flow.Context.Initiator = request.AgentId;
             flow.Context.Comment = request.Comment;
@@ -321,69 +328,56 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             {
                 return Conflict(ex.Message);
             }
+
             return Ok();
         }
 
         /// <summary>
-        /// Returns brief information about all client's recoveries
+        ///     Returns brief information about all client's recoveries
         /// </summary>
         /// <param name="clientId">The client id</param>
-        /// <returns></returns>
         [HttpGet("client/{clientId}")]
         [SwaggerOperation("GetClientRecoveries")]
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<ClientRecoveryHistoryResponse>))]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetClientRecoveries([FromRoute]string clientId)
+        [ProducesResponseType((int) HttpStatusCode.OK, Type = typeof(IEnumerable<ClientRecoveryHistoryResponse>))]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetClientRecoveries([FromRoute] string clientId)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var summary = await _stateRepository.FindRecoverySummary(clientId);
 
-            if (summary == null)
-            {
-                return NotFound();
-            }
+            if (summary == null) return NotFound();
 
             var result = from unit in summary.Log
-                         let actual = unit.ActualStatus
-                         select new ClientRecoveryHistoryResponse
-                         {
-                             Initiator = actual.Initiator,
-                             RecoveryId = actual.RecoveryId,
-                             State = actual.State,
-                             Time = actual.Time
-                         };
+                let actual = unit.ActualStatus
+                select new ClientRecoveryHistoryResponse
+                {
+                    Initiator = actual.Initiator,
+                    RecoveryId = actual.RecoveryId,
+                    State = actual.State,
+                    Time = actual.Time
+                };
             return Ok(result);
         }
 
         /// <summary>
-        /// Returns detailed information about the recovery
+        ///     Returns detailed information about the recovery
         /// </summary>
         /// <param name="recoveryId">The recovery id</param>
-        /// <returns></returns>
         [HttpGet("client/trace/{recoveryId}")]
         [SwaggerOperation("GetRecoveryTrace")]
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<RecoveryTraceResponse>))]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetRecoveryTrace([FromRoute]string recoveryId)
+        [ProducesResponseType((int) HttpStatusCode.OK, Type = typeof(IEnumerable<RecoveryTraceResponse>))]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetRecoveryTrace([FromRoute] string recoveryId)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var unit = await _logRepository.GetAsync(recoveryId);
-            if (unit.Empty)
-            {
-                return NotFound();
-            }
+            if (unit.Empty) return NotFound();
 
             var response = RecoveryTraceResponse.Convert(unit);
 
@@ -404,5 +398,17 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             }
         }
 
+        private SubmitChallengeResponse CreateSubmitChallengeError(string message)
+        {
+            return new SubmitChallengeResponse
+            {
+                OperationStatus = new OperationStatus
+                {
+                    Error = true,
+                    Message = message
+                },
+                StateToken = null
+            };
+        }
     }
 }

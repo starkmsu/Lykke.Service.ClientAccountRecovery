@@ -23,15 +23,16 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the PasswordRequest class.
         /// </summary>
-        /// <param name="recoveryId">An id of the recovery</param>
+        /// <param name="stateToken">JWE token containing current state of
+        /// recovery process.</param>
         /// <param name="passwordHash">A hash of the new password</param>
         /// <param name="pin">A new PIN</param>
         /// <param name="hint">A password hint</param>
         /// <param name="ip">Client's IP</param>
         /// <param name="userAgent">Client's user agent</param>
-        public PasswordRequest(string recoveryId, string passwordHash, string pin, string hint, string ip, string userAgent)
+        public PasswordRequest(string stateToken, string passwordHash, string pin, string hint, string ip, string userAgent)
         {
-            RecoveryId = recoveryId;
+            StateToken = stateToken;
             PasswordHash = passwordHash;
             Pin = pin;
             Hint = hint;
@@ -46,10 +47,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
-        /// Gets or sets an id of the recovery
+        /// Gets or sets JWE token containing current state of recovery
+        /// process.
         /// </summary>
-        [JsonProperty(PropertyName = "recoveryId")]
-        public string RecoveryId { get; set; }
+        [JsonProperty(PropertyName = "stateToken")]
+        public string StateToken { get; set; }
 
         /// <summary>
         /// Gets or sets a hash of the new password
@@ -89,9 +91,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// </exception>
         public virtual void Validate()
         {
-            if (RecoveryId == null)
+            if (StateToken == null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "RecoveryId");
+                throw new ValidationException(ValidationRules.CannotBeNull, "StateToken");
             }
             if (PasswordHash == null)
             {
@@ -112,13 +114,6 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
             if (UserAgent == null)
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "UserAgent");
-            }
-            if (RecoveryId != null)
-            {
-                if (RecoveryId.Length < 8)
-                {
-                    throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
-                }
             }
             if (PasswordHash != null)
             {
@@ -143,9 +138,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
             }
             if (UserAgent != null)
             {
-                if (UserAgent.Length > 128)
+                if (UserAgent.Length > 1024)
                 {
-                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 128);
+                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 1024);
                 }
             }
         }

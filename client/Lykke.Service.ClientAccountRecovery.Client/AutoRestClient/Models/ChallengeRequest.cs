@@ -23,19 +23,16 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// <summary>
         /// Initializes a new instance of the ChallengeRequest class.
         /// </summary>
-        /// <param name="recoveryId">An id of the recovery</param>
-        /// <param name="challenge">A challenge to contest. Possible values
-        /// include: 'Unknown', 'Sms', 'Email', 'Selfie', 'Words', 'Device',
-        /// 'Pin', 'Undefined'</param>
+        /// <param name="stateToken">JWE token containing current state of
+        /// recovery process.</param>
         /// <param name="action">Resolution. Possible values include:
         /// 'Undefined', 'Complete', 'Restart', 'Skip'</param>
         /// <param name="value">A challenge value</param>
         /// <param name="ip">Client's ip</param>
         /// <param name="userAgent">Client's user agent</param>
-        public ChallengeRequest(string recoveryId, Challenge challenge, Action action, string value, string ip, string userAgent)
+        public ChallengeRequest(string stateToken, Action action, string value, string ip, string userAgent)
         {
-            RecoveryId = recoveryId;
-            Challenge = challenge;
+            StateToken = stateToken;
             Action = action;
             Value = value;
             Ip = ip;
@@ -49,18 +46,11 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         partial void CustomInit();
 
         /// <summary>
-        /// Gets or sets an id of the recovery
+        /// Gets or sets JWE token containing current state of recovery
+        /// process.
         /// </summary>
-        [JsonProperty(PropertyName = "recoveryId")]
-        public string RecoveryId { get; set; }
-
-        /// <summary>
-        /// Gets or sets a challenge to contest. Possible values include:
-        /// 'Unknown', 'Sms', 'Email', 'Selfie', 'Words', 'Device', 'Pin',
-        /// 'Undefined'
-        /// </summary>
-        [JsonProperty(PropertyName = "challenge")]
-        public Challenge Challenge { get; set; }
+        [JsonProperty(PropertyName = "stateToken")]
+        public string StateToken { get; set; }
 
         /// <summary>
         /// Gets or sets resolution. Possible values include: 'Undefined',
@@ -95,9 +85,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         /// </exception>
         public virtual void Validate()
         {
-            if (RecoveryId == null)
+            if (StateToken == null)
             {
-                throw new ValidationException(ValidationRules.CannotBeNull, "RecoveryId");
+                throw new ValidationException(ValidationRules.CannotBeNull, "StateToken");
             }
             if (Value == null)
             {
@@ -111,13 +101,6 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "UserAgent");
             }
-            if (RecoveryId != null)
-            {
-                if (RecoveryId.Length < 8)
-                {
-                    throw new ValidationException(ValidationRules.MinLength, "RecoveryId", 8);
-                }
-            }
             if (Value != null)
             {
                 if (Value.Length > 128)
@@ -127,9 +110,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
             }
             if (UserAgent != null)
             {
-                if (UserAgent.Length > 128)
+                if (UserAgent.Length > 1024)
                 {
-                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 128);
+                    throw new ValidationException(ValidationRules.MaxLength, "UserAgent", 1024);
                 }
             }
         }

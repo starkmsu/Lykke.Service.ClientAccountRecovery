@@ -10,24 +10,26 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
     using Newtonsoft.Json;
     using System.Linq;
 
-    public partial class NewRecoveryResponse
+    public partial class SubmitChallengeResponse
     {
         /// <summary>
-        /// Initializes a new instance of the NewRecoveryResponse class.
+        /// Initializes a new instance of the SubmitChallengeResponse class.
         /// </summary>
-        public NewRecoveryResponse()
+        public SubmitChallengeResponse()
         {
             CustomInit();
         }
 
         /// <summary>
-        /// Initializes a new instance of the NewRecoveryResponse class.
+        /// Initializes a new instance of the SubmitChallengeResponse class.
         /// </summary>
         /// <param name="stateToken">JWE token containing current state of
         /// recovery process.</param>
-        public NewRecoveryResponse(string stateToken)
+        /// <param name="operationStatus">Status of recovery operation.</param>
+        public SubmitChallengeResponse(string stateToken, OperationStatus operationStatus)
         {
             StateToken = stateToken;
+            OperationStatus = operationStatus;
             CustomInit();
         }
 
@@ -44,6 +46,12 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
         public string StateToken { get; set; }
 
         /// <summary>
+        /// Gets or sets status of recovery operation.
+        /// </summary>
+        [JsonProperty(PropertyName = "operationStatus")]
+        public OperationStatus OperationStatus { get; set; }
+
+        /// <summary>
         /// Validate the object.
         /// </summary>
         /// <exception cref="ValidationException">
@@ -54,6 +62,14 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
             if (StateToken == null)
             {
                 throw new ValidationException(ValidationRules.CannotBeNull, "StateToken");
+            }
+            if (OperationStatus == null)
+            {
+                throw new ValidationException(ValidationRules.CannotBeNull, "OperationStatus");
+            }
+            if (OperationStatus != null)
+            {
+                OperationStatus.Validate();
             }
         }
     }

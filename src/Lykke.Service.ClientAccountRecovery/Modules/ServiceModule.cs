@@ -1,7 +1,9 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using AzureStorage;
 using AzureStorage.Tables;
 using Lykke.Common.Log;
+using Lykke.Logs;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.AzureRepositories;
 using Lykke.Service.ClientAccountRecovery.Core;
@@ -13,6 +15,7 @@ using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
+using Lykke.Service.Session.Client;
 using Lykke.SettingsReader;
 
 namespace Lykke.Service.ClientAccountRecovery.Modules
@@ -66,6 +69,9 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             builder.RegisterType<RecoveryFlowService>()
                 .As<IRecoveryFlowService>();
 
+            builder.RegisterType<RecoveryTokenService>()
+                .As<IRecoveryTokenService>();
+
             builder.RegisterType<SmsSender>()
                 .As<ISmsSender>();
 
@@ -114,6 +120,10 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             {
                 return new PersonalDataService(_settings.Nested(r => r.PersonalDataServiceClient).CurrentValue, c.Resolve<ILogFactory>().CreateLog(this));
             }).As<IPersonalDataService>().SingleInstance();
+
+            // TODO:@gafanasiev Temporary solution need to pass ILogFactory to RegisterClientSessionClient.
+            builder.RegisterClientSessionClient(_settings.Nested(r => r.SessionServiceClient.SessionServiceUrl).CurrentValue,
+                LogFactory.Create());
         }
 
         private void RegisterStorage(ContainerBuilder builder)

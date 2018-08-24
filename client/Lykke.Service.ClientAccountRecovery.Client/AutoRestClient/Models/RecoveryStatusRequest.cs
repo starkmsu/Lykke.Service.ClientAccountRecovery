@@ -10,22 +10,22 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models
     using Newtonsoft.Json;
     using System.Linq;
 
-    public partial class NewRecoveryResponse
+    public partial class RecoveryStatusRequest
     {
         /// <summary>
-        /// Initializes a new instance of the NewRecoveryResponse class.
+        /// Initializes a new instance of the RecoveryStatusRequest class.
         /// </summary>
-        public NewRecoveryResponse()
+        public RecoveryStatusRequest()
         {
             CustomInit();
         }
 
         /// <summary>
-        /// Initializes a new instance of the NewRecoveryResponse class.
+        /// Initializes a new instance of the RecoveryStatusRequest class.
         /// </summary>
         /// <param name="stateToken">JWE token containing current state of
         /// recovery process.</param>
-        public NewRecoveryResponse(string stateToken)
+        public RecoveryStatusRequest(string stateToken)
         {
             StateToken = stateToken;
             CustomInit();

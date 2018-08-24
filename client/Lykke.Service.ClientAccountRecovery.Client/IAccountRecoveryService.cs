@@ -39,8 +39,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <summary>
         /// Returns the current recovery state
         /// </summary>
-        /// <param name='recoveryId'>
-        /// Recovery Id
+        /// <param name='request'>
         /// </param>
         /// <param name='cancellationToken'>
         /// The cancellation token.
@@ -48,7 +47,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <exception cref="BadRequestException"></exception>
         /// <exception cref="NotFoundException"></exception>
         /// <exception cref="ServerErrorException"></exception>
-        Task<RecoveryStatusResponse> GetRecoveryStatusAsync(string recoveryId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<RecoveryStatusResponse> GetRecoveryStatusAsync(RecoveryStatusRequest request, CancellationToken cancellationToken = default(CancellationToken));
 
 
         /// <summary>
@@ -63,7 +62,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <exception cref="ConflictException"></exception>
         /// <exception cref="ServerErrorException"></exception>
         /// <exception cref="NotFoundException"></exception>
-        Task<OperationStatus> SubmitChallengeAsync(ChallengeRequest request, CancellationToken cancellationToken = default(CancellationToken));
+        Task<SubmitChallengeResponse> SubmitChallengeAsync(ChallengeRequest request, CancellationToken cancellationToken = default(CancellationToken));
 
 
         /// <summary>

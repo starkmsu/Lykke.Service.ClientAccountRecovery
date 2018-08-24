@@ -1,16 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Lykke.Service.ClientAccountRecovery.Core;
+using Lykke.Service.ClientAccountRecovery.Validation;
 
 namespace Lykke.Service.ClientAccountRecovery.Models
 {
     public class PasswordRequest
     {
         /// <summary>
-        /// An id of the recovery
+        ///     JWE token containing current state of recovery process.
         /// </summary>
-        [Required]
-        [MinLength(Consts.MinRecoveryIdLength)]
-        public string RecoveryId { get; set; }
+        [JweToken]
+        public string StateToken { get; set; }
 
         /// <summary>
         /// A hash of the new password
