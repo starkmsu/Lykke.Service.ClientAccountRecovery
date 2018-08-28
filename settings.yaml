@@ -37,6 +37,9 @@ PersonalDataServiceClient:
 MonitoringServiceClient:
   MonitoringServiceUrl:
     settings-key: MonitoringServiceUrl
+SessionServiceClient:
+  SessionServiceUrl: 
+    settings-key: SessionServiceUrl
 SlackNotifications:
   AzureQueue:
     ConnectionString:
