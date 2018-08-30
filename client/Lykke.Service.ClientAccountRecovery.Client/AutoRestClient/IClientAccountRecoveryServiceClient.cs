@@ -40,16 +40,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
         ServiceClientCredentials Credentials { get; }
 
 
-        /// <summary>
-        /// Checks service is alive
-        /// </summary>
         /// <param name='customHeaders'>
         /// The headers that will be added to request.
         /// </param>
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task<HttpOperationResponse<object>> IsAliveWithHttpMessagesAsync(Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<HttpOperationResponse<IsAliveResponse>> IsAliveWithHttpMessagesAsync(Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Starts password recovering process

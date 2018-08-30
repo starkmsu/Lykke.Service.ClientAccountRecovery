@@ -19,7 +19,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
             _client = new ClientAccountRecoveryServiceClient(baseUri, client, credentials);
         }
 
-        public Task<object> IsAliveAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public Task<IsAliveResponse> IsAliveAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             return _client.IsAliveAsync(cancellationToken);
         }

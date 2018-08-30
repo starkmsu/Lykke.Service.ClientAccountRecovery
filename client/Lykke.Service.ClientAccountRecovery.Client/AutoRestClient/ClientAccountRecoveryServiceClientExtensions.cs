@@ -17,16 +17,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
     /// </summary>
     public static partial class ClientAccountRecoveryServiceClientExtensions
     {
-            /// <summary>
-            /// Checks service is alive
-            /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<object> IsAliveAsync(this IClientAccountRecoveryServiceClient operations, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<IsAliveResponse> IsAliveAsync(this IClientAccountRecoveryServiceClient operations, CancellationToken cancellationToken = default(CancellationToken))
             {
                 using (var _result = await operations.IsAliveWithHttpMessagesAsync(null, cancellationToken).ConfigureAwait(false))
                 {

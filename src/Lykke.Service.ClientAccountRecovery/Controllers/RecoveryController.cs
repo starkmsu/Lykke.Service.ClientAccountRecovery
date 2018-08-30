@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Common.Log;
+using Lykke.Common.Api.Contract.Responses;
+using Lykke.Common.ApiLibrary.Contract;
 using Lykke.Common.Log;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Core;
@@ -68,8 +70,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> StartNewRecovery([FromBody] NewRecoveryRequest request)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var clientId = request.ClientId;
 
             await SealPreviousRecoveries(clientId, request.Ip, request.UserAgent);
@@ -111,8 +111,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetRecoveryStatus([FromBody] RecoveryStatusRequest model)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             try
             {
                 var recoveryId = await _recoveryTokenService.GetRecoveryIdAsync(model.StateToken);
@@ -135,7 +133,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 _log.Warning(nameof(GetRecoveryStatus), "Unable to get recovery status", e);
 
                 ModelState.AddModelError(nameof(RecoveryStatusRequest.StateToken), e.Message);
-                return BadRequest(ModelState);
+                return BadRequest(ErrorResponseFactory.Create(ModelState));
             }
         }
 
@@ -145,18 +143,16 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [HttpPost("token/challenge")]
         [SwaggerOperation("SubmitChallenge")]
         [ProducesResponseType(typeof(SubmitChallengeResponse), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(SubmitChallengeResponse), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType((int) HttpStatusCode.Conflict)]
         public async Task<IActionResult> SubmitChallenge([FromBody] ChallengeRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(CreateSubmitChallengeError(ModelState.ToString()));
-
             try
             {
-                var oldState = await _recoveryTokenService.GetTokenPayloadAsync<RecoveryTokenPayload>(request.StateToken);
+                var oldState =
+                    await _recoveryTokenService.GetTokenPayloadAsync<RecoveryTokenPayload>(request.StateToken);
 
                 var recoveryId = oldState.RecoveryId;
                 var challenge = oldState.Challenge;
@@ -168,26 +164,35 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                 flow.Context.Ip = request.Ip;
                 flow.Context.UserAgent = request.UserAgent;
 
-                var challengeSuccessful = await _challengeManager.ExecuteAction(challenge, request.Action, request.Value, flow);
-                
+                var challengeSuccessful =
+                    await _challengeManager.ExecuteAction(challenge, request.Action, request.Value, flow);
+
                 if (!challengeSuccessful)
-                    return BadRequest(CreateSubmitChallengeError("The challenge failed"));
+                    return Ok(SubmitChallengeResponse.CreateError("The challenge failed"));
 
                 var newStateToken = await _recoveryTokenService.GenerateTokenAsync(flow.Context);
 
-                return Ok(new SubmitChallengeResponse
-                {
-                    OperationStatus = new OperationStatus {Error = false},
-                    StateToken = newStateToken
-                });
+                return Ok(SubmitChallengeResponse.CreateSuccess(newStateToken));
             }
-            catch (Exception e) when (e is InvalidRecoveryTokenException ||
-                                      e is ArgumentException ||
-                                      e is InvalidActionException)
+            catch (Exception e)
             {
                 _log.Warning(nameof(SubmitChallenge), "Unable to submit challenge", e);
 
-                return BadRequest(CreateSubmitChallengeError(e.Message));
+                switch (e)
+                {
+                    case InvalidRecoveryTokenException _:
+                        ModelState.AddModelError(nameof(ChallengeRequest.StateToken), e.Message);
+                        break;
+                    case InvalidActionException _:
+                        ModelState.AddModelError(nameof(ChallengeRequest.Action), e.Message);
+                        break;
+                    case ArgumentException _:
+                        return BadRequest(ErrorResponse.Create(e.Message));
+                    default:
+                        throw;
+                }
+
+                return BadRequest(ErrorResponseFactory.Create(ModelState));
             }
         }
 
@@ -203,8 +208,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [ProducesResponseType((int) HttpStatusCode.Conflict)]
         public async Task<IActionResult> UpdatePassword([FromBody] PasswordRequest request)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             try
             {
                 var recoveryId = await _recoveryTokenService.GetRecoveryIdAsync(request.StateToken);
@@ -239,7 +242,7 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
                     case InvalidRecoveryTokenException _:
                         _log.Warning(nameof(UpdatePassword), logMessage, e);
                         ModelState.AddModelError(nameof(PasswordRequest.StateToken), e.Message);
-                        return BadRequest(ModelState);
+                        return BadRequest(ErrorResponseFactory.Create(ModelState));
                     default:
                         throw;
                 }
@@ -260,8 +263,9 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> ApproveChallenge([FromBody] ApproveChallengeRequest request)
         {
-            if (!ModelState.IsValid || request.CheckResult == CheckResult.Unknown ||
-                request.Challenge != Core.Domain.Challenge.Selfie) return BadRequest(ModelState);
+            if (request.CheckResult == CheckResult.Unknown ||
+                request.Challenge != Core.Domain.Challenge.Selfie)
+                return BadRequest();
 
             var flow = await _factory.FindExisted(request.RecoveryId);
             if (flow == null) return NotFound();
@@ -298,8 +302,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [ProducesResponseType((int) HttpStatusCode.Unauthorized)]
         public async Task<IActionResult> SubmitResolution([FromBody] ResolutionRequest request)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var flow = await _factory.FindExisted(request.RecoveryId);
             if (flow == null) return NotFound();
 
@@ -344,8 +346,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetClientRecoveries([FromRoute] string clientId)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var summary = await _stateRepository.FindRecoverySummary(clientId);
 
             if (summary == null) return NotFound();
@@ -374,8 +374,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetRecoveryTrace([FromRoute] string recoveryId)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var unit = await _logRepository.GetAsync(recoveryId);
             if (unit.Empty) return NotFound();
 
@@ -396,19 +394,6 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
 
                 await flow.JumpToForbiddenAsync();
             }
-        }
-
-        private SubmitChallengeResponse CreateSubmitChallengeError(string message)
-        {
-            return new SubmitChallengeResponse
-            {
-                OperationStatus = new OperationStatus
-                {
-                    Error = true,
-                    Message = message
-                },
-                StateToken = null
-            };
         }
     }
 }
