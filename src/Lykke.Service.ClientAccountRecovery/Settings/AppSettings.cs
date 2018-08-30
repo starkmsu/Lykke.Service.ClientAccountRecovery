@@ -1,23 +1,17 @@
 ﻿using JetBrains.Annotations;
+using Lykke.Sdk.Settings;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Settings.ServiceSettings;
-using Lykke.Service.ClientAccountRecovery.Settings.SlackNotifications;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.PersonalData.Settings;
-using Lykke.SettingsReader.Attributes;
 
 namespace Lykke.Service.ClientAccountRecovery.Settings
 {
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    public class AppSettings
+    public class AppSettings : BaseAppSettings
     {
         public ClientAccountRecoverySettings ClientAccountRecoveryService { get; set; }
-
-        public SlackNotificationsSettings SlackNotifications { get; set; }
-
-        [Optional]
-        public MonitoringServiceClientSettings MonitoringServiceClient { get; set; }
 
         public ClientAccountServiceClientSettings ClientAccountClient { get; set; }
 

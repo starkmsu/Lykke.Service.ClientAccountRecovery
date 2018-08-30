@@ -12,10 +12,17 @@ using Lykke.Service.ClientAccountRecovery.Settings;
 using Lykke.SettingsReader;
 using RabbitMQ.Client;
 
-namespace Lykke.Service.Session.Modules
+namespace Lykke.Service.ClientAccountRecovery.Modules
 {
     internal class CqrsModule : Module
     {
+        private readonly IReloadingManager<AppSettings> _appSettings;
+
+        public CqrsModule(IReloadingManager<AppSettings> appSettings)
+        {
+            _appSettings = appSettings;
+
+        }
 
         protected override void Load(ContainerBuilder builder)
         {
@@ -23,7 +30,7 @@ namespace Lykke.Service.Session.Modules
 
             builder.RegisterType<AutofacDependencyResolver>().As<IDependencyResolver>().SingleInstance();
 
-            builder.Register(c => new ConnectionFactory { Uri = c.Resolve<IReloadingManager<AppSettings>>().Nested(n => n.ClientAccountRecoveryService.RabbitMq.ConnectionString).CurrentValue });
+            builder.Register(c => new ConnectionFactory { Uri = _appSettings.CurrentValue.ClientAccountRecoveryService.RabbitMq.ConnectionString });
 
             builder.Register(c =>
             {
