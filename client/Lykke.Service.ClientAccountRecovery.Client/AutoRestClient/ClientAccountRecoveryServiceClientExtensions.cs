@@ -61,7 +61,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<object> GetRecoveryStatusAsync(this IClientAccountRecoveryServiceClient operations, RecoveryStatusRequest model = default(RecoveryStatusRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<RecoveryStatusResponse> GetRecoveryStatusAsync(this IClientAccountRecoveryServiceClient operations, RecoveryStatusRequest model = default(RecoveryStatusRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
                 using (var _result = await operations.GetRecoveryStatusWithHttpMessagesAsync(model, null, cancellationToken).ConfigureAwait(false))
                 {
@@ -80,7 +80,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<object> SubmitChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<SubmitChallengeResponse> SubmitChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
                 using (var _result = await operations.SubmitChallengeWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false))
                 {
@@ -99,12 +99,9 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<ErrorResponse> UpdatePasswordAsync(this IClientAccountRecoveryServiceClient operations, PasswordRequest request = default(PasswordRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task UpdatePasswordAsync(this IClientAccountRecoveryServiceClient operations, PasswordRequest request = default(PasswordRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.UpdatePasswordWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false))
-                {
-                    return _result.Body;
-                }
+                (await operations.UpdatePasswordWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
             }
 
             /// <summary>

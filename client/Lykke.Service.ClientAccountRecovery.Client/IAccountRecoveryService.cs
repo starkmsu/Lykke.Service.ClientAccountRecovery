@@ -18,7 +18,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client
         /// <param name='cancellationToken'>
         /// The cancellation token.
         /// </param>
-        Task<object> IsAliveAsync(CancellationToken cancellationToken = default(CancellationToken));
+        Task<IsAliveResponse> IsAliveAsync(CancellationToken cancellationToken = default(CancellationToken));
 
 
         /// <summary>
