@@ -1,5 +1,4 @@
-﻿using System;
-using Autofac;
+﻿using Autofac;
 using AzureStorage;
 using AzureStorage.Tables;
 using Lykke.Common.Log;
@@ -34,21 +33,7 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-
-
-            builder.Register(c => _settings.Nested(n => n.ClientAccountRecoveryService.RecoveryConditions));
-
-
-            builder.RegisterType<HealthService>()
-                .As<IHealthService>()
-                .SingleInstance();
-
-            builder.RegisterType<StartupManager>()
-                .As<IStartupManager>();
-
-            builder.RegisterType<ShutdownManager>()
-                .As<IShutdownManager>();
-
+            builder.Register(c => _settings.CurrentValue.ClientAccountRecoveryService.RecoveryConditions);
 
             builder.RegisterType<RecoveryStateRepository>()
                 .As<IRecoveryStateRepository>();
@@ -98,7 +83,7 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
 
             builder.Register(c => new BruteForceDetector(c.Resolve<IStateRepository>(),
                     c.Resolve<IRecoveryFlowServiceFactory>(),
-                    c.Resolve<IReloadingManager<AppSettings>>().Nested(n => n.ClientAccountRecoveryService.RecoveryConditions).CurrentValue))
+                    _settings.CurrentValue.ClientAccountRecoveryService.RecoveryConditions))
                 .As<IBruteForceDetector>();
 
             RegisterStorage(builder);
@@ -112,7 +97,7 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             builder.Register(c =>
                 {
                     //TODO pass ILogFactory to KycStatusServiceClient when it supports the new log system
-                    return new KycStatusServiceClient(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.KycServiceClient).CurrentValue, c.Resolve<ILogFactory>().CreateLog(this));
+                    return new KycStatusServiceClient(_settings.Nested(r => r.KycServiceClient).CurrentValue, c.Resolve<ILogFactory>().CreateLog(this));
                 })
                 .As<IKycStatusService>();
 
@@ -130,18 +115,18 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
         {
             builder.Register(c =>
             {
-                return AzureTableStorage<StateTableEntity>.Create(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.ClientAccountRecoveryService.Db.RecoveryActivitiesConnString), "AccountRecoveries", c.Resolve<ILogFactory>());
+                return AzureTableStorage<StateTableEntity>.Create(_settings.Nested(r => r.ClientAccountRecoveryService.Db.RecoveryActivitiesConnString), "AccountRecoveries", c.Resolve<ILogFactory>());
             }).As<INoSQLTableStorage<StateTableEntity>>()
                 .SingleInstance();
 
             builder.Register(c =>
             {
-                return AzureTableStorage<LogTableEntity>.Create(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.ClientAccountRecoveryService.Db.RecoveryActivitiesConnString), "AccountRecoveryEvents", c.Resolve<ILogFactory>());
+                return AzureTableStorage<LogTableEntity>.Create(_settings.Nested(r => r.ClientAccountRecoveryService.Db.RecoveryActivitiesConnString), "AccountRecoveryEvents", c.Resolve<ILogFactory>());
             }).As<INoSQLTableStorage<LogTableEntity>>()
                 .SingleInstance();
 
             builder.Register(c => AzureTableStorage<WalletCredentialsEntity>
-                    .Create(c.Resolve<IReloadingManager<AppSettings>>().Nested(r => r.ClientAccountRecoveryService.Db.ClientPersonalInfoConnString), "WalletCredentials", c.Resolve<ILogFactory>()))
+                    .Create(_settings.Nested(r => r.ClientAccountRecoveryService.Db.ClientPersonalInfoConnString), "WalletCredentials", c.Resolve<ILogFactory>()))
                 .As<INoSQLTableStorage<WalletCredentialsEntity>>()
                 .SingleInstance();
         }

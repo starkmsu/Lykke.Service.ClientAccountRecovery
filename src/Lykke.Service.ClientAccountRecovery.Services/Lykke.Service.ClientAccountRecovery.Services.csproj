@@ -10,10 +10,10 @@
   <ItemGroup>
     <PackageReference Include="Lykke.Common" Version="7.0.3" />
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="2.2.3" />
-    <PackageReference Include="Lykke.Service.ConfirmationCodes.Client" Version="1.0.9" />
+    <PackageReference Include="Lykke.Service.ConfirmationCodes.Client" Version="1.0.10" />
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.244" />
     <PackageReference Include="Lykke.Service.Session.Client" Version="1.23.0" />
-    <PackageReference Include="Lykke.SettingsReader" Version="4.0.0" />
+    <PackageReference Include="Lykke.SettingsReader" Version="4.0.1" />
     <PackageReference Include="NBitcoin" Version="4.1.1.45" />
     <PackageReference Include="Stateless" Version="4.2.1" />
     <PackageReference Include="Lykke.Cqrs" Version="5.0.1" />
@@ -22,5 +22,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Lykke.Service.ClientAccountRecovery.Core\Lykke.Service.ClientAccountRecovery.Core.csproj" />
   </ItemGroup>
-
 </Project>

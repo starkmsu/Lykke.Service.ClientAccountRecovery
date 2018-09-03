@@ -17,16 +17,13 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
     /// </summary>
     public static partial class ClientAccountRecoveryServiceClientExtensions
     {
-            /// <summary>
-            /// Checks service is alive
-            /// </summary>
             /// <param name='operations'>
             /// The operations group for this extension method.
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<object> IsAliveAsync(this IClientAccountRecoveryServiceClient operations, CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<IsAliveResponse> IsAliveAsync(this IClientAccountRecoveryServiceClient operations, CancellationToken cancellationToken = default(CancellationToken))
             {
                 using (var _result = await operations.IsAliveWithHttpMessagesAsync(null, cancellationToken).ConfigureAwait(false))
                 {
@@ -64,7 +61,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<RecoveryStatusResponse> GetRecoveryStatusAsync(this IClientAccountRecoveryServiceClient operations, RecoveryStatusRequest model = default(RecoveryStatusRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<object> GetRecoveryStatusAsync(this IClientAccountRecoveryServiceClient operations, RecoveryStatusRequest model = default(RecoveryStatusRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
                 using (var _result = await operations.GetRecoveryStatusWithHttpMessagesAsync(model, null, cancellationToken).ConfigureAwait(false))
                 {
@@ -83,7 +80,7 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<SubmitChallengeResponse> SubmitChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<object> SubmitChallengeAsync(this IClientAccountRecoveryServiceClient operations, ChallengeRequest request = default(ChallengeRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
                 using (var _result = await operations.SubmitChallengeWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false))
                 {
@@ -102,9 +99,12 @@ namespace Lykke.Service.ClientAccountRecovery.Client.AutoRestClient
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task UpdatePasswordAsync(this IClientAccountRecoveryServiceClient operations, PasswordRequest request = default(PasswordRequest), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<ErrorResponse> UpdatePasswordAsync(this IClientAccountRecoveryServiceClient operations, PasswordRequest request = default(PasswordRequest), CancellationToken cancellationToken = default(CancellationToken))
             {
-                (await operations.UpdatePasswordWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false)).Dispose();
+                using (var _result = await operations.UpdatePasswordWithHttpMessagesAsync(request, null, cancellationToken).ConfigureAwait(false))
+                {
+                    return _result.Body;
+                }
             }
 
             /// <summary>
