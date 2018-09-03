@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
-using Lykke.Service.ClientAccountRecovery.Middleware;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Lykke.Service.ClientAccountRecovery
+namespace Lykke.Service.ClientAccountRecovery.Middleware
 {
     [UsedImplicitly]
     internal class AddRequiredHeaderParameter : IOperationFilter

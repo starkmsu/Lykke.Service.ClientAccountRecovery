@@ -12,10 +12,12 @@ using Lykke.Service.ClientAccountRecovery.Settings;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
+using Lykke.Service.PersonalData;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.Session.Client;
 using Lykke.SettingsReader;
+using Refit;
 
 namespace Lykke.Service.ClientAccountRecovery.Modules
 {
@@ -44,9 +46,14 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             builder.RegisterType<RecoveryLogRepository>()
                 .As<IRecoveryLogRepository>();
 
-            builder.Register(context => new RecoveryConditionsService(_settings.CurrentValue.ClientAccountRecoveryService
-                    .RecoveryConditions))
-                .As<IRecoveryConditionsService>();
+            builder.Register(context => new RecoveryConditionsService(
+                _settings.CurrentValue.ClientAccountRecoveryService.RecoveryConditions)
+            ).As<IRecoveryConditionsService>();
+
+            builder.Register(context => new RecoveryFileSettings(
+                _settings.CurrentValue.ClientAccountRecoveryService.SelfieImageMaxSizeMBytes,
+                context.Resolve<ILogFactory>())
+            ).As<IRecoveryFileSettings>();
 
             builder.RegisterType<RecoveryFlowServiceFactory>()
                 .As<IRecoveryFlowServiceFactory>();
@@ -109,6 +116,8 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             // TODO:@gafanasiev Temporary solution need to pass ILogFactory to RegisterClientSessionClient.
             builder.RegisterClientSessionClient(_settings.Nested(r => r.SessionServiceClient.SessionServiceUrl).CurrentValue,
                 LogFactory.Create());
+
+            builder.RegisterPersonalDataServiceClient(_settings.CurrentValue.PersonalDataServiceClient);
         }
 
         private void RegisterStorage(ContainerBuilder builder)

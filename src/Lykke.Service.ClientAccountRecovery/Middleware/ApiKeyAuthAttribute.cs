@@ -7,7 +7,8 @@ namespace Lykke.Service.ClientAccountRecovery.Middleware
     [UsedImplicitly]
     public sealed class ApiKeyAuthAttribute : ActionFilterAttribute
     {
-        public const string HeaderName = "X-ApiKey";
+        // "api-key" Header key is used in Lykke.HttpClientGenerator .WithApiKey() method for refit client generation.
+        public const string HeaderName = "api-key";
 
         internal static string ApiKey { get; set; }
         

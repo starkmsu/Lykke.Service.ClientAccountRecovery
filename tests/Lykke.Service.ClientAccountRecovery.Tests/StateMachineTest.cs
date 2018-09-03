@@ -524,6 +524,27 @@ namespace Lykke.Service.ClientAccountRecovery.Tests
         }
 
         [Test]
+        public void Allows_SelfieUpload_OnlyInAwaitSelfieVerificationState([Values] State state)
+        {
+            var context = new RecoveryContext
+            {
+                State = state
+            };
+
+            var stateMachine = new RecoveryFlowService(_smsSender, _emailSender, _stateRepository, _recoveryConditions, context);
+
+
+            if (state == State.AwaitSelfieVerification)
+            {
+                Assert.That(stateMachine.IsSelfieUploadAllowed, Is.True);
+            }
+            else
+            {
+                Assert.That(stateMachine.IsSelfieUploadAllowed, Is.False);
+            }
+        }
+
+        [Test]
         public async Task ShouldSendEmailRequest()
         {
             var context = new RecoveryContext
