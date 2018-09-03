@@ -44,13 +44,13 @@ namespace Lykke.Service.ClientAccountRecovery.Modules
             builder.RegisterType<RecoveryLogRepository>()
                 .As<IRecoveryLogRepository>();
 
-            builder.RegisterType<RecoveryFlowServiceFactory>()
-                .As<IRecoveryFlowServiceFactory>();
+            builder.Register(context => new RecoveryConditionsService(_settings.CurrentValue.ClientAccountRecoveryService
+                    .RecoveryConditions))
+                .As<IRecoveryConditionsService>();
 
             builder.RegisterType<RecoveryFlowServiceFactory>()
                 .As<IRecoveryFlowServiceFactory>();
-
-
+                           
             builder.RegisterType<RecoveryFlowService>()
                 .As<IRecoveryFlowService>();
 

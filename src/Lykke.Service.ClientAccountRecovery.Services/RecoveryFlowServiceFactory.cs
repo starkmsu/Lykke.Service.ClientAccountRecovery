@@ -20,19 +20,22 @@ namespace Lykke.Service.ClientAccountRecovery.Services
         private readonly IKycStatusService _kycStatusService;
         private readonly IClientAccountClient _accountClient;
         private readonly IWalletCredentialsRepository _credentialsRepository;
+        private readonly RecoveryConditions _recoveryConditions;
 
 
         public RecoveryFlowServiceFactory(ILifetimeScope container,
             IRecoveryLogRepository repository,
             IKycStatusService kycStatusService,
             IClientAccountClient accountClient,
-            IWalletCredentialsRepository credentialsRepository)
+            IWalletCredentialsRepository credentialsRepository, 
+            IRecoveryConditionsService recoveryConditionsService)
         {
             _container = container;
             _repository = repository;
             _kycStatusService = kycStatusService;
             _accountClient = accountClient;
             _credentialsRepository = credentialsRepository;
+            _recoveryConditions = recoveryConditionsService.RecoveryConditions;
         }
 
         public async Task<IRecoveryFlowService> InitiateNew(string clientId)
@@ -46,10 +49,9 @@ namespace Lykke.Service.ClientAccountRecovery.Services
                 PinKnown = await IsPinEntered(clientId),
                 PublicKeyKnown = await PublicKeyKnown(clientId)
             };
-            var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
             var service = _container.Resolve<IRecoveryFlowService>(
                 TypedParameter.From(initialContext),
-                TypedParameter.From(recoveryConditions));
+                TypedParameter.From(_recoveryConditions));
             return service;
         }
 
@@ -66,11 +68,9 @@ namespace Lykke.Service.ClientAccountRecovery.Services
             context.PinKnown = await IsPinEntered(context.ClientId);
             context.PublicKeyKnown = await PublicKeyKnown(context.ClientId);
 
-            var recoveryConditions = _container.Resolve<IReloadingManager<RecoveryConditions>>().CurrentValue;
-
             var service = _container.Resolve<IRecoveryFlowService>(
                 TypedParameter.From(context),
-                TypedParameter.From(recoveryConditions));
+                TypedParameter.From(_recoveryConditions));
             return service;
         }
 
