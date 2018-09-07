@@ -13,7 +13,6 @@
     <RepositoryUrl>https://github.com/LykkeCity/Lykke.Service.ClientAccountRecovery.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Lykke</PackageTags>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -30,8 +29,10 @@
 
   <ItemGroup>
     <PackageReference Include="Lykke.Common" Version="7.0.3" />
+    <PackageReference Include="Lykke.HttpClientGenerator" Version="2.2.0" />
     <PackageReference Include="Lykke.SettingsReader" Version="4.0.1" />
     <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="2.3.13" />
+    <PackageReference Include="Refit" Version="4.6.30" />
   </ItemGroup>
 
 </Project>

@@ -7,6 +7,7 @@ namespace Lykke.Service.ClientAccountRecovery.Core.Services
     {
         RecoveryContext Context { get; }
         bool IsPasswordUpdateAllowed { get; }
+        bool IsSelfieUploadAllowed { get; }
 
         Task StartRecoveryAsync();
         Task SecretPhrasesCompleteAsync();

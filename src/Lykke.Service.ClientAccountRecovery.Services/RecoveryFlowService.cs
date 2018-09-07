@@ -69,6 +69,7 @@ namespace Lykke.Service.ClientAccountRecovery.Services
 
         public bool IsPasswordUpdateAllowed => _stateMachine.CanFire(Trigger.UpdatePassword);
 
+        public bool IsSelfieUploadAllowed => _stateMachine.IsInState(State.AwaitSelfieVerification);
 
         private void Configure()
         {
