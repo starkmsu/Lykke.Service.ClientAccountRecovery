@@ -413,6 +413,9 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
         {
             try
             {
+                if (file == null)
+                    return BadRequest(ErrorResponse.Create("File could not be null."));
+
                 var state =
                     await _recoveryTokenService.GetTokenPayloadAsync<RecoveryTokenPayload>(stateToken);
 
@@ -448,8 +451,9 @@ namespace Lykke.Service.ClientAccountRecovery.Controllers
             }
             catch (Exception e)
             {
+
                 _log.Warning(
-                    $"Unable to upload file. FileName: {file.FileName}; Length: {file.Length} bytes; ContentType: {file.ContentType};",
+                    $"Unable to upload file. FileName: {file?.FileName}; Length: {file?.Length} bytes; ContentType: {file?.ContentType};",
                     e);
 
                 switch (e)
